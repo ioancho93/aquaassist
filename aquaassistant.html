@@ -2894,6 +2894,15 @@
         // ---------- Няколко аквариума (LocalStorage v2, безопасно четене/запис) ----------
         const STORAGE_V2 = "aquaAssistantState_v2";
         const STORAGE_V1 = "aquaAssistantState";
+        // Маркер, който пазим отделно от самите данни — казва "тук е имало реални
+        // данни преди". Ако при зареждане изведнъж не намерим данни, но този маркер
+        // казва, че е трябвало да ги има, е по-вероятно да става дума за временен
+        // проблем с четенето (напр. рестартиране/офлайн/claning на браузъра в движение),
+        // отколкото реално изтрити данни — затова НЕ презаписваме мълчаливо с празен
+        // аквариум, а предупреждаваме и спираме автоматичния запис, докато не се
+        // презареди успешно.
+        const HAS_DATA_KEY = "aquaAssistantHasData_v1";
+        let saveBlockedUnsafe = false;
         // ---------- Превод (BG / EN) ----------
         const LANG_KEY = "aquaAssistLang";
         let currentLang = "bg";
@@ -4316,7 +4325,6 @@
             if (!fbReady) { alert(tr('Синхронизацията не е настроена още.')); return; }
             syncBusy = true;
             try {
-                showToast(tr('Изтегляне...'));
                 const doc = await firebase.firestore().collection('syncCodes').doc(code).get();
                 if (!doc.exists) { alert(tr('Няма данни с този код.')); return; }
                 if (askConfirm && !confirm(tr('Това ще замести текущите данни на това устройство с тези от облака. Продължи?'))) return;
@@ -4753,10 +4761,17 @@
         }
 
         function saveData() {
+            // Предпазна спирачка: ако при зареждането сме открили, че данните
+            // изглеждат изчезнали, въпреки че е трябвало да ги има, спираме
+            // автоматичния запис — за да не презапишем истинския бекъп в
+            // localStorage с празно/временно състояние. Презареждането на
+            // страницата премахва тази спирачка, ако реалните данни се прочетат успешно.
+            if (saveBlockedUnsafe) return;
             try {
                 if (!store.tanks.length) return;
                 captureTank();
                 localStorage.setItem(STORAGE_V2, JSON.stringify({ theme: currentTheme, active: store.active, tanks: store.tanks }));
+                try { localStorage.setItem(HAS_DATA_KEY, "1"); } catch (e) {}
             } catch (e) {
                 if (!storageWarned && e && (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014)) {
                     storageWarned = true;
@@ -4767,6 +4782,7 @@
 
         function loadData() {
             let data = null;
+            let readFailed = false;
             try {
                 const raw = localStorage.getItem(STORAGE_V2);
                 data = raw ? JSON.parse(raw) : null;
@@ -4777,7 +4793,23 @@
                         data = { theme: o.theme, active: 0, tanks: [{ name: "Аквариум 1", aqType: o.aqType, aqLiters: o.aqLiters, temp: o.temp, ph: o.ph, nh3: o.nh3, no3: o.no3, taskFilter: o.taskFilter, taskPlants: o.taskPlants, taskGlass: o.taskGlass, fish: o.myFishList }] };
                     }
                 }
-            } catch (e) { data = null; }
+            } catch (e) { data = null; readFailed = true; }
+
+            // Ако нямаме данни сега, но маркерът казва, че преди е имало записани
+            // данни на това устройство — това почти сигурно е временен проблем с
+            // прочитането (презареждане в лош момент, рестартирана страница и т.н.),
+            // не реално изтрити данни. В този случай НЕ подменяме с празен аквариум
+            // и НЕ позволяваме запис, докато потребителят не презареди страницата
+            // наново и истинските данни не се прочетат успешно.
+            let hadDataBefore = false;
+            try { hadDataBefore = localStorage.getItem(HAS_DATA_KEY) === "1"; } catch (e) {}
+            const looksEmpty = !data || !Array.isArray(data.tanks) || !data.tanks.length;
+            if (looksEmpty && hadDataBefore) {
+                saveBlockedUnsafe = true;
+                setTimeout(() => {
+                    alert(tr('Данните временно не могат да се прочетат — вероятно от прекъсване на връзката при зареждане. За да не се загубят, приложението няма да ги запазва в този режим. Моля, презареди страницата (дръпни надолу или бутона за презареждане на браузъра), след като имаш връзка с интернет.'));
+                }, 300);
+            }
 
             if (data && themeClasses[data.theme]) currentTheme = data.theme;
             else { const h = new Date().getHours(); currentTheme = (h >= 7 && h < 19) ? "ocean" : "abyss"; }
