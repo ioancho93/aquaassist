@@ -120,6 +120,10 @@
         body[data-theme="abyss"] { background-image: radial-gradient(ellipse 90% 55% at 50% -10%, rgba(99,102,241,0.18), transparent 60%), radial-gradient(ellipse 80% 50% at 15% 100%, rgba(74,4,78,0.4), transparent 70%); background-attachment: fixed; }
         body[data-theme="jungle"] { background-image: radial-gradient(ellipse 90% 55% at 50% -10%, rgba(163,230,53,0.14), transparent 60%), radial-gradient(ellipse 80% 50% at 85% 100%, rgba(69,26,3,0.55), transparent 70%); background-attachment: fixed; }
         /* ===== Премиум UI слой (само визуален, не пипа функционалност) ===== */
+        /* Кара браузъра да рисува собствените си контроли (падащо меню на
+           input type="time"/"date", скролбар и т.н.) в тъмен стил вместо
+           по подразбиране бял — приложението няма светла тема. */
+        :root { color-scheme: dark; }
         body { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif; line-height: 1.55; -webkit-tap-highlight-color: transparent; }
         ::selection { background: rgba(34,211,238,0.35); }
         main h2 { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.01em; }
@@ -1349,10 +1353,11 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.11";
+        const APP_VERSION = "3.6.12";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         const CHANGELOG = [
+            { v: "3.6.12", items: ["Поправка: падащите менюта на браузъра (напр. избор на час при дозиране) вече са в тъмен стил, вместо бели"] },
             { v: "3.6.11", items: ["\"Диагностика на здравето\" вече е и в плаващото меню за бързи действия на телефон, за по-лесен достъп"] },
             { v: "3.6.10", items: ["Диагностика на здравето: добавени лимфоцистис, болест на неоновите тетри, химическо изгаряне от амоняк и задържане на яйца — общо 28 симптома / 27 състояния"] },
             { v: "3.6.9", items: ["Диагностика на здравето: разширена с още 10 симптома и 10 състояния (паразити, запек, загуба на цвят, проблеми с линеенето при скариди и др.)"] },
