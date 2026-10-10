@@ -984,7 +984,7 @@
                         <button onclick="copySyncCode()" title="Копирай" data-i18n-title aria-label="Копирай кода" class="text-slate-400 hover:text-cyan-300"><i class="fa-solid fa-copy"></i></button>
                     </div>
                     <p class="text-[11px] text-amber-400"><i class="fa-solid fa-triangle-exclamation mr-1"></i><span data-i18n>Запиши си този код някъде — ще ти трябва за другите устройства. Няма начин да го възстановим, ако го загубиш.</span></p>
-                    <button onclick="saveRecoveryCard()" class="w-full bg-slate-700 hover:bg-slate-600 border border-slate-600 text-xs px-3 py-2 rounded-lg font-medium text-amber-300"><i class="fa-solid fa-download mr-1.5"></i><span data-i18n>Свали картичка за възстановяване</span></button>
+                    <button onclick="saveRecoveryCard()" class="w-full bg-slate-700 hover:bg-slate-600 border border-slate-600 text-xs px-3 py-2 rounded-lg font-medium text-amber-300"><i class="fa-solid fa-download mr-1.5"></i><span data-i18n>Изтегли резервен файл с кода</span></button>
                     <button id="syncUploadBtn" onclick="uploadToCloud()" class="w-full bg-cyan-700 hover:bg-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed text-xs px-3 py-2 rounded-lg font-medium text-white" data-i18n>Качи в облака</button>
                     <p id="syncLastUpload" class="text-[11px] text-slate-500"></p>
                     <button onclick="forgetSyncCode()" class="text-[11px] text-red-400 hover:text-red-300 underline" data-i18n>Забрави този код на това устройство</button>
@@ -3293,14 +3293,14 @@
             "Тук можеш да синхронизираш между устройства": "You can sync across devices here",
             "Вече имам код от друго устройство": "I already have a code from another device",
             "Запиши си този код някъде — ще ти трябва за другите устройства. Няма начин да го възстановим, ако го загубиш.": "Save this code somewhere — you'll need it on other devices. There's no way to recover it if you lose it.",
-            "Свали картичка за възстановяване": "Download recovery card",
+            "Изтегли резервен файл с кода": "Download backup file with code",
             "код за синхронизация": "sync code",
             "Код": "Code",
             "Създаден на": "Created on",
             "Пази този файл на сигурно място (напр. бележки на телефона, email до себе си).": "Keep this file somewhere safe (e.g. your phone's notes, an email to yourself).",
             "Въведи кода на друго устройство през „Вече имам код от друго устройство\", за да изтеглиш данните си.": "Enter the code on another device via \"I already have a code from another device\" to download your data.",
             "AquaAssist не може да възстанови този код вместо теб, ако го загубиш.": "AquaAssist cannot recover this code for you if you lose it.",
-            "Картичката е свалена.": "Recovery card downloaded.",
+            "Резервният файл е свален.": "Backup file downloaded.",
             "напр. yoan-4f2a9c": "e.g. yoan-4f2a9c",
             "Изтегли": "Download",
             "Назад": "Back",
@@ -4122,7 +4122,7 @@
             a.click();
             document.body.removeChild(a);
             setTimeout(() => URL.revokeObjectURL(url), 2000);
-            showToast(tr('Картичката е свалена.'));
+            showToast(tr('Резервният файл е свален.'));
         }
 
         // Контакт по имейл — отваря Gmail compose в нов таб с попълнен получател.
@@ -4287,7 +4287,7 @@
             if (syncBusy) return;
             if (!mySyncCode) { showToast(tr('Няма код още.'), 'warn'); return; }
             if (!fbReady) { showToast(tr('Синхронизацията не е настроена още.'), 'warn'); return; }
-            if (!store.tanks || !store.tanks.length) { alert(tr('Няма аквариуми за качване.')); return; }
+            if (!store.tanks || !store.tanks.length) { showAppAlert(tr('Няма аквариуми за качване.'), 'warn'); return; }
             const btn = document.getElementById('syncUploadBtn');
             syncBusy = true;
             if (btn) btn.disabled = true;
@@ -4304,7 +4304,7 @@
                 showToast(tr('Качено успешно!'));
                 updateSyncStatus();
             } catch (e) {
-                alert(`${tr('Грешка при качване:')} ${e && e.message ? e.message : e}`);
+                showAppAlert(`${tr('Грешка при качване:')} ${e && e.message ? e.message : e}`, 'error');
                 flagSyncError();
             } finally {
                 syncBusy = false;
@@ -4322,15 +4322,15 @@
         // askConfirm=true показва диалог "сигурен ли си"; false е за случаи, където вече сме питали с друго съобщение.
         async function downloadByCode(code, askConfirm) {
             if (syncBusy) return;
-            if (!fbReady) { alert(tr('Синхронизацията не е настроена още.')); return; }
+            if (!fbReady) { showAppAlert(tr('Синхронизацията не е настроена още.'), 'warn'); return; }
             syncBusy = true;
             try {
                 const doc = await firebase.firestore().collection('syncCodes').doc(code).get();
-                if (!doc.exists) { alert(tr('Няма данни с този код.')); return; }
+                if (!doc.exists) { showAppAlert(tr('Няма данни с този код.'), 'warn'); return; }
                 if (askConfirm && !confirm(tr('Това ще замести текущите данни на това устройство с тези от облака. Продължи?'))) return;
                 const data = doc.data();
                 if (!data || !Array.isArray(data.tanks) || !data.tanks.length) {
-                    alert(tr('Данните в облака изглеждат невалидни или празни. Нищо не е приложено.'));
+                    showAppAlert(tr('Данните в облака изглеждат невалидни или празни. Нищо не е приложено.'), 'warn');
                     return;
                 }
                 const newTanks = data.tanks;
@@ -4345,10 +4345,10 @@
                 localStorage.setItem(STORAGE_V2, JSON.stringify({ theme: st.theme || currentTheme, active: newActive, tanks: newTanks }));
                 if (st.lang === 'en' || st.lang === 'bg') { try { localStorage.setItem(LANG_KEY, st.lang); } catch (e) {} }
                 if (typeof st.notify === 'boolean') { try { localStorage.setItem(NOTIFY_KEY, st.notify ? "1" : "0"); } catch (e) {} }
-                alert(tr('Данните са заменени успешно. Приложението ще се презареди сега.'));
-                location.reload();
+                showAppAlert(tr('Данните са заменени успешно. Приложението ще се презареди сега.'), 'success', () => location.reload());
+                return;
             } catch (e) {
-                alert(`${tr('Грешка при изтегляне:')} ${e && e.message ? e.message : e}`);
+                showAppAlert(`${tr('Грешка при изтегляне:')} ${e && e.message ? e.message : e}`, 'error');
                 flagSyncError();
             } finally {
                 syncBusy = false;
@@ -4581,6 +4581,34 @@
             else if (kind === 'expense') go('expenseDesc', 'expenseDesc');
         }
 
+        // Красив модален прозорец вместо грозния вграден alert() на браузъра —
+        // ползва същия стил (тъмна карта, цветна иконка) като другите модали в приложението.
+        // variant: 'info' (син), 'warn' (жълт, напр. "нищо не намерено"), 'error' (червен), 'success' (зелен).
+        function showAppAlert(message, variant, onClose) {
+            const themes = {
+                info:    { icon: 'fa-circle-info',          color: 'text-cyan-400',    border: 'border-cyan-700' },
+                warn:    { icon: 'fa-triangle-exclamation',  color: 'text-amber-400',   border: 'border-amber-700' },
+                error:   { icon: 'fa-circle-exclamation',    color: 'text-red-400',     border: 'border-red-700' },
+                success: { icon: 'fa-circle-check',          color: 'text-emerald-400', border: 'border-emerald-700' }
+            };
+            const t = themes[variant] || themes.info;
+            const overlay = document.createElement('div');
+            overlay.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4';
+            overlay.innerHTML = `
+                <div class="bg-slate-800 border ${t.border} rounded-2xl p-5 max-w-sm w-full text-sm">
+                    <div class="flex items-start gap-3 mb-4">
+                        <i class="fa-solid ${t.icon} ${t.color} text-xl mt-0.5"></i>
+                        <p class="text-slate-200 leading-relaxed" id="appAlertMsg"></p>
+                    </div>
+                    <button class="w-full bg-cyan-700 hover:bg-cyan-600 text-white text-sm py-2 rounded-lg font-medium">${tr('Разбрах')}</button>
+                </div>`;
+            overlay.querySelector('#appAlertMsg').textContent = message;
+            const close = () => { overlay.remove(); if (typeof onClose === 'function') onClose(); };
+            overlay.querySelector('button').addEventListener('click', close);
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+            document.body.appendChild(overlay);
+        }
+
         function showToast(msg, type) {
             msg = tr(msg);
             const warn = type === 'warn';
@@ -4807,7 +4835,7 @@
             if (looksEmpty && hadDataBefore) {
                 saveBlockedUnsafe = true;
                 setTimeout(() => {
-                    alert(tr('Данните временно не могат да се прочетат — вероятно от прекъсване на връзката при зареждане. За да не се загубят, приложението няма да ги запазва в този режим. Моля, презареди страницата (дръпни надолу или бутона за презареждане на браузъра), след като имаш връзка с интернет.'));
+                    showAppAlert(tr('Данните временно не могат да се прочетат — вероятно от прекъсване на връзката при зареждане. За да не се загубят, приложението няма да ги запазва в този режим. Моля, презареди страницата (дръпни надолу или бутона за презареждане на браузъра), след като имаш връзка с интернет.'), 'warn');
                 }, 300);
             }
 
