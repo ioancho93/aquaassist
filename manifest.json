@@ -3,7 +3,7 @@
   "name": "AquaAssist — Смарт помощник за аквариум",
   "short_name": "AquaAssist",
   "description": "Проследяване на параметри, обитатели, съвместимост и поддръжка на аквариум.",
-  "start_url": "./aquaassistant.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",

@@ -1,6 +1,9 @@
-const CACHE_NAME = "aquaassistant-cache-v1";
+// v2: основният файл вече е index.html вместо aquaassistant.html (за чист адрес
+// aquaassist.app без наставка) — смяната на CACHE_NAME изхвърля старото кеширано
+// v1 съдържание, за да не остане "призрачна" стара версия в офлайн кеша.
+const CACHE_NAME = "aquaassistant-cache-v2";
 const CORE_ASSETS = [
-  "./aquaassistant.html",
+  "./index.html",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
@@ -36,7 +39,7 @@ self.addEventListener("fetch", (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(req, copy)).catch(() => {});
           return res;
         })
-        .catch(() => caches.match(req).then((r) => r || caches.match("./aquaassistant.html")))
+        .catch(() => caches.match(req).then((r) => r || caches.match("./index.html")))
     );
     return;
   }
