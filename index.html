@@ -1234,7 +1234,17 @@
             { id: 's11', label: 'Зачервени ивици или петна по тялото' },
             { id: 's12', label: 'Плува накриво или трудно пази равновесие' },
             { id: 's13', label: 'Мътни или побелели очи' },
-            { id: 's14', label: 'Бяла плесенна линия около устата' }
+            { id: 's14', label: 'Бяла плесенна линия около устата' },
+            { id: 's15', label: 'Видими "червейчета" или израстъци, забити в кожата' },
+            { id: 's16', label: 'Малки движещи се точки по кожата или хрилете' },
+            { id: 's17', label: 'Прекомерна лигавица/слуз по тялото' },
+            { id: 's18', label: 'Загуба на цвят, избледняване' },
+            { id: 's19', label: 'Раздразнени хрилни капачета, бързо движение на хрилете' },
+            { id: 's20', label: 'Дупчици или ями по главата, особено около очите' },
+            { id: 's21', label: 'Подуване, не изхвърля изпражнения' },
+            { id: 's22', label: 'Перките са притиснати плътно към тялото' },
+            { id: 's23', label: 'Черни точки по тялото или перките' },
+            { id: 's24', label: 'Проблем с линеенето при скариди' }
         ];
 
         const DIAGNOSES = [
@@ -1250,7 +1260,17 @@
             { id: 'bacterial', name: 'Бактериална инфекция', symptoms: ['s11'], action: 'Подобри качеството на водата и приложи антибактериален медикамент. Препоръчва се карантина.' },
             { id: 'swimbladder', name: 'Нарушение на плавателния мехур', symptoms: ['s12'], action: 'Провери температурата на водата и количеството храна (риск от преяждане). Обмисли 24-48 часа без хранене.' },
             { id: 'cloudyeye', name: 'Мътно око', symptoms: ['s13'], action: 'Провери качеството на водата. Възможна е травма или начална бактериална инфекция.' },
-            { id: 'columnaris', name: 'Устна гниене (Columnaris)', symptoms: ['s14'], action: 'Силно заразно заболяване — нужна е бърза карантина и антибактериален медикамент.' }
+            { id: 'columnaris', name: 'Устна гниене (Columnaris)', symptoms: ['s14'], action: 'Силно заразно заболяване — нужна е бърза карантина и антибактериален медикамент.' },
+            { id: 'anchorworm', name: 'Анкерни червеи', symptoms: ['s15'], action: 'Отстрани внимателно с пинсета, ако е възможно, и приложи подходящ антипаразитен медикамент. Карантинирай нови риби преди да ги пуснеш в основния аквариум.' },
+            { id: 'fishlice', name: 'Рибешки въшки', symptoms: ['s16'], action: 'Приложи антипаразитен медикамент, подходящ за външни паразити. Карантинирай нови обитатели занапред.' },
+            { id: 'excessmucus', name: 'Прекомерна лигавица', symptoms: ['s17'], action: 'Провери параметрите на водата — често е реакция на стрес или дразнител в нея.' },
+            { id: 'colorloss', name: 'Загуба на цвят', symptoms: ['s18', 's5'], action: 'Чест признак на стрес — провери качеството на водата, храненето и съвместимостта с другите обитатели.' },
+            { id: 'gillflukes', name: 'Хрилни метилчета', symptoms: ['s19', 's4'], action: 'Нужен е антипаразитен медикамент, насочен срещу хрилни метилчета. Провери и качеството на водата.' },
+            { id: 'hexamita', name: 'Дупчици по главата (Hole-in-the-head)', symptoms: ['s20'], action: 'Подобри храненето и качеството на водата, нужен е специфичен антипаразитен медикамент (напр. с метронидазол).' },
+            { id: 'constipation', name: 'Запек', symptoms: ['s21'], action: 'Спри храненето за 24-48 часа, после предложи обелен грах — помага за раздвижване на храносмилането.' },
+            { id: 'clampedfins', name: 'Притиснати перки', symptoms: ['s22', 's5'], action: 'Общ признак на стрес или влошено качество на водата — провери параметрите и наблюдавай.' },
+            { id: 'blackspot', name: 'Болест на черните точки', symptoms: ['s23'], action: 'Обикновено паразитни ларви, често отшумява само; при по-тежък случай приложи антипаразитен медикамент и подобри качеството на водата.' },
+            { id: 'moltissues', name: 'Проблем с линеенето (скариди)', symptoms: ['s24'], action: 'Провери нивата на калций и обща твърдост (GH) на водата. Избягвай медикаменти на базата на мед — опасни са за скаридите.' }
         ];
 
         let selectedSymptoms = new Set();
@@ -1320,10 +1340,11 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.8";
+        const APP_VERSION = "3.6.9";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         const CHANGELOG = [
+            { v: "3.6.9", items: ["Диагностика на здравето: разширена с още 10 симптома и 10 състояния (паразити, запек, загуба на цвят, проблеми с линеенето при скариди и др.)"] },
             { v: "3.6.8", items: ["Преименуван бутон \"Болна ли изглежда рибата?\" на \"Диагностика на здравето\""] },
             { v: "3.6.7", items: ["Ново: \"Диагностика на здравето\" — проверка на симптоми по справочник с чести заболявания, работи изцяло офлайн (не е заместител на ветеринар)"] },
             { v: "3.6.6", items: ["Ново: бутон \"Сподели приложението\" долу — отваря родното меню за споделяне на устройството или копира линк"] },
@@ -3385,6 +3406,36 @@
             "Провери качеството на водата. Възможна е травма или начална бактериална инфекция.": "Check water quality. It could be an injury or an early bacterial infection.",
             "Устна гниене (Columnaris)": "Columnaris (mouth rot)",
             "Силно заразно заболяване — нужна е бърза карантина и антибактериален медикамент.": "Highly contagious — fast quarantine and an antibacterial treatment are needed.",
+            "Видими \"червейчета\" или израстъци, забити в кожата": "Visible \"worms\" or growths embedded in the skin",
+            "Малки движещи се точки по кожата или хрилете": "Small moving specks on the skin or gills",
+            "Прекомерна лигавица/слуз по тялото": "Excess slime coat on the body",
+            "Загуба на цвят, избледняване": "Loss of color, fading",
+            "Раздразнени хрилни капачета, бързо движение на хрилете": "Irritated gill covers, rapid gill movement",
+            "Дупчици или ями по главата, особено около очите": "Small pits or holes on the head, especially around the eyes",
+            "Подуване, не изхвърля изпражнения": "Bloating, not passing waste",
+            "Перките са притиснати плътно към тялото": "Fins clamped tightly against the body",
+            "Черни точки по тялото или перките": "Black spots on the body or fins",
+            "Проблем с линеенето при скариди": "Molting problems in shrimp",
+            "Анкерни червеи": "Anchor worms",
+            "Отстрани внимателно с пинсета, ако е възможно, и приложи подходящ антипаразитен медикамент. Карантинирай нови риби преди да ги пуснеш в основния аквариум.": "Carefully remove with tweezers if possible, and use a suitable anti-parasitic treatment. Quarantine new fish before adding them to the main tank.",
+            "Рибешки въшки": "Fish lice",
+            "Приложи антипаразитен медикамент, подходящ за външни паразити. Карантинирай нови обитатели занапред.": "Use an anti-parasitic treatment suited for external parasites. Quarantine new inhabitants going forward.",
+            "Прекомерна лигавица": "Excess slime coat",
+            "Провери параметрите на водата — често е реакция на стрес или дразнител в нея.": "Check your water parameters — this is often a stress response or a reaction to an irritant in the water.",
+            "Загуба на цвят": "Loss of color",
+            "Чест признак на стрес — провери качеството на водата, храненето и съвместимостта с другите обитатели.": "A common sign of stress — check water quality, diet, and compatibility with other inhabitants.",
+            "Хрилни метилчета": "Gill flukes",
+            "Нужен е антипаразитен медикамент, насочен срещу хрилни метилчета. Провери и качеството на водата.": "A targeted anti-parasitic treatment for gill flukes is needed. Also check water quality.",
+            "Дупчици по главата (Hole-in-the-head)": "Hole-in-the-head disease",
+            "Подобри храненето и качеството на водата, нужен е специфичен антипаразитен медикамент (напр. с метронидазол).": "Improve diet and water quality; a specific anti-parasitic treatment (e.g. with metronidazole) is needed.",
+            "Запек": "Constipation",
+            "Спри храненето за 24-48 часа, после предложи обелен грах — помага за раздвижване на храносмилането.": "Stop feeding for 24-48 hours, then offer peeled peas — this helps get digestion moving again.",
+            "Притиснати перки": "Clamped fins",
+            "Общ признак на стрес или влошено качество на водата — провери параметрите и наблюдавай.": "A general sign of stress or poor water quality — check your parameters and keep watching.",
+            "Болест на черните точки": "Black spot disease",
+            "Обикновено паразитни ларви, често отшумява само; при по-тежък случай приложи антипаразитен медикамент и подобри качеството на водата.": "Usually parasitic larvae, often clears up on its own; for a more severe case use an anti-parasitic treatment and improve water quality.",
+            "Проблем с линеенето (скариди)": "Molting problem (shrimp)",
+            "Провери нивата на калций и обща твърдост (GH) на водата. Избягвай медикаменти на базата на мед — опасни са за скаридите.": "Check calcium levels and general hardness (GH) of the water. Avoid copper-based medications — they are dangerous for shrimp.",
             "Сподели приложението": "Share the app",
             "Пробвай AquaAssist — безплатно приложение за проследяване на параметри, обитатели и поддръжка на аквариум.": "Try AquaAssist — a free app for tracking aquarium parameters, inhabitants and maintenance.",
             "Линкът е копиран — готово за споделяне.": "Link copied — ready to share.",
