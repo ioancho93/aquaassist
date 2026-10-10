@@ -911,7 +911,7 @@
             <div class="space-y-2">
                 <h3 class="text-sm font-semibold text-cyan-300 flex items-center justify-between border-b border-slate-700 pb-1">
                     <span class="flex items-center"><i class="fa-solid fa-fish mr-2"></i> <span data-i18n>Риби и Безгръбначни</span></span>
-                    <button type="button" onclick="openDiagnosisModal()" class="text-[11px] font-normal text-amber-300 hover:text-amber-200 underline inline-flex items-center gap-1"><i class="fa-solid fa-stethoscope"></i><span data-i18n>Болна ли изглежда рибата?</span></button>
+                    <button type="button" onclick="openDiagnosisModal()" class="text-[11px] font-normal text-amber-300 hover:text-amber-200 underline inline-flex items-center gap-1"><i class="fa-solid fa-stethoscope"></i><span data-i18n>Диагностика на здравето</span></button>
                 </h3>
                 <ul id="myAnimalsList" class="divide-y divide-slate-700/60 text-sm">
                     <li class="py-8 flex flex-col items-center gap-2 text-center text-slate-500">
@@ -1320,11 +1320,12 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.7";
+        const APP_VERSION = "3.6.8";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         const CHANGELOG = [
-            { v: "3.6.7", items: ["Ново: \"Болна ли изглежда рибата?\" — проверка на симптоми по справочник с чести заболявания, работи изцяло офлайн (не е заместител на ветеринар)"] },
+            { v: "3.6.8", items: ["Преименуван бутон \"Болна ли изглежда рибата?\" на \"Диагностика на здравето\""] },
+            { v: "3.6.7", items: ["Ново: \"Диагностика на здравето\" — проверка на симптоми по справочник с чести заболявания, работи изцяло офлайн (не е заместител на ветеринар)"] },
             { v: "3.6.6", items: ["Ново: бутон \"Сподели приложението\" долу — отваря родното меню за споделяне на устройството или копира линк"] },
             { v: "3.6.5", items: ["Анонимна статистика за посещения (Cloudflare Web Analytics) — без бисквитки и без лични данни"] },
             { v: "3.6.4", items: ["Собствен домейн: aquaassist.app — приложението вече живее на чист адрес, без наставка накрая"] },
@@ -3337,7 +3338,7 @@
             "Заключен преглед — не може да се редактира": "Locked preview — cannot be edited",
             "Докладвай бъг": "Report a bug",
             "Контакт": "Contact",
-            "Болна ли изглежда рибата?": "Does your fish look sick?",
+            "Диагностика на здравето": "Health diagnosis",
             "Провери симптоми": "Check symptoms",
             "Това не замества консултация с ветеринар или опитен аквариумист — само общ ориентир по избраните симптоми.": "This does not replace consulting a vet or an experienced fishkeeper — it's only a general pointer based on the symptoms you pick.",
             "Какво забелязваш? (отбележи всичко подходящо)": "What do you notice? (check everything that applies)",
