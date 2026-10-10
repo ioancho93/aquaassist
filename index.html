@@ -1022,6 +1022,7 @@
             <button onclick="fabGo('params')" class="flex items-center gap-2 bg-slate-800/95 border border-white/10 backdrop-blur-md text-sm text-slate-100 px-3.5 py-2 rounded-full shadow-lg active:scale-95 transition-all duration-200"><i class="fa-solid fa-flask text-cyan-400"></i>Запиши параметри</button>
             <button onclick="fabGo('note')" class="flex items-center gap-2 bg-slate-800/95 border border-white/10 backdrop-blur-md text-sm text-slate-100 px-3.5 py-2 rounded-full shadow-lg active:scale-95 transition-all duration-200"><i class="fa-solid fa-camera-retro text-cyan-400"></i>Бележка / снимка</button>
             <button onclick="fabGo('expense')" class="flex items-center gap-2 bg-slate-800/95 border border-white/10 backdrop-blur-md text-sm text-slate-100 px-3.5 py-2 rounded-full shadow-lg active:scale-95 transition-all duration-200"><i class="fa-solid fa-receipt text-cyan-400"></i>Нов разход</button>
+            <button onclick="fabGo('diagnosis')" class="flex items-center gap-2 bg-slate-800/95 border border-white/10 backdrop-blur-md text-sm text-slate-100 px-3.5 py-2 rounded-full shadow-lg active:scale-95 transition-all duration-200"><i class="fa-solid fa-stethoscope text-amber-400"></i>Диагностика на здравето</button>
         </div>
         <button id="fabBtn" onclick="toggleFab()" aria-label="Бързи действия" class="w-14 h-14 rounded-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-lg flex items-center justify-center active:scale-90 transition-all duration-200"><i id="fabIcon" class="fa-solid fa-plus text-xl transition-transform duration-300"></i></button>
     </div>
@@ -1348,10 +1349,11 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.10";
+        const APP_VERSION = "3.6.11";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         const CHANGELOG = [
+            { v: "3.6.11", items: ["\"Диагностика на здравето\" вече е и в плаващото меню за бързи действия на телефон, за по-лесен достъп"] },
             { v: "3.6.10", items: ["Диагностика на здравето: добавени лимфоцистис, болест на неоновите тетри, химическо изгаряне от амоняк и задържане на яйца — общо 28 симптома / 27 състояния"] },
             { v: "3.6.9", items: ["Диагностика на здравето: разширена с още 10 симптома и 10 състояния (паразити, запек, загуба на цвят, проблеми с линеенето при скариди и др.)"] },
             { v: "3.6.8", items: ["Преименуван бутон \"Болна ли изглежда рибата?\" на \"Диагностика на здравето\""] },
@@ -4833,6 +4835,7 @@
             else if (kind === 'params') { document.getElementById('paramEditForm').classList.remove('hidden'); go('paramEditForm', 'inTemp'); }
             else if (kind === 'note') go('timelineNote', 'timelineNote');
             else if (kind === 'expense') go('expenseDesc', 'expenseDesc');
+            else if (kind === 'diagnosis') openDiagnosisModal();
         }
 
         // Красив модален прозорец вместо грозния вграден alert() на браузъра —
