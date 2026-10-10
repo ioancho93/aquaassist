@@ -909,8 +909,9 @@
 
             <!-- Раздел 1: Риби и Безгръбначни -->
             <div class="space-y-2">
-                <h3 class="text-sm font-semibold text-cyan-300 flex items-center border-b border-slate-700 pb-1">
-                    <i class="fa-solid fa-fish mr-2"></i> <span data-i18n>Риби и Безгръбначни</span>
+                <h3 class="text-sm font-semibold text-cyan-300 flex items-center justify-between border-b border-slate-700 pb-1">
+                    <span class="flex items-center"><i class="fa-solid fa-fish mr-2"></i> <span data-i18n>Риби и Безгръбначни</span></span>
+                    <button type="button" onclick="openDiagnosisModal()" class="text-[11px] font-normal text-amber-300 hover:text-amber-200 underline inline-flex items-center gap-1"><i class="fa-solid fa-stethoscope"></i><span data-i18n>Болна ли изглежда рибата?</span></button>
                 </h3>
                 <ul id="myAnimalsList" class="divide-y divide-slate-700/60 text-sm">
                     <li class="py-8 flex flex-col items-center gap-2 text-center text-slate-500">
@@ -1080,6 +1081,22 @@
         </div>
     </div>
 
+    <!-- Проверка на симптоми — статичен справочник, работи изцяло офлайн, без AI/сървър.
+         НЕ е медицинска/ветеринарна диагноза, а само ориентир по избрани симптоми. -->
+    <div id="diagnosisModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-amber-700 rounded-2xl p-5 max-w-md w-full max-h-[85vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-lg font-bold text-amber-300"><i class="fa-solid fa-stethoscope mr-2"></i><span data-i18n>Провери симптоми</span></h3>
+                <button onclick="closeDiagnosisModal()" class="text-slate-400 hover:text-white text-xl leading-none">&times;</button>
+            </div>
+            <p class="text-[11px] text-amber-200 bg-amber-950/60 border border-amber-800 rounded-lg p-2.5 mb-3 leading-relaxed"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i><span data-i18n>Това не замества консултация с ветеринар или опитен аквариумист — само общ ориентир по избраните симптоми.</span></p>
+            <p class="text-xs text-slate-400 mb-2" data-i18n>Какво забелязваш? (отбележи всичко подходящо)</p>
+            <div id="symptomChecklist" class="grid grid-cols-1 gap-1.5 text-sm mb-3"></div>
+            <button type="button" onclick="runDiagnosis()" class="w-full bg-amber-700 hover:bg-amber-600 text-white text-sm py-2 rounded-lg font-medium"><i class="fa-solid fa-magnifying-glass mr-1.5"></i><span data-i18n>Провери</span></button>
+            <div id="diagnosisResults" class="mt-3 space-y-2"></div>
+        </div>
+    </div>
+
     <script>
         // Абсолютна застраховка: ако нещо, някъде по-долу, хвърли грешка извън контрол и
         // спре изпълнението на скрипта преди нормалната логика да скрие splash екрана,
@@ -1201,6 +1218,91 @@
         ];
 
 
+        // ---------- Проверка на симптоми — статичен справочник (без AI/сървър, работи офлайн) ----------
+        // НЕ е медицинска диагноза — само ориентировъчно съвпадение по избрани симптоми.
+        const SYMPTOMS = [
+            { id: 's1', label: 'Бели точици по тялото или перките' },
+            { id: 's2', label: 'Разръфани или изгнили краища на перките' },
+            { id: 's3', label: 'Подут корем, люспите стърчат като шишарка' },
+            { id: 's4', label: 'Учестено дишане, чести посещения на повърхността' },
+            { id: 's5', label: 'Летаргия — крие се, не плува, отказва храна' },
+            { id: 's6', label: 'Бели пухкави влакна по тялото' },
+            { id: 's7', label: 'Златист или кадифен прах по тялото' },
+            { id: 's8', label: 'Трие се в декорации или камъни' },
+            { id: 's9', label: 'Хлътнал корем въпреки хранене' },
+            { id: 's10', label: 'Издути, изпъкнали очи' },
+            { id: 's11', label: 'Зачервени ивици или петна по тялото' },
+            { id: 's12', label: 'Плува накриво или трудно пази равновесие' },
+            { id: 's13', label: 'Мътни или побелели очи' },
+            { id: 's14', label: 'Бяла плесенна линия около устата' }
+        ];
+
+        const DIAGNOSES = [
+            { id: 'ich', name: 'Ихтиофтириус (бяла точка)', symptoms: ['s1', 's8'], action: 'Повиши постепенно температурата до 28-29°C (ако видовете го понасят) и приложи подходящ медикамент против ихтиофтириус. Силно заразно — следи и другите обитатели.' },
+            { id: 'finrot', name: 'Гниене на перките', symptoms: ['s2'], action: 'Провери амоняк и нитрити веднага, направи частична смяна на водата. При напредване е нужен антибактериален медикамент.' },
+            { id: 'dropsy', name: 'Воднянка', symptoms: ['s3'], action: 'Сериозен симптом с нисък шанс за възстановяване. Изолирай рибата, провери параметрите на водата и се консултирай с опитен аквариумист или ветеринар.' },
+            { id: 'ammonia', name: 'Амонячно/нитритно отравяне', symptoms: ['s4', 's5'], action: 'Провери незабавно амоняк и нитрити — това е спешно. Направи голяма частична смяна на водата веднага.' },
+            { id: 'fungus', name: 'Гъбично заболяване', symptoms: ['s6'], action: 'Подобри качеството на водата и приложи подходящ антигъбичен медикамент.' },
+            { id: 'velvet', name: 'Кадифена болест', symptoms: ['s7', 's8'], action: 'Затъмни аквариума временно, приложи медикамент против кадифена болест и провери температурата.' },
+            { id: 'parasites', name: 'Външни паразити или дразнене', symptoms: ['s8'], action: 'Провери качеството на водата и наблюдавай отблизо. При влошаване обмисли карантинен резервоар.' },
+            { id: 'internal', name: 'Вътрешни паразити', symptoms: ['s9'], action: 'Нужен е специализиран обезпаразитяващ медикамент. Препоръчва се временна карантина.' },
+            { id: 'popeye', name: 'Издути очи (Pop-eye)', symptoms: ['s10'], action: 'Провери качеството на водата. При една засегната риба може да е травма, а не заболяване.' },
+            { id: 'bacterial', name: 'Бактериална инфекция', symptoms: ['s11'], action: 'Подобри качеството на водата и приложи антибактериален медикамент. Препоръчва се карантина.' },
+            { id: 'swimbladder', name: 'Нарушение на плавателния мехур', symptoms: ['s12'], action: 'Провери температурата на водата и количеството храна (риск от преяждане). Обмисли 24-48 часа без хранене.' },
+            { id: 'cloudyeye', name: 'Мътно око', symptoms: ['s13'], action: 'Провери качеството на водата. Възможна е травма или начална бактериална инфекция.' },
+            { id: 'columnaris', name: 'Устна гниене (Columnaris)', symptoms: ['s14'], action: 'Силно заразно заболяване — нужна е бърза карантина и антибактериален медикамент.' }
+        ];
+
+        let selectedSymptoms = new Set();
+
+        function renderSymptomChecklist() {
+            const box = document.getElementById('symptomChecklist');
+            if (!box) return;
+            box.innerHTML = SYMPTOMS.map(s => `
+                <label class="flex items-start gap-2 text-slate-300 hover:text-slate-100 cursor-pointer">
+                    <input type="checkbox" value="${s.id}" onchange="toggleSymptom('${s.id}', this.checked)" class="mt-0.5 shrink-0">
+                    <span>${tr(s.label)}</span>
+                </label>
+            `).join('');
+        }
+
+        function toggleSymptom(id, checked) {
+            if (checked) selectedSymptoms.add(id); else selectedSymptoms.delete(id);
+        }
+
+        function openDiagnosisModal() {
+            selectedSymptoms = new Set();
+            renderSymptomChecklist();
+            document.getElementById('diagnosisResults').innerHTML = '';
+            document.getElementById('diagnosisModal').classList.remove('hidden');
+        }
+
+        function closeDiagnosisModal() {
+            document.getElementById('diagnosisModal').classList.add('hidden');
+        }
+
+        function runDiagnosis() {
+            const box = document.getElementById('diagnosisResults');
+            if (!selectedSymptoms.size) {
+                box.innerHTML = `<p class="text-sm text-slate-500 text-center py-2">${tr('Отбележи поне един симптом.')}</p>`;
+                return;
+            }
+            const matches = DIAGNOSES
+                .map(d => ({ d, count: d.symptoms.filter(s => selectedSymptoms.has(s)).length }))
+                .filter(m => m.count > 0)
+                .sort((a, b) => b.count - a.count || (b.count / b.d.symptoms.length) - (a.count / a.d.symptoms.length));
+            if (!matches.length) {
+                box.innerHTML = `<p class="text-sm text-slate-500 text-center py-2">${tr('Няма съвпадение с нищо от справочника. Наблюдавай рибата и провери параметрите на водата.')}</p>`;
+                return;
+            }
+            box.innerHTML = matches.slice(0, 5).map(({ d, count }) => `
+                <div class="bg-slate-900/60 border border-slate-700 rounded-lg p-3 text-sm space-y-1">
+                    <p class="font-semibold text-amber-300">${tr(d.name)}</p>
+                    <p class="text-slate-300">${tr(d.action)}</p>
+                </div>
+            `).join('');
+        }
+
         // Правила за съвместимост, генерирани от особеностите на видовете
         const compatRules = [];
         const shrimpItems = animalsDB.filter(a => a.isShrimp);
@@ -1218,10 +1320,11 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.6";
+        const APP_VERSION = "3.6.7";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         const CHANGELOG = [
+            { v: "3.6.7", items: ["Ново: \"Болна ли изглежда рибата?\" — проверка на симптоми по справочник с чести заболявания, работи изцяло офлайн (не е заместител на ветеринар)"] },
             { v: "3.6.6", items: ["Ново: бутон \"Сподели приложението\" долу — отваря родното меню за споделяне на устройството или копира линк"] },
             { v: "3.6.5", items: ["Анонимна статистика за посещения (Cloudflare Web Analytics) — без бисквитки и без лични данни"] },
             { v: "3.6.4", items: ["Собствен домейн: aquaassist.app — приложението вече живее на чист адрес, без наставка накрая"] },
@@ -3234,6 +3337,53 @@
             "Заключен преглед — не може да се редактира": "Locked preview — cannot be edited",
             "Докладвай бъг": "Report a bug",
             "Контакт": "Contact",
+            "Болна ли изглежда рибата?": "Does your fish look sick?",
+            "Провери симптоми": "Check symptoms",
+            "Това не замества консултация с ветеринар или опитен аквариумист — само общ ориентир по избраните симптоми.": "This does not replace consulting a vet or an experienced fishkeeper — it's only a general pointer based on the symptoms you pick.",
+            "Какво забелязваш? (отбележи всичко подходящо)": "What do you notice? (check everything that applies)",
+            "Провери": "Check",
+            "Отбележи поне един симптом.": "Check at least one symptom.",
+            "Няма съвпадение с нищо от справочника. Наблюдавай рибата и провери параметрите на водата.": "No match found in the reference list. Keep watching the fish and check your water parameters.",
+            "Бели точици по тялото или перките": "White spots on the body or fins",
+            "Разръфани или изгнили краища на перките": "Ragged or rotting fin edges",
+            "Подут корем, люспите стърчат като шишарка": "Swollen belly, scales sticking out like a pinecone",
+            "Учестено дишане, чести посещения на повърхността": "Rapid breathing, frequent trips to the surface",
+            "Летаргия — крие се, не плува, отказва храна": "Lethargy — hiding, not swimming, refusing food",
+            "Бели пухкави влакна по тялото": "White fluffy strands on the body",
+            "Златист или кадифен прах по тялото": "Golden or velvety dust on the body",
+            "Трие се в декорации или камъни": "Rubbing against decorations or rocks",
+            "Хлътнал корем въпреки хранене": "Sunken belly despite feeding",
+            "Издути, изпъкнали очи": "Swollen, bulging eyes",
+            "Зачервени ивици или петна по тялото": "Red streaks or spots on the body",
+            "Плува накриво или трудно пази равновесие": "Swimming sideways or struggling to balance",
+            "Мътни или побелели очи": "Cloudy or whitened eyes",
+            "Бяла плесенна линия около устата": "White fuzzy line around the mouth",
+            "Ихтиофтириус (бяла точка)": "Ich (white spot disease)",
+            "Повиши постепенно температурата до 28-29°C (ако видовете го понасят) и приложи подходящ медикамент против ихтиофтириус. Силно заразно — следи и другите обитатели.": "Gradually raise the temperature to 28-29°C (if the species tolerate it) and use a suitable ich treatment. Highly contagious — watch the other inhabitants too.",
+            "Гниене на перките": "Fin rot",
+            "Провери амоняк и нитрити веднага, направи частична смяна на водата. При напредване е нужен антибактериален медикамент.": "Check ammonia and nitrite right away and do a partial water change. If it progresses, an antibacterial treatment is needed.",
+            "Воднянка": "Dropsy",
+            "Сериозен симптом с нисък шанс за възстановяване. Изолирай рибата, провери параметрите на водата и се консултирай с опитен аквариумист или ветеринар.": "A serious symptom with a low recovery chance. Isolate the fish, check your water parameters and consult an experienced fishkeeper or a vet.",
+            "Амонячно/нитритно отравяне": "Ammonia/nitrite poisoning",
+            "Провери незабавно амоняк и нитрити — това е спешно. Направи голяма частична смяна на водата веднага.": "Check ammonia and nitrite immediately — this is urgent. Do a large partial water change right away.",
+            "Гъбично заболяване": "Fungal infection",
+            "Подобри качеството на водата и приложи подходящ антигъбичен медикамент.": "Improve water quality and use a suitable antifungal treatment.",
+            "Кадифена болест": "Velvet disease",
+            "Затъмни аквариума временно, приложи медикамент против кадифена болест и провери температурата.": "Dim the tank temporarily, use a velvet disease treatment and check the temperature.",
+            "Външни паразити или дразнене": "External parasites or irritation",
+            "Провери качеството на водата и наблюдавай отблизо. При влошаване обмисли карантинен резервоар.": "Check water quality and watch closely. If it worsens, consider a quarantine tank.",
+            "Вътрешни паразити": "Internal parasites",
+            "Нужен е специализиран обезпаразитяващ медикамент. Препоръчва се временна карантина.": "A specialized deworming treatment is needed. Temporary quarantine is recommended.",
+            "Издути очи (Pop-eye)": "Pop-eye",
+            "Провери качеството на водата. При една засегната риба може да е травма, а не заболяване.": "Check water quality. If only one fish is affected, it could be an injury rather than a disease.",
+            "Бактериална инфекция": "Bacterial infection",
+            "Подобри качеството на водата и приложи антибактериален медикамент. Препоръчва се карантина.": "Improve water quality and use an antibacterial treatment. Quarantine is recommended.",
+            "Нарушение на плавателния мехур": "Swim bladder disorder",
+            "Провери температурата на водата и количеството храна (риск от преяждане). Обмисли 24-48 часа без хранене.": "Check the water temperature and feeding amount (risk of overfeeding). Consider a 24-48 hour fast.",
+            "Мътно око": "Cloudy eye",
+            "Провери качеството на водата. Възможна е травма или начална бактериална инфекция.": "Check water quality. It could be an injury or an early bacterial infection.",
+            "Устна гниене (Columnaris)": "Columnaris (mouth rot)",
+            "Силно заразно заболяване — нужна е бърза карантина и антибактериален медикамент.": "Highly contagious — fast quarantine and an antibacterial treatment are needed.",
             "Сподели приложението": "Share the app",
             "Пробвай AquaAssist — безплатно приложение за проследяване на параметри, обитатели и поддръжка на аквариум.": "Try AquaAssist — a free app for tracking aquarium parameters, inhabitants and maintenance.",
             "Линкът е копиран — готово за споделяне.": "Link copied — ready to share.",
