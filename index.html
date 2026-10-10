@@ -1003,6 +1003,8 @@
             <span class="text-slate-700">·</span>
             <button type="button" onclick="contactEmail('general')" class="hover:text-cyan-300 underline" data-i18n>Контакт</button>
             <span class="text-slate-700">·</span>
+            <button type="button" onclick="shareApp()" class="hover:text-cyan-300 underline inline-flex items-center gap-1"><i class="fa-solid fa-share-nodes"></i><span data-i18n>Сподели приложението</span></button>
+            <span class="text-slate-700">·</span>
             <span id="syncStatusIndicator" class="inline-flex items-center gap-1.5 text-slate-500">
                 <span id="syncStatusDot" class="w-1.5 h-1.5 rounded-full bg-slate-500 shrink-0"></span>
                 <span id="syncStatusText"></span>
@@ -1216,10 +1218,11 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.5";
+        const APP_VERSION = "3.6.6";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         const CHANGELOG = [
+            { v: "3.6.6", items: ["Ново: бутон \"Сподели приложението\" долу — отваря родното меню за споделяне на устройството или копира линк"] },
             { v: "3.6.5", items: ["Анонимна статистика за посещения (Cloudflare Web Analytics) — без бисквитки и без лични данни"] },
             { v: "3.6.4", items: ["Собствен домейн: aquaassist.app — приложението вече живее на чист адрес, без наставка накрая"] },
             { v: "3.6.3", items: ["Поправка: нови потребители без запазена тема вече винаги започват с темата \"Океанско Синьо\", вместо темата да се сменя автоматично вечер — за по-спокойно първо впечатление"] },
@@ -3231,6 +3234,9 @@
             "Заключен преглед — не може да се редактира": "Locked preview — cannot be edited",
             "Докладвай бъг": "Report a bug",
             "Контакт": "Contact",
+            "Сподели приложението": "Share the app",
+            "Пробвай AquaAssist — безплатно приложение за проследяване на параметри, обитатели и поддръжка на аквариум.": "Try AquaAssist — a free app for tracking aquarium parameters, inhabitants and maintenance.",
+            "Линкът е копиран — готово за споделяне.": "Link copied — ready to share.",
             "Имейлът е копиран:": "Email copied:",
             "В кой раздел е проблемът?": "Which section is the problem in?",
             "Опиши какво се случва:": "Describe what's happening:",
@@ -4135,6 +4141,27 @@
         // такива без такъв клиент) просто не прави нищо видимо или показва грешка
         // "This content is blocked". Линк към Gmail web compose е обикновен https
         // адрес, работи навсякъде еднакво, с copy-to-clipboard като резервен вариант.
+        // Споделяне на приложението — на телефон/съвместим браузър отваря родното
+        // меню "Сподели" (Viber, Messenger, SMS и т.н.); иначе пада обратно към
+        // копиране на текста в клипборда, по същия модел като contactEmail().
+        function shareApp() {
+            const shareText = tr('Пробвай AquaAssist — безплатно приложение за проследяване на параметри, обитатели и поддръжка на аквариум.');
+            const shareUrl = 'https://aquaassist.app';
+            if (navigator.share) {
+                navigator.share({ title: 'AquaAssist', text: shareText, url: shareUrl }).catch(() => {});
+                return;
+            }
+            const fullText = `${shareText} ${shareUrl}`;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(fullText).then(
+                    () => showToast(tr('Линкът е копиран — готово за споделяне.')),
+                    () => showToast(shareUrl)
+                );
+            } else {
+                showToast(shareUrl);
+            }
+        }
+
         const CONTACT_EMAIL = 'ioancho93@gmail.com';
         function contactEmail(kind) {
             const subject = encodeURIComponent('AquaAssist');
