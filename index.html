@@ -1127,6 +1127,22 @@
         </div>
     </div>
 
+    <!-- Прозорче за име на аквариум — ползва се и при добавяне на нов, и при преименуване. -->
+    <div id="tankNameModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-cyan-700 rounded-2xl p-5 max-w-sm w-full">
+            <div class="flex items-center justify-between mb-3">
+                <h3 id="tankNameModalTitle" class="text-lg font-bold text-cyan-300"><i class="fa-solid fa-water mr-2"></i><span data-i18n>Нов аквариум</span></h3>
+                <button onclick="closeTankNameModal()" class="text-slate-400 hover:text-white text-xl leading-none">&times;</button>
+            </div>
+            <label class="block text-xs text-slate-400 mb-1" data-i18n>Име на аквариума</label>
+            <input id="tankNameInput" type="text" maxlength="40" onkeydown="if(event.key==='Enter'){confirmTankName();}else if(event.key==='Escape'){closeTankNameModal();}" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-sm focus:outline-none focus:border-cyan-400" data-i18n-placeholder placeholder="Напр. Хол, 120л общ">
+            <div class="flex gap-2 mt-4">
+                <button type="button" onclick="closeTankNameModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm py-2 rounded-lg font-medium"><span data-i18n>Отказ</span></button>
+                <button type="button" onclick="confirmTankName()" class="flex-1 bg-cyan-700 hover:bg-cyan-600 text-white text-sm py-2 rounded-lg font-medium"><span data-i18n>Запиши</span></button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Абсолютна застраховка: ако нещо, някъде по-долу, хвърли грешка извън контрол и
         // спре изпълнението на скрипта преди нормалната логика да скрие splash екрана,
@@ -1378,10 +1394,11 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.15";
+        const APP_VERSION = "3.6.16";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         const CHANGELOG = [
+            { v: "3.6.16", items: ["Именуването на нов/преименуван аквариум вече е през прегледно прозорче по средата на екрана, вместо грозното системно изскачащо поле на браузъра"] },
             { v: "3.6.15", items: ["При добавяне на нов аквариум вече веднага се пита за име, вместо автоматично да се казва \"Аквариум N\""] },
             { v: "3.6.14", items: ["Подобрено откриване в Google: добавени ключови думи (кирилица и транслитерация), structured data, robots.txt и sitemap.xml"] },
             { v: "3.6.13", items: ["Поправка: раздел \"Добави\" вече правилно се показва само когато е избран, вместо да прониква и в раздел \"Обитатели\""] },
@@ -3120,6 +3137,8 @@
             "Потвърди": "Confirm", "Потвърди / Запиши": "Confirm / Save", "Добави аквариум": "Add aquarium",
             "Преименувай": "Rename", "Изтрий аквариума": "Delete aquarium", "Експорт (JSON)": "Export (JSON)", "Импорт (JSON)": "Import (JSON)",
             "Нов аквариум": "New aquarium", "Нитрати (NO3)": "Nitrates (NO3)",
+            "Преименувай аквариум": "Rename aquarium", "Име на аквариума": "Aquarium name",
+            "Напр. Хол, 120л общ": "E.g. Living room, 120L community",
             // --- Справочник с видове (имена, храна/грижа, съвместимост) ---
             "Температура": "Temperature",
             "Мин. обем": "Min. volume",
@@ -5015,25 +5034,54 @@
 
         function switchTank(i) { captureTank(); store.active = parseInt(i); applyTank(); refreshAfterTankChange(); saveData(); }
 
+        let tankNameModalMode = null; // "add" или "rename"
+
         function addTank() {
-            captureTank();
+            // Веднага питаме за име чрез модалното прозорче, за да не остава
+            // стандартното "Аквариум N" (което може да е на различен език от
+            // текущо избрания, ако е било създадено по-рано) — потребителят
+            // може да приеме предложеното име или да въведе свое.
             const defaultName = (currentLang === "en" ? "Aquarium " : "Аквариум ") + (store.tanks.length + 1);
-            // Веднага питаме за име, за да не остава стандартното "Аквариум N"
-            // (което може да е на различен език от текущо избрания, ако е било
-            // създадено по-рано) — потребителят може да приеме предложеното
-            // име или да въведе свое.
-            const chosen = prompt(tr("Име на новия аквариум:"), defaultName);
-            const finalName = (chosen && chosen.trim()) ? chosen.trim().slice(0, 40) : defaultName;
-            store.tanks.push(newTank(finalName));
-            store.active = store.tanks.length - 1;
-            applyTank(); refreshAfterTankChange(); saveData();
-            showToast("Създаден е нов аквариум");
+            openTankNameModal("add", defaultName);
         }
 
         function renameTank() {
             const t = store.tanks[store.active];
-            const n = prompt(tr("Име на аквариума:"), t.name);
-            if (n && n.trim()) { t.name = n.trim().slice(0, 40); refreshTankSelect(); saveData(); }
+            openTankNameModal("rename", t.name);
+        }
+
+        function openTankNameModal(mode, prefill) {
+            tankNameModalMode = mode;
+            const title = document.getElementById('tankNameModalTitle');
+            title.innerHTML = mode === "add"
+                ? '<i class="fa-solid fa-water mr-2"></i>' + tr("Нов аквариум")
+                : '<i class="fa-solid fa-water mr-2"></i>' + tr("Преименувай аквариум");
+            const input = document.getElementById('tankNameInput');
+            input.value = prefill || '';
+            document.getElementById('tankNameModal').classList.remove('hidden');
+            setTimeout(() => { input.focus(); input.select(); }, 50);
+        }
+
+        function closeTankNameModal() {
+            document.getElementById('tankNameModal').classList.add('hidden');
+            tankNameModalMode = null;
+        }
+
+        function confirmTankName() {
+            const input = document.getElementById('tankNameInput');
+            const name = input.value.trim().slice(0, 40);
+            if (!name) { input.focus(); return; }
+            if (tankNameModalMode === "add") {
+                captureTank();
+                store.tanks.push(newTank(name));
+                store.active = store.tanks.length - 1;
+                applyTank(); refreshAfterTankChange(); saveData();
+                showToast("Създаден е нов аквариум");
+            } else if (tankNameModalMode === "rename") {
+                store.tanks[store.active].name = name;
+                refreshTankSelect(); saveData();
+            }
+            closeTankNameModal();
         }
 
         function deleteTank() {
