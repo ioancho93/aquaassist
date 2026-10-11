@@ -1378,10 +1378,11 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.14";
+        const APP_VERSION = "3.6.15";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         const CHANGELOG = [
+            { v: "3.6.15", items: ["При добавяне на нов аквариум вече веднага се пита за име, вместо автоматично да се казва \"Аквариум N\""] },
             { v: "3.6.14", items: ["Подобрено откриване в Google: добавени ключови думи (кирилица и транслитерация), structured data, robots.txt и sitemap.xml"] },
             { v: "3.6.13", items: ["Поправка: раздел \"Добави\" вече правилно се показва само когато е избран, вместо да прониква и в раздел \"Обитатели\""] },
             { v: "3.6.12", items: ["Поправка: падащите менюта на браузъра (напр. избор на час при дозиране) вече са в тъмен стил, вместо бели"] },
@@ -3689,6 +3690,7 @@
             "от аквариума?": "from the aquarium?",
             "Създаден е нов аквариум": "A new aquarium was created",
             "Име на аквариума:": "Aquarium name:",
+            "Име на новия аквариум:": "Name for the new aquarium:",
             "Трябва да остане поне един аквариум": "At least one aquarium must remain",
             "Приложението вече е инсталирано или браузърът не поддържа инсталиране.": "The app is already installed or the browser doesn't support installation.",
             "Браузърът не поддържа известия.": "The browser doesn't support notifications.",
@@ -5015,7 +5017,14 @@
 
         function addTank() {
             captureTank();
-            store.tanks.push(newTank((currentLang === "en" ? "Aquarium " : "Аквариум ") + (store.tanks.length + 1)));
+            const defaultName = (currentLang === "en" ? "Aquarium " : "Аквариум ") + (store.tanks.length + 1);
+            // Веднага питаме за име, за да не остава стандартното "Аквариум N"
+            // (което може да е на различен език от текущо избрания, ако е било
+            // създадено по-рано) — потребителят може да приеме предложеното
+            // име или да въведе свое.
+            const chosen = prompt(tr("Име на новия аквариум:"), defaultName);
+            const finalName = (chosen && chosen.trim()) ? chosen.trim().slice(0, 40) : defaultName;
+            store.tanks.push(newTank(finalName));
             store.active = store.tanks.length - 1;
             applyTank(); refreshAfterTankChange(); saveData();
             showToast("Създаден е нов аквариум");
