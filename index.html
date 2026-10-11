@@ -1394,10 +1394,11 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.16";
+        const APP_VERSION = "3.6.17";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         const CHANGELOG = [
+            { v: "3.6.17", items: ["Съвсем нов потребител (прясна инсталация) вече веднага бива поканен да кръсти първия си аквариум, вместо автоматично да остане \"Аквариум 1\""] },
             { v: "3.6.16", items: ["Именуването на нов/преименуван аквариум вече е през прегледно прозорче по средата на екрана, вместо грозното системно изскачащо поле на браузъра"] },
             { v: "3.6.15", items: ["При добавяне на нов аквариум вече веднага се пита за име, вместо автоматично да се казва \"Аквариум N\""] },
             { v: "3.6.14", items: ["Подобрено откриване в Google: добавени ключови думи (кирилица и транслитерация), structured data, robots.txt и sitemap.xml"] },
@@ -3099,6 +3100,7 @@
         // ---------- Превод (BG / EN) ----------
         const LANG_KEY = "aquaAssistLang";
         let currentLang = "bg";
+        let needsFirstTankNamePrompt = false; // true само при съвсем прясна инсталация, без никакви запазени данни
 
         // Речник: български оригинал -> английски превод. Използва се и за статичен HTML (data-i18n), и за динамични съобщения (tr()).
         const I18N = {
@@ -5194,7 +5196,14 @@
             else currentTheme = "ocean";
             const raws = data && Array.isArray(data.tanks) ? data.tanks : [];
             store.tanks = raws.map((t, i) => cleanTank(t || {}, "Аквариум " + (i + 1)));
-            if (!store.tanks.length) store.tanks.push(newTank((currentLang === "en" ? "Aquarium 1" : "Аквариум 1")));
+            if (!store.tanks.length) {
+                store.tanks.push(newTank((currentLang === "en" ? "Aquarium 1" : "Аквариум 1")));
+                // Съвсем прясна инсталация (никога не е имало запазени данни) —
+                // ще предложим на потребителя да кръсти аквариума си веднага
+                // след като интерфейсът се зареди напълно (вижте извикването
+                // по-долу, след останалата инициализация).
+                if (!hadDataBefore) needsFirstTankNamePrompt = true;
+            }
             store.active = data && Number.isInteger(data.active) && data.active >= 0 && data.active < store.tanks.length ? data.active : 0;
 
             applyTank();
@@ -5345,6 +5354,13 @@
         initSyncUI();
         maybeShowSyncTooltip();
         updateSyncStatus();
+        // При съвсем прясна инсталация — питаме за име на аквариума веднага,
+        // след като началният екран (splash) е изчезнал и всичко друго се е
+        // заредило, за да не изглежда прибързано или да се сблъска с друга анимация.
+        if (needsFirstTankNamePrompt) {
+            needsFirstTankNamePrompt = false;
+            setTimeout(() => openTankNameModal("rename", store.tanks[0].name), 900);
+        }
         // checkViewFromUrl се проверява първо и връща true, ако е заключила екрана
         // в режим "само преглед" — в такъв случай останалите две не бива да се пипат,
         // защото нормалното приложение вече е скрито и заключено.
