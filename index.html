@@ -3,22 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AquaAssist</title>
-    <meta name="description" content="Безплатно уеб приложение за проследяване на параметри на водата, обитатели, съвместимост и поддръжка на аквариум. Без регистрация, данните остават на твоето устройство.">
+    <title>AquaAssist — Аква Асистент за аквариум | Проследяване на параметри и обитатели</title>
+    <meta name="description" content="AquaAssist (Аква Асистент) — безплатно уеб приложение за аквариум: проследяване на параметри на водата, риби, безгръбначни и растения, съвместимост, диагностика на здравето и поддръжка. Без регистрация, данните остават на твоето устройство.">
+    <meta name="keywords" content="aquaassist, аквуасистент, аква асистент, акваасистент, aqua assistant, приложение за аквариум, aplikacia za akvarium, akvarium app, aquarium app bulgaria, параметри на вода аквариум, параметри на водата, обитатели на аквариум, диагностика на здравето на рибите, съвместимост риби аквариум, akvarium, аквариум калкулатор, fish tank tracker, рибен аквариум приложение">
+    <link rel="canonical" href="https://aquaassist.app/">
+    <meta name="robots" content="index, follow">
 
     <!-- Open Graph / Facebook, месинджъри, форуми -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://aquaassist.app/">
-    <meta property="og:title" content="AquaAssist">
-    <meta property="og:description" content="Проследяване на параметри на водата, обитатели, съвместимост и поддръжка на аквариум. Безплатно, без регистрация.">
+    <meta property="og:title" content="AquaAssist — Аква Асистент за аквариум">
+    <meta property="og:description" content="Проследяване на параметри на водата, обитатели, съвместимост, диагностика на здравето и поддръжка на аквариум. Безплатно, без регистрация.">
     <meta property="og:image" content="https://aquaassist.app/icons/icon-512.png">
     <meta property="og:locale" content="bg_BG">
+    <meta property="og:site_name" content="AquaAssist">
 
     <!-- Twitter/X card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="AquaAssist">
-    <meta name="twitter:description" content="Проследяване на параметри на водата, обитатели, съвместимост и поддръжка на аквариум. Безплатно, без регистрация.">
+    <meta name="twitter:title" content="AquaAssist — Аква Асистент за аквариум">
+    <meta name="twitter:description" content="Проследяване на параметри на водата, обитатели, съвместимост, диагностика на здравето и поддръжка на аквариум. Безплатно, без регистрация.">
     <meta name="twitter:image" content="https://aquaassist.app/icons/icon-512.png">
+
+    <!-- Structured data за Google (помага да се разбере какво е приложението) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "AquaAssist",
+        "alternateName": ["Аква Асистент", "АкваАсистент", "Aqua Assistant"],
+        "url": "https://aquaassist.app/",
+        "description": "Безплатно уеб приложение за проследяване на параметри на водата, обитатели, съвместимост, диагностика на здравето и поддръжка на аквариум. Без регистрация.",
+        "applicationCategory": "LifestyleApplication",
+        "operatingSystem": "Any",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "BGN" },
+        "inLanguage": ["bg", "en"]
+    }
+    </script>
 
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" id="themeColorMeta" content="#0f172a">
@@ -1358,10 +1378,11 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.13";
+        const APP_VERSION = "3.6.14";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         const CHANGELOG = [
+            { v: "3.6.14", items: ["Подобрено откриване в Google: добавени ключови думи (кирилица и транслитерация), structured data, robots.txt и sitemap.xml"] },
             { v: "3.6.13", items: ["Поправка: раздел \"Добави\" вече правилно се показва само когато е избран, вместо да прониква и в раздел \"Обитатели\""] },
             { v: "3.6.12", items: ["Поправка: падащите менюта на браузъра (напр. избор на час при дозиране) вече са в тъмен стил, вместо бели"] },
             { v: "3.6.11", items: ["\"Диагностика на здравето\" вече е и в плаващото меню за бързи действия на телефон, за по-лесен достъп"] },
