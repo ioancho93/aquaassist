@@ -1405,11 +1405,12 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.20";
+        const APP_VERSION = "3.6.21";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.21", items: ["Премахнато автоматично изскачащо прозорче за име на аквариум при съвсем нова инсталация — усещаше се натрапчиво заедно с приветствения банер; аквариумът остава \"Аквариум 1\", а преименуването е достъпно по всяко време по избор"], items_en: ["Removed the automatic aquarium-naming popup on a brand-new install — it felt pushy alongside the welcome banner; the aquarium now stays \"Aquarium 1\" and renaming remains available any time, at the user's choice"] },
             { v: "3.6.20", items: ["Поправка: записите в \"Какво ново\" вече имат и английски превод, вместо да са само на български независимо от избрания език"], items_en: ["Fix: \"What's new\" entries now have an English translation too, instead of always being shown only in Bulgarian regardless of the selected language"] },
             { v: "3.6.19", items: ["Поправка: панелът \"Какво ново\" погрешно се показваше и на съвсем нови посетители (без никакви запазени данни) заради грешен ред на проверките"], items_en: ["Fix: the \"What's new\" panel was incorrectly shown to brand-new visitors (with no saved data at all) due to a wrong check order"] },
             { v: "3.6.18", items: ["Добавен е кратък приветствен текст на началния екран за съвсем нови посетители, обясняващ за какво е приложението"], items_en: ["Added a short welcome message on the home screen for brand-new visitors, explaining what the app is for"] },
@@ -5386,14 +5387,16 @@
         initSyncUI();
         maybeShowSyncTooltip();
         updateSyncStatus();
-        // При съвсем прясна инсталация — питаме за име на аквариума веднага,
-        // след като началният екран (splash) е изчезнал и всичко друго се е
-        // заредило, за да не изглежда прибързано или да се сблъска с друга анимация.
+        // При съвсем прясна инсталация — показваме само приветствения банер.
+        // По-рано тук автоматично изскачаше и прозорче за име на аквариума,
+        // но двете едно след друго (банер + изскачащо прозорче без потребителят
+        // да е направил нищо) се усещаше натрапчиво за съвсем нов посетител.
+        // Аквариумът просто остава "Аквариум 1" — преименуването си стои
+        // достъпно по всяко време през бутона за преименуване, по избор на потребителя.
         if (needsFirstTankNamePrompt) {
             needsFirstTankNamePrompt = false;
             const wb = document.getElementById('welcomeBanner');
             if (wb) wb.classList.remove('hidden');
-            setTimeout(() => openTankNameModal("rename", store.tanks[0].name), 900);
         }
         // checkViewFromUrl се проверява първо и връща true, ако е заключила екрана
         // в режим "само преглед" — в такъв случай останалите две не бива да се пипат,
