@@ -1387,6 +1387,7 @@
                     <p class="text-slate-300">${tr(d.action)}</p>
                 </div>
             `).join('');
+            logFeatureUse('diagnosisRun');
         }
 
         // Правила за съвместимост, генерирани от особеностите на видовете
@@ -1406,11 +1407,12 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.23";
+        const APP_VERSION = "3.6.24";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.24", items: ["Добавена анонимна статистика за употреба на функции (само общи бройки — без лична информация), обновена политика за поверителност"], items_en: ["Added anonymous feature-usage statistics (only aggregate counts — no personal information), updated privacy policy"] },
             { v: "3.6.23", items: ["Всичките 8 потвърждения за изтриване/замяна вече минават през собствено стилизирано прозорче на приложението, вместо грозния вграден confirm() на браузъра"], items_en: ["All 8 delete/replace confirmations now use the app's own styled dialog, instead of the browser's plain built-in confirm() box"] },
             { v: "3.6.22", items: ["Предпускова проверка: допреведени около 20 забравени съобщения/надписи на английски (известия, потвърждения за изтриване, aria-label-и за екранни четци), добавени липсващи връзки label↔поле за достъпност, поправен id в manifest.json"], items_en: ["Pre-launch pass: translated roughly 20 previously untranslated messages/labels into English (toasts, delete confirmations, screen-reader aria-labels), added missing label↔field associations for accessibility, fixed a stale id in manifest.json"] },
             { v: "3.6.21", items: ["Премахнато автоматично изскачащо прозорче за име на аквариум при съвсем нова инсталация — усещаше се натрапчиво заедно с приветствения банер; аквариумът остава \"Аквариум 1\", а преименуването е достъпно по всяко време по избор"], items_en: ["Removed the automatic aquarium-naming popup on a brand-new install — it felt pushy alongside the welcome banner; the aquarium now stays \"Aquarium 1\" and renaming remains available any time, at the user's choice"] },
@@ -1756,6 +1758,7 @@
             refreshSelects();
             vibrate(15);
             saveData();
+            logFeatureUse('animalAdded');
         }
 
         function addPlantToAquarium() {
@@ -1776,6 +1779,7 @@
             refreshSelects();
             vibrate(15);
             saveData();
+            logFeatureUse('plantAdded');
         }
 
         function updateMyInhabitants() {
@@ -3005,6 +3009,7 @@
                 if (store.tanks.length < 2) { showToast('Добави поне 2 аквариума, за да сравняваш', 'warn'); return; }
                 refreshCompareSelects();
                 renderCompare();
+                logFeatureUse('compareOpened');
             }
             body.classList.toggle('hidden');
         }
@@ -4346,6 +4351,22 @@
             }
         } catch (e) { fbReady = false; }
 
+        // ---------- Анонимна продуктова аналитика (само бройки, без лична информация) ----------
+        // Всяко извикване само увеличава с 1 едно числово поле в ЕДИН споделен документ
+        // (analytics/featureUsage) — не пази кой, кога, или от кое устройство е дошло
+        // извикването, само обща бройка колко пъти дадена функция е ползвана някога от
+        // всички потребители общо. "Best-effort": ако няма връзка или Firebase не е
+        // наличен, просто се прескача без грешка — никога не пречи на самото действие.
+        function logFeatureUse(name) {
+            if (!fbReady || typeof firebase === 'undefined' || navigator.onLine === false) return;
+            try {
+                firebase.firestore().collection('analytics').doc('featureUsage').set(
+                    { [name]: firebase.firestore.FieldValue.increment(1) },
+                    { merge: true }
+                ).catch(() => {});
+            } catch (e) {}
+        }
+
         // ---------- Облачна синхронизация (без регистрация — само код, който пазиш сам) ----------
         const SYNC_CODE_KEY = 'aquaAssistSyncCode';
         const SYNC_TOOLTIP_SHOWN_KEY = 'aquaAssistSyncTooltipShown';
@@ -5179,6 +5200,7 @@
                 store.active = store.tanks.length - 1;
                 applyTank(); refreshAfterTankChange(); saveData();
                 showToast("Създаден е нов аквариум");
+                logFeatureUse('tankCreated');
             } else if (tankNameModalMode === "rename") {
                 store.tanks[store.active].name = name;
                 refreshTankSelect(); saveData();
