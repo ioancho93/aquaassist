@@ -16,6 +16,7 @@
     <meta property="og:description" content="Проследяване на параметри на водата, обитатели, съвместимост, диагностика на здравето и поддръжка на аквариум. Безплатно, без регистрация.">
     <meta property="og:image" content="https://aquaassist.app/icons/icon-512.png">
     <meta property="og:locale" content="bg_BG">
+    <meta property="og:locale:alternate" content="en_US">
     <meta property="og:site_name" content="AquaAssist">
 
     <!-- Twitter/X card -->
@@ -482,7 +483,7 @@
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                    <label class="block text-sm text-slate-400 mb-1" data-i18n>Вид аквариум:</label>
+                    <label for="aqType" class="block text-sm text-slate-400 mb-1" data-i18n>Вид аквариум:</label>
                     <select id="aqType" onchange="saveData()" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-sm focus:outline-none focus:border-cyan-400">
                         <option value="Общ аквариум (Community)" data-i18n>Общ аквариум</option>
                         <option value="Акваскейп (растителен)" data-i18n>Растителен аквариум</option>
@@ -491,7 +492,7 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm text-slate-400 mb-1" data-i18n>Форма на аквариума:</label>
+                    <label for="aqShape" class="block text-sm text-slate-400 mb-1" data-i18n>Форма на аквариума:</label>
                     <select id="aqShape" onchange="saveData()" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-sm focus:outline-none focus:border-cyan-400">
                         <option value="Правоъгълен" data-i18n>Правоъгълен</option>
                         <option value="Куб" data-i18n>Куб</option>
@@ -501,7 +502,7 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm text-slate-400 mb-1" data-i18n>Обем (Литри):</label>
+                    <label for="aqLiters" class="block text-sm text-slate-400 mb-1" data-i18n>Обем (Литри):</label>
                     <input type="number" id="aqLiters" value="0" min="1" oninput="updateCapacity(); saveData();" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-sm focus:outline-none focus:border-cyan-400">
                 </div>
             </div>
@@ -510,15 +511,15 @@
                 <p class="text-xs text-slate-400 mb-2"><i class="fa-solid fa-ruler-combined mr-1.5 text-cyan-400"></i><span data-i18n>Калкулатор за обем по размери (за правоъгълен/куб аквариум)</span></p>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs items-end">
                     <div>
-                        <label class="block text-slate-400 mb-1" data-i18n>Дължина (см):</label>
+                        <label for="aqLength" class="block text-slate-400 mb-1" data-i18n>Дължина (см):</label>
                         <input type="number" id="aqLength" min="0" class="w-full bg-slate-700 p-2 rounded border border-slate-600">
                     </div>
                     <div>
-                        <label class="block text-slate-400 mb-1" data-i18n>Ширина (см):</label>
+                        <label for="aqWidth" class="block text-slate-400 mb-1" data-i18n>Ширина (см):</label>
                         <input type="number" id="aqWidth" min="0" class="w-full bg-slate-700 p-2 rounded border border-slate-600">
                     </div>
                     <div>
-                        <label class="block text-slate-400 mb-1" data-i18n>Височина (см):</label>
+                        <label for="aqHeight" class="block text-slate-400 mb-1" data-i18n>Височина (см):</label>
                         <input type="number" id="aqHeight" min="0" class="w-full bg-slate-700 p-2 rounded border border-slate-600">
                     </div>
                     <button onclick="calcVolume()" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-cyan-300 px-3 py-2 rounded font-medium transition" data-i18n>Изчисли</button>
@@ -579,31 +580,31 @@
 
             <div id="paramEditForm" class="hidden bg-slate-900/60 p-4 rounded-xl border border-slate-700 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
                 <div>
-                    <label class="block text-slate-400 mb-1" data-i18n>Temp (°C):</label>
+                    <label for="inTemp" class="block text-slate-400 mb-1" data-i18n>Temp (°C):</label>
                     <input type="number" step="0.1" id="inTemp" value="" class="w-full bg-slate-700 p-2 rounded border border-slate-600">
                 </div>
                 <div>
-                    <label class="block text-slate-400 mb-1" data-i18n>pH:</label>
+                    <label for="inPH" class="block text-slate-400 mb-1" data-i18n>pH:</label>
                     <input type="number" step="0.1" id="inPH" value="" class="w-full bg-slate-700 p-2 rounded border border-slate-600">
                 </div>
                 <div>
-                    <label class="block text-slate-400 mb-1" data-i18n>NH3 (mg/l):</label>
+                    <label for="inNH3" class="block text-slate-400 mb-1" data-i18n>NH3 (mg/l):</label>
                     <input type="number" step="0.1" id="inNH3" value="" class="w-full bg-slate-700 p-2 rounded border border-slate-600">
                 </div>
                 <div>
-                    <label class="block text-slate-400 mb-1" data-i18n>NO2 (mg/l):</label>
+                    <label for="inNO2" class="block text-slate-400 mb-1" data-i18n>NO2 (mg/l):</label>
                     <input type="number" step="0.1" id="inNO2" value="" class="w-full bg-slate-700 p-2 rounded border border-slate-600">
                 </div>
                 <div>
-                    <label class="block text-slate-400 mb-1" data-i18n>NO3 (mg/l):</label>
+                    <label for="inNO3" class="block text-slate-400 mb-1" data-i18n>NO3 (mg/l):</label>
                     <input type="number" step="1" id="inNO3" value="" class="w-full bg-slate-700 p-2 rounded border border-slate-600">
                 </div>
                 <div>
-                    <label class="block text-slate-400 mb-1" data-i18n>GH (dGH):</label>
+                    <label for="inGH" class="block text-slate-400 mb-1" data-i18n>GH (dGH):</label>
                     <input type="number" step="1" id="inGH" value="" class="w-full bg-slate-700 p-2 rounded border border-slate-600">
                 </div>
                 <div>
-                    <label class="block text-slate-400 mb-1" data-i18n>KH (dKH):</label>
+                    <label for="inKH" class="block text-slate-400 mb-1" data-i18n>KH (dKH):</label>
                     <input type="number" step="1" id="inKH" value="" class="w-full bg-slate-700 p-2 rounded border border-slate-600">
                 </div>
                 <div class="col-span-2 md:col-span-4 flex justify-end">
@@ -741,7 +742,7 @@
             </div>
             <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700 grid grid-cols-1 md:grid-cols-4 gap-2 text-xs items-end">
                 <div>
-                    <label class="block text-slate-400 mb-1" data-i18n>Категория:</label>
+                    <label for="expenseCategory" class="block text-slate-400 mb-1" data-i18n>Категория:</label>
                     <select id="expenseCategory" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2">
                         <option value="Храна" data-i18n>Храна</option>
                         <option value="Тестове" data-i18n>Тестове</option>
@@ -752,11 +753,11 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-slate-400 mb-1" data-i18n>Описание:</label>
+                    <label for="expenseDesc" class="block text-slate-400 mb-1" data-i18n>Описание:</label>
                     <input type="text" id="expenseDesc" placeholder="напр. Люспи 100г" data-i18n-placeholder class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2">
                 </div>
                 <div>
-                    <label class="block text-slate-400 mb-1" data-i18n>Сума (лв.):</label>
+                    <label for="expenseAmount" class="block text-slate-400 mb-1" data-i18n>Сума (лв.):</label>
                     <input type="number" id="expenseAmount" min="0" step="0.01" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2">
                 </div>
                 <button onclick="addExpense()" class="bg-cyan-700 hover:bg-cyan-600 text-white px-3 py-2 rounded-lg font-medium transition" data-i18n>Добави разход</button>
@@ -842,7 +843,7 @@
                 
                 <div class="space-y-3">
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1" data-i18n>Избери вид:</label>
+                        <label for="animalSelect" class="block text-xs text-slate-400 mb-1" data-i18n>Избери вид:</label>
                         <div class="relative mb-2">
                             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs pointer-events-none"></i>
                             <input type="text" id="animalSearch" oninput="refreshSelects()" placeholder="Търси вид по име..." data-i18n-placeholder aria-label="Търси вид по име" class="w-full bg-slate-700 border border-slate-600 rounded-lg pl-8 pr-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-400">
@@ -855,7 +856,7 @@
                         <input type="checkbox" id="fitOnly" onchange="refreshSelects()" class="mr-1.5 accent-cyan-500"> <span data-i18n>Само подходящи за моя аквариум</span>
                     </label>
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1" data-i18n>Брой (рибки / охлюви / скариди):</label>
+                        <label for="animalCount" class="block text-xs text-slate-400 mb-1" data-i18n>Брой (рибки / охлюви / скариди):</label>
                         <input type="number" id="animalCount" value="1" min="1" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2 text-xs focus:outline-none focus:border-cyan-400">
                     </div>
                 </div>
@@ -877,7 +878,7 @@
                 
                 <div class="space-y-3">
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1" data-i18n>Избери растение:</label>
+                        <label for="plantSelect" class="block text-xs text-slate-400 mb-1" data-i18n>Избери растение:</label>
                         <div class="relative mb-2">
                             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs pointer-events-none"></i>
                             <input type="text" id="plantSearch" oninput="refreshSelects()" placeholder="Търси растение по име..." data-i18n-placeholder aria-label="Търси растение по име" class="w-full bg-slate-700 border border-slate-600 rounded-lg pl-8 pr-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-400">
@@ -887,7 +888,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1" data-i18n>Количество (корена / стръка):</label>
+                        <label for="plantCount" class="block text-xs text-slate-400 mb-1" data-i18n>Количество (корена / стръка):</label>
                         <input type="number" id="plantCount" value="1" min="1" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2 text-xs focus:outline-none focus:border-emerald-400">
                     </div>
                 </div>
@@ -922,14 +923,14 @@
             <div id="encSearchResults" class="hidden bg-slate-900/60 border border-slate-700 rounded-xl divide-y divide-slate-700/60 max-h-72 overflow-y-auto"></div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="space-y-2">
-                    <label class="block text-xs text-slate-400 mb-1" data-i18n>Риби и безгръбначни:</label>
+                    <label for="encAnimalSelect" class="block text-xs text-slate-400 mb-1" data-i18n>Риби и безгръбначни:</label>
                     <select id="encAnimalSelect" onchange="renderEncyclopedia('animal', this.value)" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-400"></select>
                     <div id="encCardAnimal" class="bg-slate-900/60 border border-slate-700 rounded-xl p-4 text-xs space-y-2 min-h-[110px]">
                         <p class="text-slate-400 italic" data-i18n>Избери вид от менютата по-горе, за да видиш пълна информация.</p>
                     </div>
                 </div>
                 <div class="space-y-2">
-                    <label class="block text-xs text-slate-400 mb-1" data-i18n>Растения:</label>
+                    <label for="encPlantSelect" class="block text-xs text-slate-400 mb-1" data-i18n>Растения:</label>
                     <select id="encPlantSelect" onchange="renderEncyclopedia('plant', this.value)" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-400"></select>
                     <div id="encCardPlant" class="bg-slate-900/60 border border-slate-700 rounded-xl p-4 text-xs space-y-2 min-h-[110px]">
                         <p class="text-slate-400 italic" data-i18n>Избери вид от менютата по-горе, за да видиш пълна информация.</p>
@@ -1092,15 +1093,15 @@
             </div>
             <div class="space-y-3 text-sm">
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1" data-i18n>Твоето име (по желание):</label>
+                    <label for="bugReporterName" class="block text-xs text-slate-400 mb-1" data-i18n>Твоето име (по желание):</label>
                     <input id="bugReporterName" type="text" maxlength="40" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-sm focus:outline-none focus:border-cyan-400" data-i18n-placeholder placeholder="Напр. Иван">
                 </div>
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1" data-i18n>Имейл (по желание, за да ти отговорим):</label>
+                    <label for="bugReporterEmail" class="block text-xs text-slate-400 mb-1" data-i18n>Имейл (по желание, за да ти отговорим):</label>
                     <input id="bugReporterEmail" type="email" maxlength="100" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-sm focus:outline-none focus:border-cyan-400" data-i18n-placeholder placeholder="Напр. ivan@email.com">
                 </div>
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1" data-i18n>В кой раздел е проблемът?</label>
+                    <label for="bugTabSelect" class="block text-xs text-slate-400 mb-1" data-i18n>В кой раздел е проблемът?</label>
                     <select id="bugTabSelect" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-sm focus:outline-none focus:border-cyan-400">
                         <option value="Начало" data-i18n>Начало</option>
                         <option value="Аквариум" data-i18n>Аквариум</option>
@@ -1113,7 +1114,7 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1" data-i18n>Опиши какво се случва:</label>
+                    <label for="bugDescription" class="block text-xs text-slate-400 mb-1" data-i18n>Опиши какво се случва:</label>
                     <textarea id="bugDescription" rows="5" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-sm focus:outline-none focus:border-cyan-400 resize-none" data-i18n-placeholder placeholder="Напр. при натискане на бутона за смяна на вода нищо не се случва..."></textarea>
                 </div>
                 <p class="text-[11px] text-slate-500" data-i18n>Докладът се изпраща директно към нас заедно с версията на приложението. Ако оставиш имейл, ще го използваме само за да ти отговорим по този доклад.</p>
@@ -1145,7 +1146,7 @@
                 <h3 id="tankNameModalTitle" class="text-lg font-bold text-cyan-300"><i class="fa-solid fa-water mr-2"></i><span data-i18n>Нов аквариум</span></h3>
                 <button onclick="closeTankNameModal()" class="text-slate-400 hover:text-white text-xl leading-none">&times;</button>
             </div>
-            <label class="block text-xs text-slate-400 mb-1" data-i18n>Име на аквариума</label>
+            <label for="tankNameInput" class="block text-xs text-slate-400 mb-1" data-i18n>Име на аквариума</label>
             <input id="tankNameInput" type="text" maxlength="40" onkeydown="if(event.key==='Enter'){confirmTankName();}else if(event.key==='Escape'){closeTankNameModal();}" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-sm focus:outline-none focus:border-cyan-400" data-i18n-placeholder placeholder="Напр. Хол, 120л общ">
             <div class="flex gap-2 mt-4">
                 <button type="button" onclick="closeTankNameModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm py-2 rounded-lg font-medium"><span data-i18n>Отказ</span></button>
@@ -1405,11 +1406,12 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.21";
+        const APP_VERSION = "3.6.22";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.22", items: ["Предпускова проверка: допреведени около 20 забравени съобщения/надписи на английски (известия, потвърждения за изтриване, aria-label-и за екранни четци), добавени липсващи връзки label↔поле за достъпност, поправен id в manifest.json"], items_en: ["Pre-launch pass: translated roughly 20 previously untranslated messages/labels into English (toasts, delete confirmations, screen-reader aria-labels), added missing label↔field associations for accessibility, fixed a stale id in manifest.json"] },
             { v: "3.6.21", items: ["Премахнато автоматично изскачащо прозорче за име на аквариум при съвсем нова инсталация — усещаше се натрапчиво заедно с приветствения банер; аквариумът остава \"Аквариум 1\", а преименуването е достъпно по всяко време по избор"], items_en: ["Removed the automatic aquarium-naming popup on a brand-new install — it felt pushy alongside the welcome banner; the aquarium now stays \"Aquarium 1\" and renaming remains available any time, at the user's choice"] },
             { v: "3.6.20", items: ["Поправка: записите в \"Какво ново\" вече имат и английски превод, вместо да са само на български независимо от избрания език"], items_en: ["Fix: \"What's new\" entries now have an English translation too, instead of always being shown only in Bulgarian regardless of the selected language"] },
             { v: "3.6.19", items: ["Поправка: панелът \"Какво ново\" погрешно се показваше и на съвсем нови посетители (без никакви запазени данни) заради грешен ред на проверките"], items_en: ["Fix: the \"What's new\" panel was incorrectly shown to brand-new visitors (with no saved data at all) due to a wrong check order"] },
@@ -1862,7 +1864,7 @@
             it.editing = false;
             updateMyInhabitants();
             saveData();
-            showToast('Записано: ' + it.name.split(' (')[0]);
+            showToast(tr('Записано:') + ' ' + it.name.split(' (')[0]);
         }
 
         function changeCount(i, d) {
@@ -1875,7 +1877,7 @@
 
         function removeItem(i) {
             if (!myFishList[i]) return;
-            if (!confirm('Да изтрия ли „' + myFishList[i].name.split(' (')[0] + '“ от аквариума?')) return;
+            if (!confirm(`${tr('Да изтрия ли')} „${myFishList[i].name.split(' (')[0]}“ ${tr('от аквариума?')}`)) return;
             myFishList.splice(i, 1);
             updateMyInhabitants();
             saveData();
@@ -2396,7 +2398,7 @@
                 const realIdx = list.indexOf(e);
                 return `
                 <div class="bg-slate-900/60 border border-slate-700 rounded-xl overflow-hidden">
-                    ${e.photoId ? `<div class="w-full h-32 bg-slate-800 flex items-center justify-center"><img data-photo-id="${e.photoId}" class="w-full h-32 object-cover hidden" onload="this.classList.remove('hidden'); this.previousElementSibling && this.previousElementSibling.remove();"><i class="fa-solid fa-image text-slate-600 animate-pulse"></i></div>` : ''}
+                    ${e.photoId ? `<div class="w-full h-32 bg-slate-800 flex items-center justify-center"><img data-photo-id="${e.photoId}" alt="${tr('Снимка от дневника')}" class="w-full h-32 object-cover hidden" onload="this.classList.remove('hidden'); this.previousElementSibling && this.previousElementSibling.remove();"><i class="fa-solid fa-image text-slate-600 animate-pulse"></i></div>` : ''}
                     <div class="p-2.5 text-xs space-y-1">
                         <div class="flex justify-between items-start">
                             <span class="text-slate-500">${new Date(e.t).toLocaleString(locale())}</span>
@@ -2645,7 +2647,7 @@
         }
 
         function clearHistory() {
-            if (!confirm("Да изчистя ли историята на параметрите за този аквариум?")) return;
+            if (!confirm(tr("Да изчистя ли историята на параметрите за този аквариум?"))) return;
             store.tanks[store.active].history = [];
             renderHistoryCharts(); renderInsights();
             saveData();
@@ -3750,6 +3752,27 @@
             "Данните са експортирани": "Data exported",
             "Данните са импортирани": "Data imported",
             "Невалиден файл за импорт": "Invalid import file",
+            "Фоновата снимка е зададена": "Background photo set",
+            "Неуспешно запазване на снимката": "Failed to save the photo",
+            "Невалидна снимка": "Invalid photo",
+            "Фоновата снимка е премахната": "Background photo removed",
+            "Добави бележка или снимка.": "Add a note or photo.",
+            "Записът е добавен": "Entry added",
+            "Няма история за експорт.": "No history to export.",
+            "Историята е експортирана (CSV)": "History exported (CSV)",
+            "Добави поне 2 аквариума, за да сравняваш": "Add at least 2 aquariums to compare",
+            "Въведи модел или бележка.": "Enter a model or note.",
+            "Хранилището е пълно! Направи експорт и изтрий стари снимки.": "Storage is full! Export your data and delete old photos.",
+            "AquaAssist е инсталиран!": "AquaAssist is installed!",
+            "Известията са изключени": "Notifications are off",
+            "от аквариума?": "from the aquarium?",
+            "Да изчистя ли историята на параметрите за този аквариум?": "Clear the parameter history for this aquarium?",
+            "Литри сменени": "Liters changed",
+            "Търси вид по име": "Search by species name",
+            "Търси растение по име": "Search by plant name",
+            "Бързи действия": "Quick actions",
+            "Копирай кода": "Copy the code",
+            "Снимка от дневника": "Journal photo",
             "Предупреждения": "Warnings",
             "Риби и Безгръбначни": "Fish and Invertebrates",
             "Растения и Флора": "Plants and Flora",
@@ -4001,6 +4024,14 @@
             document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
                 if (!el.dataset.bgOrigPh) el.dataset.bgOrigPh = el.getAttribute('placeholder') || '';
                 el.placeholder = tr(el.dataset.bgOrigPh);
+            });
+            // aria-label не се пренаписва динамично при рендериране на всички бутони
+            // (напр. фиксираните бутони в хедъра) — превеждаме ги тук, за да не
+            // останат завинаги на български за потребители на екранен четец,
+            // дори след превключване на английски.
+            document.querySelectorAll('[aria-label]').forEach(el => {
+                if (!el.dataset.bgOrigAria) el.dataset.bgOrigAria = el.getAttribute('aria-label') || '';
+                el.setAttribute('aria-label', tr(el.dataset.bgOrigAria));
             });
             document.documentElement.lang = currentLang;
         }
@@ -5121,7 +5152,7 @@
 
         function deleteTank() {
             if (store.tanks.length < 2) { showToast("Трябва да остане поне един аквариум", 'warn'); return; }
-            if (!confirm(`Да изтрия ли „${store.tanks[store.active].name}“?`)) return;
+            if (!confirm(`${tr('Да изтрия ли')} „${store.tanks[store.active].name}“?`)) return;
             store.tanks.splice(store.active, 1);
             store.active = 0;
             applyTank(); refreshAfterTankChange(); saveData();
