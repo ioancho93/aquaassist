@@ -398,6 +398,17 @@
 
         <!-- Начало: моментен статус на живо -->
         <div data-tab="home" class="tab-panel space-y-2">
+            <!-- Приветствен банер — вижда се само при съвсем прясна инсталация, преди да има запазени данни. -->
+            <div id="welcomeBanner" class="hidden bg-cyan-950 border border-cyan-700 text-cyan-100 p-4 rounded-xl shadow-lg relative mb-1">
+                <button type="button" onclick="dismissWelcomeBanner()" class="absolute top-2 right-2 text-cyan-400 hover:text-white text-lg leading-none" aria-label="Затвори">&times;</button>
+                <div class="flex items-start gap-3 pr-6">
+                    <i class="fa-solid fa-fish text-cyan-400 text-2xl mt-0.5"></i>
+                    <div>
+                        <h3 class="text-sm font-bold text-cyan-200 mb-1" data-i18n>Добре дошъл в AquaAssist!</h3>
+                        <p class="text-xs text-cyan-300 leading-relaxed" data-i18n>Безплатно приложение за аквариум — следи параметрите на водата, обитателите, съвместимостта и поддръжката, с вграден наръчник и диагностика на здравето. Без регистрация — всички данни остават на твоето устройство.</p>
+                    </div>
+                </div>
+            </div>
             <h2 class="text-sm font-semibold text-slate-400 flex items-center px-1"><i class="fa-solid fa-gauge-high mr-2 text-cyan-400"></i> <span data-i18n>Моментен статус</span></h2>
             <div id="miniStatus" class="grid grid-cols-2 md:grid-cols-4 gap-2"></div>
         </div>
@@ -1394,10 +1405,11 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.17";
+        const APP_VERSION = "3.6.18";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         const CHANGELOG = [
+            { v: "3.6.18", items: ["Добавен е кратък приветствен текст на началния екран за съвсем нови посетители, обясняващ за какво е приложението"] },
             { v: "3.6.17", items: ["Съвсем нов потребител (прясна инсталация) вече веднага бива поканен да кръсти първия си аквариум, вместо автоматично да остане \"Аквариум 1\""] },
             { v: "3.6.16", items: ["Именуването на нов/преименуван аквариум вече е през прегледно прозорче по средата на екрана, вместо грозното системно изскачащо поле на браузъра"] },
             { v: "3.6.15", items: ["При добавяне на нов аквариум вече веднага се пита за име, вместо автоматично да се казва \"Аквариум N\""] },
@@ -3141,6 +3153,8 @@
             "Нов аквариум": "New aquarium", "Нитрати (NO3)": "Nitrates (NO3)",
             "Преименувай аквариум": "Rename aquarium", "Име на аквариума": "Aquarium name",
             "Напр. Хол, 120л общ": "E.g. Living room, 120L community",
+            "Добре дошъл в AquaAssist!": "Welcome to AquaAssist!",
+            "Безплатно приложение за аквариум — следи параметрите на водата, обитателите, съвместимостта и поддръжката, с вграден наръчник и диагностика на здравето. Без регистрация — всички данни остават на твоето устройство.": "A free aquarium app — track water parameters, inhabitants, compatibility and maintenance, with a built-in species handbook and health diagnosis tool. No account needed — all your data stays on your device.",
             // --- Справочник с видове (имена, храна/грижа, съвместимост) ---
             "Температура": "Temperature",
             "Мин. обем": "Min. volume",
@@ -5069,6 +5083,11 @@
             tankNameModalMode = null;
         }
 
+        function dismissWelcomeBanner() {
+            const wb = document.getElementById('welcomeBanner');
+            if (wb) wb.classList.add('hidden');
+        }
+
         function confirmTankName() {
             const input = document.getElementById('tankNameInput');
             const name = input.value.trim().slice(0, 40);
@@ -5359,6 +5378,8 @@
         // заредило, за да не изглежда прибързано или да се сблъска с друга анимация.
         if (needsFirstTankNamePrompt) {
             needsFirstTankNamePrompt = false;
+            const wb = document.getElementById('welcomeBanner');
+            if (wb) wb.classList.remove('hidden');
             setTimeout(() => openTankNameModal("rename", store.tanks[0].name), 900);
         }
         // checkViewFromUrl се проверява първо и връща true, ако е заключила екрана
