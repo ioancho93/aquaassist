@@ -1406,11 +1406,12 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.22";
+        const APP_VERSION = "3.6.23";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.23", items: ["Всичките 8 потвърждения за изтриване/замяна вече минават през собствено стилизирано прозорче на приложението, вместо грозния вграден confirm() на браузъра"], items_en: ["All 8 delete/replace confirmations now use the app's own styled dialog, instead of the browser's plain built-in confirm() box"] },
             { v: "3.6.22", items: ["Предпускова проверка: допреведени около 20 забравени съобщения/надписи на английски (известия, потвърждения за изтриване, aria-label-и за екранни четци), добавени липсващи връзки label↔поле за достъпност, поправен id в manifest.json"], items_en: ["Pre-launch pass: translated roughly 20 previously untranslated messages/labels into English (toasts, delete confirmations, screen-reader aria-labels), added missing label↔field associations for accessibility, fixed a stale id in manifest.json"] },
             { v: "3.6.21", items: ["Премахнато автоматично изскачащо прозорче за име на аквариум при съвсем нова инсталация — усещаше се натрапчиво заедно с приветствения банер; аквариумът остава \"Аквариум 1\", а преименуването е достъпно по всяко време по избор"], items_en: ["Removed the automatic aquarium-naming popup on a brand-new install — it felt pushy alongside the welcome banner; the aquarium now stays \"Aquarium 1\" and renaming remains available any time, at the user's choice"] },
             { v: "3.6.20", items: ["Поправка: записите в \"Какво ново\" вече имат и английски превод, вместо да са само на български независимо от избрания език"], items_en: ["Fix: \"What's new\" entries now have an English translation too, instead of always being shown only in Bulgarian regardless of the selected language"] },
@@ -1875,9 +1876,9 @@
             saveData();
         }
 
-        function removeItem(i) {
+        async function removeItem(i) {
             if (!myFishList[i]) return;
-            if (!confirm(`${tr('Да изтрия ли')} „${myFishList[i].name.split(' (')[0]}“ ${tr('от аквариума?')}`)) return;
+            if (!await showAppConfirm(`${tr('Да изтрия ли')} „${myFishList[i].name.split(' (')[0]}“ ${tr('от аквариума?')}`)) return;
             myFishList.splice(i, 1);
             updateMyInhabitants();
             saveData();
@@ -2535,10 +2536,10 @@
             showToast(tr('Отчетено:') + ' ' + d.name);
         }
 
-        function deleteDosing(id) {
+        async function deleteDosing(id) {
             const t = store.tanks[store.active];
             const d = (t.dosing || []).find(x => x.id === id);
-            if (!d || !confirm(`${tr('Да изтрия ли')} „${d.name}“?`)) return;
+            if (!d || !await showAppConfirm(`${tr('Да изтрия ли')} „${d.name}“?`)) return;
             t.dosing = t.dosing.filter(x => x.id !== id);
             renderDosing();
             saveData();
@@ -2646,8 +2647,8 @@
             renderHistoryCharts(); renderInsights();
         }
 
-        function clearHistory() {
-            if (!confirm(tr("Да изчистя ли историята на параметрите за този аквариум?"))) return;
+        async function clearHistory() {
+            if (!await showAppConfirm(tr("Да изчистя ли историята на параметрите за този аквариум?"))) return;
             store.tanks[store.active].history = [];
             renderHistoryCharts(); renderInsights();
             saveData();
@@ -2902,7 +2903,7 @@
             if (!syncCodeFromQr) return;
             // Чистим адреса веднага, за да не се пита пак при презареждане/споделяне на линка
             history.replaceState({}, '', location.pathname);
-            if (!confirm(`${tr('Да изтегля ли всички аквариуми, запазени под код')} "${syncCodeFromQr}"? ${tr('Това ще замести текущите данни на това устройство.')}`)) return;
+            if (!await showAppConfirm(`${tr('Да изтегля ли всички аквариуми, запазени под код')} "${syncCodeFromQr}"? ${tr('Това ще замести текущите данни на това устройство.')}`, 'warn', 'Продължи')) return;
             await downloadByCode(syncCodeFromQr, false);
         }
 
@@ -3163,7 +3164,7 @@
             "Обитатели в моя аквариум": "Inhabitants of my aquarium",
             "Данни и резервно копие": "Data & backup",
             // Чести бутони/етикети
-            "Запиши": "Save", "Запиши / Запиши": "Save", "Редактирай": "Edit", "Изтрий": "Delete", "Отказ": "Cancel",
+            "Запиши": "Save", "Запиши / Запиши": "Save", "Редактирай": "Edit", "Изтрий": "Delete", "Отказ": "Cancel", "Продължи": "Continue",
             "Потвърди": "Confirm", "Потвърди / Запиши": "Confirm / Save", "Добави аквариум": "Add aquarium",
             "Преименувай": "Rename", "Изтрий аквариума": "Delete aquarium", "Експорт (JSON)": "Export (JSON)", "Импорт (JSON)": "Import (JSON)",
             "Нов аквариум": "New aquarium", "Нитрати (NO3)": "Nitrates (NO3)",
@@ -4634,8 +4635,8 @@
             }
         }
 
-        function forgetSyncCode() {
-            if (!confirm(tr('Сигурен ли си? Ще трябва да го въведеш ръчно, за да го ползваш пак на това устройство.'))) return;
+        async function forgetSyncCode() {
+            if (!await showAppConfirm(tr('Сигурен ли си? Ще трябва да го въведеш ръчно, за да го ползваш пак на това устройство.'), 'warn', 'Продължи')) return;
             mySyncCode = '';
             try { localStorage.removeItem(SYNC_CODE_KEY); } catch (e) {}
             initSyncUI();
@@ -4697,7 +4698,7 @@
             try {
                 const doc = await firebase.firestore().collection('syncCodes').doc(code).get();
                 if (!doc.exists) { showAppAlert(tr('Няма данни с този код.'), 'warn'); return; }
-                if (askConfirm && !confirm(tr('Това ще замести текущите данни на това устройство с тези от облака. Продължи?'))) return;
+                if (askConfirm && !await showAppConfirm(tr('Това ще замести текущите данни на това устройство с тези от облака. Продължи?'), 'warn', 'Продължи')) return;
                 const data = doc.data();
                 if (!data || !Array.isArray(data.tanks) || !data.tanks.length) {
                     showAppAlert(tr('Данните в облака изглеждат невалидни или празни. Нищо не е приложено.'), 'warn');
@@ -4827,8 +4828,8 @@
 
         function cancelEquipment(k) { eqEditing[k] = false; fillEquipmentFields(k); renderEquipment(); }
 
-        function deleteEquipment(k) {
-            if (!confirm(`${tr('Да изтрия ли записа за')} „${tr(EQ_MAP[k].label)}“?`)) return;
+        async function deleteEquipment(k) {
+            if (!await showAppConfirm(`${tr('Да изтрия ли записа за')} „${tr(EQ_MAP[k].label)}“?`)) return;
             const eq = store.tanks[store.active].equipment[k];
             eq.model = ''; eq.notes = ''; if (EQ_MAP[k].hours) eq.hours = '';
             delete eq.savedAt; delete eq.createdAt;
@@ -4978,6 +4979,41 @@
             overlay.querySelector('button').addEventListener('click', close);
             overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
             document.body.appendChild(overlay);
+        }
+
+        // Стилизирана замяна на браузърния confirm() — връща Promise<boolean>,
+        // за да може да се ползва с "if (!await showAppConfirm(...)) return;"
+        // точно както преди се ползваше синхронният confirm(). Esc и клик извън
+        // прозорчето се броят за "Отказ".
+        function showAppConfirm(message, variant, okLabel) {
+            const themes = {
+                warn:  { icon: 'fa-triangle-exclamation', color: 'text-amber-400', border: 'border-amber-700', btn: 'bg-amber-700 hover:bg-amber-600' },
+                error: { icon: 'fa-circle-exclamation',   color: 'text-red-400',   border: 'border-red-700',   btn: 'bg-red-700 hover:bg-red-600' }
+            };
+            const t = themes[variant] || themes.warn;
+            return new Promise((resolve) => {
+                const overlay = document.createElement('div');
+                overlay.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4';
+                overlay.innerHTML = `
+                    <div class="bg-slate-800 border ${t.border} rounded-2xl p-5 max-w-sm w-full text-sm">
+                        <div class="flex items-start gap-3 mb-4">
+                            <i class="fa-solid ${t.icon} ${t.color} text-xl mt-0.5"></i>
+                            <p class="text-slate-200 leading-relaxed" id="appConfirmMsg"></p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button type="button" data-act="cancel" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm py-2 rounded-lg font-medium">${tr('Отказ')}</button>
+                            <button type="button" data-act="ok" class="flex-1 ${t.btn} text-white text-sm py-2 rounded-lg font-medium">${tr(okLabel || 'Изтрий')}</button>
+                        </div>
+                    </div>`;
+                overlay.querySelector('#appConfirmMsg').textContent = message;
+                const finish = (result) => { overlay.remove(); document.removeEventListener('keydown', onKey); resolve(result); };
+                const onKey = (e) => { if (e.key === 'Escape') finish(false); };
+                overlay.querySelector('[data-act="cancel"]').addEventListener('click', () => finish(false));
+                overlay.querySelector('[data-act="ok"]').addEventListener('click', () => finish(true));
+                overlay.addEventListener('click', (e) => { if (e.target === overlay) finish(false); });
+                document.addEventListener('keydown', onKey);
+                document.body.appendChild(overlay);
+            });
         }
 
         function showToast(msg, type) {
@@ -5150,9 +5186,9 @@
             closeTankNameModal();
         }
 
-        function deleteTank() {
+        async function deleteTank() {
             if (store.tanks.length < 2) { showToast("Трябва да остане поне един аквариум", 'warn'); return; }
-            if (!confirm(`${tr('Да изтрия ли')} „${store.tanks[store.active].name}“?`)) return;
+            if (!await showAppConfirm(`${tr('Да изтрия ли')} „${store.tanks[store.active].name}“?`)) return;
             store.tanks.splice(store.active, 1);
             store.active = 0;
             applyTank(); refreshAfterTankChange(); saveData();
