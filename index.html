@@ -1405,44 +1405,46 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.19";
+        const APP_VERSION = "3.6.20";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
+        // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
-            { v: "3.6.19", items: ["Поправка: панелът \"Какво ново\" погрешно се показваше и на съвсем нови посетители (без никакви запазени данни) заради грешен ред на проверките"] },
-            { v: "3.6.18", items: ["Добавен е кратък приветствен текст на началния екран за съвсем нови посетители, обясняващ за какво е приложението"] },
-            { v: "3.6.17", items: ["Съвсем нов потребител (прясна инсталация) вече веднага бива поканен да кръсти първия си аквариум, вместо автоматично да остане \"Аквариум 1\""] },
-            { v: "3.6.16", items: ["Именуването на нов/преименуван аквариум вече е през прегледно прозорче по средата на екрана, вместо грозното системно изскачащо поле на браузъра"] },
-            { v: "3.6.15", items: ["При добавяне на нов аквариум вече веднага се пита за име, вместо автоматично да се казва \"Аквариум N\""] },
-            { v: "3.6.14", items: ["Подобрено откриване в Google: добавени ключови думи (кирилица и транслитерация), structured data, robots.txt и sitemap.xml"] },
-            { v: "3.6.13", items: ["Поправка: раздел \"Добави\" вече правилно се показва само когато е избран, вместо да прониква и в раздел \"Обитатели\""] },
-            { v: "3.6.12", items: ["Поправка: падащите менюта на браузъра (напр. избор на час при дозиране) вече са в тъмен стил, вместо бели"] },
-            { v: "3.6.11", items: ["\"Диагностика на здравето\" вече е и в плаващото меню за бързи действия на телефон, за по-лесен достъп"] },
-            { v: "3.6.10", items: ["Диагностика на здравето: добавени лимфоцистис, болест на неоновите тетри, химическо изгаряне от амоняк и задържане на яйца — общо 28 симптома / 27 състояния"] },
-            { v: "3.6.9", items: ["Диагностика на здравето: разширена с още 10 симптома и 10 състояния (паразити, запек, загуба на цвят, проблеми с линеенето при скариди и др.)"] },
-            { v: "3.6.8", items: ["Преименуван бутон \"Болна ли изглежда рибата?\" на \"Диагностика на здравето\""] },
-            { v: "3.6.7", items: ["Ново: \"Диагностика на здравето\" — проверка на симптоми по справочник с чести заболявания, работи изцяло офлайн (не е заместител на ветеринар)"] },
-            { v: "3.6.6", items: ["Ново: бутон \"Сподели приложението\" долу — отваря родното меню за споделяне на устройството или копира линк"] },
-            { v: "3.6.5", items: ["Анонимна статистика за посещения (Cloudflare Web Analytics) — без бисквитки и без лични данни"] },
-            { v: "3.6.4", items: ["Собствен домейн: aquaassist.app — приложението вече живее на чист адрес, без наставка накрая"] },
-            { v: "3.6.3", items: ["Поправка: нови потребители без запазена тема вече винаги започват с темата \"Океанско Синьо\", вместо темата да се сменя автоматично вечер — за по-спокойно първо впечатление"] },
-            { v: "3.6.2", items: ["Поправка: данните вече не се губят при временно прекъсване на връзката — приложението спира автоматичния запис и предупреждава, вместо тихо да замести запазените данни с празни", "Поправка: кодът за синхронизация вече приема само латиница и цифри навсякъде (и при създаване, и при въвеждане), за да работи сигурно между устройства", "По-хубав вид на съобщенията при синхронизация (напр. \"Няма данни с този код\") — вместо грозния системен прозорец на браузъра", "Преименуван бутон \"Свали картичка за възстановяване\" на \"Изтегли резервен файл с кода\""] },
-            { v: "3.6.1", items: ["Ново: формата за доклад за бъг вече има поле и за имейл (по желание), за да можем да отговорим по доклада; обновена политика за поверителност, за да отразява облачната синхронизация и докладите за бъг"] },
-            { v: "3.6.0", items: ["Ново: формата за доклад за бъг вече има поле за име (по желание) — приложението го запомня на устройството, за да се знае кой е писал"] },
-            { v: "3.5.9", items: ["Ново: докладите за бъг вече се изпращат директно в облака (Firestore), не само се копират — стигат веднага, без да минават през имейл клиент; при липса на връзка пада обратно към копиране, за да не се губи докладът"] },
-            { v: "3.5.8", items: ["Ново: \"Докладвай бъг\" вече отваря форма — избор на раздел от падащо меню + свободен текст за описание на проблема, после копира готов доклад в клипборда"] },
-            { v: "3.5.7", items: ["Поправка: \"Докладвай бъг\" и \"Контакт\" вече само копират имейла и показват известие — премахнат е автоматичният опит за отваряне на mailto:, който в някои браузъри/прегледи показваше грешка \"This content is blocked\""] },
-            { v: "3.5.6", items: ["Поправка: линкът \"Политика за поверителност\" долу вече е абсолютен и работи навсякъде; GitHub хранилището вече не е публично линкнато от приложението (за да не кани странични хора в суровите файлове); \"Докладвай бъг\" и \"Контакт\" вече копират имейла и показват известие, вместо да разчитат само на mailto"] },
-            { v: "3.5.5", items: ["Поправка: панелът \"Какво ново\" хвърляше грешка в конзолата и никога не се показваше, защото елементите му бяха поставени след скрипта в кода"] },
-            { v: "3.5.4", items: ["Ново: ред с активни линкове долу в приложението — политика за поверителност, GitHub, докладване на бъг, контакт"] },
-            { v: "3.5.3", items: ["Поправка: споделен линк (само преглед) вече показва напълно заключен екран без каквато и да е възможност за редактиране — вместо затварящ се прозорец над работещото приложение"] },
-            { v: "3.5.1", items: ["Поправка: приложението вече никога не може да заседне на splash екрана при отваряне на споделен линк"] },
-            { v: "3.5.0", items: ["Ново: Сподели аквариум само за преглед (линк за приятел, без запис у него)", "Ново: панел \"Какво ново\" (този, който виждаш точно сега)"] },
-            { v: "3.4.0", items: ["Темата, езикът и известията вече се пренасят при облачна синхронизация"] },
-            { v: "3.3.0", items: ["QR кодът вече пренася ВСИЧКИ аквариуми наведнъж чрез кода за синхронизация"] },
-            { v: "3.0.0", items: ["Облачна синхронизация между устройства — псевдоним + код, без регистрация"] },
-            { v: "2.6.0", items: ["Ръчна дата при закъсняло отчитане на смяна на вода и поддръжка"] },
-            { v: "2.2.0", items: ["Предупреждение \"Преди да добавиш\" — проверка за съвместимост преди покупка"] },
+            { v: "3.6.20", items: ["Поправка: записите в \"Какво ново\" вече имат и английски превод, вместо да са само на български независимо от избрания език"], items_en: ["Fix: \"What's new\" entries now have an English translation too, instead of always being shown only in Bulgarian regardless of the selected language"] },
+            { v: "3.6.19", items: ["Поправка: панелът \"Какво ново\" погрешно се показваше и на съвсем нови посетители (без никакви запазени данни) заради грешен ред на проверките"], items_en: ["Fix: the \"What's new\" panel was incorrectly shown to brand-new visitors (with no saved data at all) due to a wrong check order"] },
+            { v: "3.6.18", items: ["Добавен е кратък приветствен текст на началния екран за съвсем нови посетители, обясняващ за какво е приложението"], items_en: ["Added a short welcome message on the home screen for brand-new visitors, explaining what the app is for"] },
+            { v: "3.6.17", items: ["Съвсем нов потребител (прясна инсталация) вече веднага бива поканен да кръсти първия си аквариум, вместо автоматично да остане \"Аквариум 1\""], items_en: ["A brand-new user (fresh install) is now immediately invited to name their first aquarium, instead of it automatically staying \"Aquarium 1\""] },
+            { v: "3.6.16", items: ["Именуването на нов/преименуван аквариум вече е през прегледно прозорче по средата на екрана, вместо грозното системно изскачащо поле на браузъра"], items_en: ["Naming a new/renamed aquarium now uses a clean modal window in the middle of the screen, instead of the browser's ugly system prompt"] },
+            { v: "3.6.15", items: ["При добавяне на нов аквариум вече веднага се пита за име, вместо автоматично да се казва \"Аквариум N\""], items_en: ["Adding a new aquarium now immediately asks for a name, instead of automatically being called \"Aquarium N\""] },
+            { v: "3.6.14", items: ["Подобрено откриване в Google: добавени ключови думи (кирилица и транслитерация), structured data, robots.txt и sitemap.xml"], items_en: ["Improved Google discoverability: added keywords (Cyrillic and transliteration), structured data, robots.txt and sitemap.xml"] },
+            { v: "3.6.13", items: ["Поправка: раздел \"Добави\" вече правилно се показва само когато е избран, вместо да прониква и в раздел \"Обитатели\""], items_en: ["Fix: the \"Add\" tab now correctly shows only when selected, instead of bleeding into the \"Inhabitants\" tab"] },
+            { v: "3.6.12", items: ["Поправка: падащите менюта на браузъра (напр. избор на час при дозиране) вече са в тъмен стил, вместо бели"], items_en: ["Fix: browser dropdown menus (e.g. the time picker for dosing) are now dark-styled instead of white"] },
+            { v: "3.6.11", items: ["\"Диагностика на здравето\" вече е и в плаващото меню за бързи действия на телефон, за по-лесен достъп"], items_en: ["\"Health diagnosis\" is now also in the floating quick-actions menu on phone, for easier access"] },
+            { v: "3.6.10", items: ["Диагностика на здравето: добавени лимфоцистис, болест на неоновите тетри, химическо изгаряне от амоняк и задържане на яйца — общо 28 симптома / 27 състояния"], items_en: ["Health diagnosis: added lymphocystis, neon tetra disease, ammonia chemical burn and egg binding — 28 symptoms / 27 conditions in total"] },
+            { v: "3.6.9", items: ["Диагностика на здравето: разширена с още 10 симптома и 10 състояния (паразити, запек, загуба на цвят, проблеми с линеенето при скариди и др.)"], items_en: ["Health diagnosis: expanded with 10 more symptoms and 10 more conditions (parasites, constipation, loss of color, shrimp molting issues, and more)"] },
+            { v: "3.6.8", items: ["Преименуван бутон \"Болна ли изглежда рибата?\" на \"Диагностика на здравето\""], items_en: ["Renamed the \"Does the fish look sick?\" button to \"Health diagnosis\""] },
+            { v: "3.6.7", items: ["Ново: \"Диагностика на здравето\" — проверка на симптоми по справочник с чести заболявания, работи изцяло офлайн (не е заместител на ветеринар)"], items_en: ["New: \"Health diagnosis\" — check symptoms against a handbook of common diseases, works entirely offline (not a substitute for a vet)"] },
+            { v: "3.6.6", items: ["Ново: бутон \"Сподели приложението\" долу — отваря родното меню за споделяне на устройството или копира линк"], items_en: ["New: a \"Share the app\" button at the bottom — opens the device's native share menu or copies a link"] },
+            { v: "3.6.5", items: ["Анонимна статистика за посещения (Cloudflare Web Analytics) — без бисквитки и без лични данни"], items_en: ["Anonymous visitor statistics (Cloudflare Web Analytics) — no cookies, no personal data"] },
+            { v: "3.6.4", items: ["Собствен домейн: aquaassist.app — приложението вече живее на чист адрес, без наставка накрая"], items_en: ["Custom domain: aquaassist.app — the app now lives at a clean address, with no suffix at the end"] },
+            { v: "3.6.3", items: ["Поправка: нови потребители без запазена тема вече винаги започват с темата \"Океанско Синьо\", вместо темата да се сменя автоматично вечер — за по-спокойно първо впечатление"], items_en: ["Fix: new users with no saved theme now always start with the \"Ocean Blue\" theme, instead of it auto-switching in the evening — for a calmer first impression"] },
+            { v: "3.6.2", items: ["Поправка: данните вече не се губят при временно прекъсване на връзката — приложението спира автоматичния запис и предупреждава, вместо тихо да замести запазените данни с празни", "Поправка: кодът за синхронизация вече приема само латиница и цифри навсякъде (и при създаване, и при въвеждане), за да работи сигурно между устройства", "По-хубав вид на съобщенията при синхронизация (напр. \"Няма данни с този код\") — вместо грозния системен прозорец на браузъра", "Преименуван бутон \"Свали картичка за възстановяване\" на \"Изтегли резервен файл с кода\""], items_en: ["Fix: data is no longer lost on a temporary connection drop — the app now pauses auto-save and warns, instead of silently overwriting saved data with empty data", "Fix: the sync code now accepts only Latin letters and digits everywhere (both when creating and entering it), so it works reliably across devices", "Nicer-looking sync messages (e.g. \"No data found for this code\") — instead of the browser's ugly system dialog", "Renamed the \"Download recovery card\" button to \"Download code backup file\""] },
+            { v: "3.6.1", items: ["Ново: формата за доклад за бъг вече има поле и за имейл (по желание), за да можем да отговорим по доклада; обновена политика за поверителност, за да отразява облачната синхронизация и докладите за бъг"], items_en: ["New: the bug report form now also has an optional email field, so we can reply about the report; updated privacy policy to reflect cloud sync and bug reports"] },
+            { v: "3.6.0", items: ["Ново: формата за доклад за бъг вече има поле за име (по желание) — приложението го запомня на устройството, за да се знае кой е писал"], items_en: ["New: the bug report form now has an optional name field — the app remembers it on the device, so we know who wrote in"] },
+            { v: "3.5.9", items: ["Ново: докладите за бъг вече се изпращат директно в облака (Firestore), не само се копират — стигат веднага, без да минават през имейл клиент; при липса на връзка пада обратно към копиране, за да не се губи докладът"], items_en: ["New: bug reports are now sent directly to the cloud (Firestore), not just copied — they arrive instantly, without going through an email client; falls back to copying when offline, so the report isn't lost"] },
+            { v: "3.5.8", items: ["Ново: \"Докладвай бъг\" вече отваря форма — избор на раздел от падащо меню + свободен текст за описание на проблема, после копира готов доклад в клипборда"], items_en: ["New: \"Report a bug\" now opens a form — pick a section from a dropdown plus free text describing the issue, then copies a ready-made report to the clipboard"] },
+            { v: "3.5.7", items: ["Поправка: \"Докладвай бъг\" и \"Контакт\" вече само копират имейла и показват известие — премахнат е автоматичният опит за отваряне на mailto:, който в някои браузъри/прегледи показваше грешка \"This content is blocked\""], items_en: ["Fix: \"Report a bug\" and \"Contact\" now only copy the email address and show a notice — removed the automatic attempt to open mailto:, which showed a \"This content is blocked\" error in some browsers/previews"] },
+            { v: "3.5.6", items: ["Поправка: линкът \"Политика за поверителност\" долу вече е абсолютен и работи навсякъде; GitHub хранилището вече не е публично линкнато от приложението (за да не кани странични хора в суровите файлове); \"Докладвай бъг\" и \"Контакт\" вече копират имейла и показват известие, вместо да разчитат само на mailto"], items_en: ["Fix: the \"Privacy policy\" link at the bottom is now absolute and works everywhere; the GitHub repository is no longer publicly linked from the app (so it doesn't invite outsiders into the raw files); \"Report a bug\" and \"Contact\" now copy the email and show a notice, instead of relying only on mailto"] },
+            { v: "3.5.5", items: ["Поправка: панелът \"Какво ново\" хвърляше грешка в конзолата и никога не се показваше, защото елементите му бяха поставени след скрипта в кода"], items_en: ["Fix: the \"What's new\" panel threw a console error and never showed, because its elements were placed after the script in the code"] },
+            { v: "3.5.4", items: ["Ново: ред с активни линкове долу в приложението — политика за поверителност, GitHub, докладване на бъг, контакт"], items_en: ["New: a row of links at the bottom of the app — privacy policy, GitHub, report a bug, contact"] },
+            { v: "3.5.3", items: ["Поправка: споделен линк (само преглед) вече показва напълно заключен екран без каквато и да е възможност за редактиране — вместо затварящ се прозорец над работещото приложение"], items_en: ["Fix: a shared (view-only) link now shows a fully locked screen with no editing possible at all — instead of a dismissible window over the working app"] },
+            { v: "3.5.1", items: ["Поправка: приложението вече никога не може да заседне на splash екрана при отваряне на споделен линк"], items_en: ["Fix: the app can no longer get stuck on the splash screen when opening a shared link"] },
+            { v: "3.5.0", items: ["Ново: Сподели аквариум само за преглед (линк за приятел, без запис у него)", "Ново: панел \"Какво ново\" (този, който виждаш точно сега)"], items_en: ["New: Share an aquarium view-only (a link for a friend, with no editing on their end)", "New: a \"What's new\" panel (the one you're looking at right now)"] },
+            { v: "3.4.0", items: ["Темата, езикът и известията вече се пренасят при облачна синхронизация"], items_en: ["Theme, language and notifications are now carried over by cloud sync"] },
+            { v: "3.3.0", items: ["QR кодът вече пренася ВСИЧКИ аквариуми наведнъж чрез кода за синхронизация"], items_en: ["The QR code now carries ALL aquariums at once via the sync code"] },
+            { v: "3.0.0", items: ["Облачна синхронизация между устройства — псевдоним + код, без регистрация"], items_en: ["Cloud sync between devices — alias + code, no registration"] },
+            { v: "2.6.0", items: ["Ръчна дата при закъсняло отчитане на смяна на вода и поддръжка"], items_en: ["Manual date entry for a late-logged water change or maintenance"] },
+            { v: "2.2.0", items: ["Предупреждение \"Преди да добавиш\" — проверка за съвместимост преди покупка"], items_en: ["A \"Before you add\" warning — compatibility check before buying"] },
         ];
         let waterDue = Date.now() + 5 * DAY_MS;
         let waterChangedToday = false;
@@ -2768,13 +2770,16 @@
             const entriesToShow = idx === -1 ? CHANGELOG.slice(0, 3) : CHANGELOG.slice(0, idx);
             if (!entriesToShow.length) return;
 
-            document.getElementById('whatsNewContent').innerHTML = entriesToShow.map(entry => `
+            document.getElementById('whatsNewContent').innerHTML = entriesToShow.map(entry => {
+                const list = (currentLang === 'en' && Array.isArray(entry.items_en)) ? entry.items_en : entry.items;
+                return `
                 <div>
                     <p class="text-cyan-400 font-semibold text-xs mb-1">v${entry.v}</p>
                     <ul class="list-disc list-inside space-y-0.5 text-slate-300">
-                        ${entry.items.map(i => `<li>${i}</li>`).join('')}
+                        ${list.map(i => `<li>${i}</li>`).join('')}
                     </ul>
-                </div>`).join('');
+                </div>`;
+            }).join('');
             document.getElementById('whatsNewModal').classList.remove('hidden');
         }
 
