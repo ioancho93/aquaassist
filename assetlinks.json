@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.aquaassist.twa",
+        "sha256_cert_fingerprints": ["85:24:E8:C9:E6:C0:F0:10:F9:7C:09:D7:86:31:02:59:0F:B9:D0:92:94:75:0B:E7:FD:88:0C:7F:52:F3:24:60"]
+      }
+    }]
