@@ -36,7 +36,7 @@
         "description": "Free web app for tracking aquarium water parameters, inhabitants, compatibility, health diagnosis and maintenance. No registration needed. / Безплатно уеб приложение за проследяване на параметри на водата, обитатели, съвместимост и поддръжка на аквариум.",
         "applicationCategory": "LifestyleApplication",
         "operatingSystem": "Any",
-        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "BGN" },
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
         "inLanguage": ["bg", "en"]
     }
     </script>
@@ -245,6 +245,19 @@
         #settingsPanel:not(.hidden) { animation: aquaPanelIn 0.22s cubic-bezier(.16,1,.3,1) both; transform-origin: top right; }
         #settingsBackdrop:not(.hidden) { animation: aquaBackdropIn 0.22s ease both; }
         @media (prefers-reduced-motion: reduce) { #settingsPanel, #settingsBackdrop { animation: none !important; } }
+
+        /* Параметри на водата — редакция direkt в картите (т.2) */
+        .paramVal-editing {
+            outline: 2px dashed #22d3ee;
+            border-radius: 6px;
+            padding: 0 6px;
+            cursor: text;
+            background: rgba(34, 211, 238, 0.08);
+        }
+        .paramVal-editing:focus { outline-style: solid; }
+
+        /* Литри на аквариума — заключено/отключено поле (т.7) */
+        #aqLiters:disabled { opacity: .6; cursor: not-allowed; }
         /* Семантичните "добре/успешно" зелени елементи НЕ трябва да следват акцента на темата —
            те означават "здраве/успех", не бранд цвят. ID-базираните селектори тук имат по-висок
            приоритет от общите body[data-accent] .клас правила по-горе и връщат истинско зелено. */
@@ -506,8 +519,13 @@
                     </select>
                 </div>
                 <div>
-                    <label for="aqLiters" class="block text-sm text-slate-400 mb-1" data-i18n>Обем (Литри):</label>
-                    <input type="number" id="aqLiters" value="0" min="1" oninput="updateCapacity(); saveData();" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-sm focus:outline-none focus:border-cyan-400">
+                    <div class="flex items-center justify-between gap-2 mb-1">
+                        <label for="aqLiters" class="block text-sm text-slate-400" data-i18n>Обем (Литри):</label>
+                        <button type="button" id="aqLitersEditBtn" onclick="toggleAqLitersEdit()" class="shrink-0 text-[11px] bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded border border-slate-600 text-cyan-300 transition">
+                            <i id="aqLitersEditBtnIcon" class="fa-solid fa-pen mr-1"></i> <span id="aqLitersEditBtnLabel" data-i18n>Редактирай</span>
+                        </button>
+                    </div>
+                    <input type="number" id="aqLiters" value="0" min="1" disabled oninput="updateCapacity();" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-sm focus:outline-none focus:border-cyan-400">
                 </div>
             </div>
 
@@ -546,73 +564,39 @@
         <section id="secParams" data-tab="aquarium" class="tab-panel bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-md space-y-4">
             <div class="flex justify-between items-center">
                 <h2 class="text-lg font-semibold flex items-center"><i class="fa-solid fa-flask mr-2 text-cyan-400"></i> <span data-i18n>Параметри на водата</span></h2>
-                <button onclick="toggleParamEdit()" class="text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded border border-slate-600 text-cyan-300 transition">
-                    <i class="fa-solid fa-pen mr-1"></i> <span data-i18n>Редактирай</span>
+                <button id="paramEditBtn" onclick="toggleParamEdit()" class="text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded border border-slate-600 text-cyan-300 transition">
+                    <i id="paramEditBtnIcon" class="fa-solid fa-pen mr-1"></i> <span id="paramEditBtnLabel" data-i18n>Редактирай</span>
                 </button>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                 <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
-                    <span class="text-xs text-slate-400" data-i18n>Температура</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help" title="Температура на водата. Оптимално: 24–26 °C" data-i18n-title></i>
-                    <p class="text-xl font-bold text-cyan-300 mt-1"><span id="valTemp">—</span> °C</p>
+                    <span class="text-xs text-slate-400" data-i18n>Температура</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help paramInfoIcon" tabindex="0" title="Температура на водата. Оптимално: 24–26 °C" data-i18n-title data-info="Температура на водата. Оптимално: 24–26 °C"></i>
+                    <p class="text-xl font-bold text-cyan-300 mt-1"><span id="valTemp" class="paramVal" inputmode="decimal">—</span> °C</p>
                 </div>
                 <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
-                    <span class="text-xs text-slate-400" data-i18n>pH ниво</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help" title="pH — киселинност на водата. Оптимално: 6.5 – 7.5" data-i18n-title></i>
-                    <p class="text-xl font-bold text-green-300 mt-1"><span id="valPH">—</span> <span class="text-xs font-normal text-slate-400">pH</span></p>
+                    <span class="text-xs text-slate-400" data-i18n>pH ниво</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help paramInfoIcon" tabindex="0" title="pH — киселинност на водата. Оптимално: 6.5 – 7.5" data-i18n-title data-info="pH — киселинност на водата. Оптимално: 6.5 – 7.5"></i>
+                    <p class="text-xl font-bold text-green-300 mt-1"><span id="valPH" class="paramVal" inputmode="decimal">—</span> <span class="text-xs font-normal text-slate-400">pH</span></p>
                 </div>
                 <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
-                    <span class="text-xs text-slate-400" data-i18n>Амоняк (NH3)</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help" title="NH3/NH4 — токсичен отпадък от рибите. Оптимално: 0 mg/l" data-i18n-title></i>
-                    <p class="text-xl font-bold text-emerald-300 mt-1"><span id="valNH3">—</span> mg/l</p>
+                    <span class="text-xs text-slate-400" data-i18n>Амоняк (NH3)</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help paramInfoIcon" tabindex="0" title="NH3/NH4 — токсичен отпадък от рибите. Оптимално: 0 mg/l" data-i18n-title data-info="NH3/NH4 — токсичен отпадък от рибите. Оптимално: 0 mg/l"></i>
+                    <p class="text-xl font-bold text-emerald-300 mt-1"><span id="valNH3" class="paramVal" inputmode="decimal">—</span> mg/l</p>
                 </div>
                 <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
-                    <span class="text-xs text-slate-400" data-i18n>Нитрити (NO2)</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help" title="NO2 — междинен токсичен продукт от азотния цикъл. Оптимално: 0 mg/l" data-i18n-title></i>
-                    <p class="text-xl font-bold text-red-300 mt-1"><span id="valNO2">—</span> mg/l</p>
+                    <span class="text-xs text-slate-400" data-i18n>Нитрити (NO2)</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help paramInfoIcon" tabindex="0" title="NO2 — междинен токсичен продукт от азотния цикъл. Оптимално: 0 mg/l" data-i18n-title data-info="NO2 — междинен токсичен продукт от азотния цикъл. Оптимално: 0 mg/l"></i>
+                    <p class="text-xl font-bold text-red-300 mt-1"><span id="valNO2" class="paramVal" inputmode="decimal">—</span> mg/l</p>
                 </div>
                 <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
-                    <span class="text-xs text-slate-400" data-i18n>Нитрати (NO3)</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help" title="NO3 — краен продукт от азотния цикъл. Оптимално: 10–25 mg/l" data-i18n-title></i>
-                    <p class="text-xl font-bold text-yellow-300 mt-1"><span id="valNO3">—</span> mg/l</p>
+                    <span class="text-xs text-slate-400" data-i18n>Нитрати (NO3)</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help paramInfoIcon" tabindex="0" title="NO3 — краен продукт от азотния цикъл. Оптимално: 10–25 mg/l" data-i18n-title data-info="NO3 — краен продукт от азотния цикъл. Оптимално: 10–25 mg/l"></i>
+                    <p class="text-xl font-bold text-yellow-300 mt-1"><span id="valNO3" class="paramVal" inputmode="decimal">—</span> mg/l</p>
                 </div>
                 <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
-                    <span class="text-xs text-slate-400" data-i18n>Обща твърдост (GH)</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help" title="GH — обща твърдост на водата. Ориентировъчно оптимално: 4–12 dGH" data-i18n-title></i>
-                    <p class="text-xl font-bold text-blue-300 mt-1"><span id="valGH">—</span> dGH</p>
+                    <span class="text-xs text-slate-400" data-i18n>Обща твърдост (GH)</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help paramInfoIcon" tabindex="0" title="GH — обща твърдост на водата. Ориентировъчно оптимално: 4–12 dGH" data-i18n-title data-info="GH — обща твърдост на водата. Ориентировъчно оптимално: 4–12 dGH"></i>
+                    <p class="text-xl font-bold text-blue-300 mt-1"><span id="valGH" class="paramVal" inputmode="decimal">—</span> dGH</p>
                 </div>
                 <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
-                    <span class="text-xs text-slate-400" data-i18n>Карбонатна твърдост (KH)</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help" title="KH — карбонатна твърдост, буферира pH. Ориентировъчно оптимално: 3–8 dKH" data-i18n-title></i>
-                    <p class="text-xl font-bold text-indigo-300 mt-1"><span id="valKH">—</span> dKH</p>
-                </div>
-            </div>
-
-            <div id="paramEditForm" class="hidden bg-slate-900/60 p-4 rounded-xl border border-slate-700 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-                <div>
-                    <label for="inTemp" class="block text-slate-400 mb-1" data-i18n>Temp (°C):</label>
-                    <input type="number" step="0.1" id="inTemp" value="" class="w-full bg-slate-700 p-2 rounded border border-slate-600">
-                </div>
-                <div>
-                    <label for="inPH" class="block text-slate-400 mb-1" data-i18n>pH:</label>
-                    <input type="number" step="0.1" id="inPH" value="" class="w-full bg-slate-700 p-2 rounded border border-slate-600">
-                </div>
-                <div>
-                    <label for="inNH3" class="block text-slate-400 mb-1" data-i18n>NH3 (mg/l):</label>
-                    <input type="number" step="0.1" id="inNH3" value="" class="w-full bg-slate-700 p-2 rounded border border-slate-600">
-                </div>
-                <div>
-                    <label for="inNO2" class="block text-slate-400 mb-1" data-i18n>NO2 (mg/l):</label>
-                    <input type="number" step="0.1" id="inNO2" value="" class="w-full bg-slate-700 p-2 rounded border border-slate-600">
-                </div>
-                <div>
-                    <label for="inNO3" class="block text-slate-400 mb-1" data-i18n>NO3 (mg/l):</label>
-                    <input type="number" step="1" id="inNO3" value="" class="w-full bg-slate-700 p-2 rounded border border-slate-600">
-                </div>
-                <div>
-                    <label for="inGH" class="block text-slate-400 mb-1" data-i18n>GH (dGH):</label>
-                    <input type="number" step="1" id="inGH" value="" class="w-full bg-slate-700 p-2 rounded border border-slate-600">
-                </div>
-                <div>
-                    <label for="inKH" class="block text-slate-400 mb-1" data-i18n>KH (dKH):</label>
-                    <input type="number" step="1" id="inKH" value="" class="w-full bg-slate-700 p-2 rounded border border-slate-600">
-                </div>
-                <div class="col-span-2 md:col-span-4 flex justify-end">
-                    <button onclick="saveParams()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-1.5 rounded font-medium transition" data-i18n>Запази стойностите</button>
+                    <span class="text-xs text-slate-400" data-i18n>Карбонатна твърдост (KH)</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help paramInfoIcon" tabindex="0" title="KH — карбонатна твърдост, буферира pH. Ориентировъчно оптимално: 3–8 dKH" data-i18n-title data-info="KH — карбонатна твърдост, буферира pH. Ориентировъчно оптимално: 3–8 dKH"></i>
+                    <p class="text-xl font-bold text-indigo-300 mt-1"><span id="valKH" class="paramVal" inputmode="decimal">—</span> dKH</p>
                 </div>
             </div>
         </section>
@@ -666,6 +650,29 @@
             <p class="text-[11px] text-slate-500">Интервалът е в дни. Статусът се смята от последния потвърден запис в „Рутинна поддръжка“ и „Дневник на смените на водата“.</p>
         </section>
 
+        <!-- График за дозиране (торове, добавки) — преместено до "Графици и напомняния" (т.10),
+             за да се вижда редом с останалите напомняния; поддържа произволен брой продукти,
+             за разлика от фиксираните напомняния по-горе. -->
+        <section id="secDosing" data-tab="history" class="tab-panel bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-md space-y-3">
+            <div class="flex justify-between items-center">
+                <h2 class="text-lg font-semibold flex items-center"><i class="fa-solid fa-calendar-check mr-2 text-cyan-400"></i> <span data-i18n>График за дозиране</span></h2>
+                <button onclick="toggleDosingForm()" class="text-[11px] px-2.5 py-1.5 rounded-lg border bg-cyan-700 hover:bg-cyan-600 border-cyan-600 text-white transition-all duration-200"><i class="fa-solid fa-plus mr-1"></i><span data-i18n>Добави</span></button>
+            </div>
+            <div id="dosingForm" class="hidden bg-slate-900/60 border border-slate-700 rounded-xl p-3 grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                <input type="text" id="dosingName" placeholder="Продукт (напр. Tropica Grow)" data-i18n-placeholder class="col-span-2 md:col-span-2 bg-slate-700 border border-slate-600 rounded-lg p-2">
+                <input type="number" id="dosingAmount" placeholder="Доза" data-i18n-placeholder min="0" step="0.1" class="bg-slate-700 border border-slate-600 rounded-lg p-2">
+                <select id="dosingUnit" class="bg-slate-700 border border-slate-600 rounded-lg p-2">
+                    <option value="ml">ml</option>
+                    <option value="g">g</option>
+                    <option value="капки" data-i18n>капки</option>
+                </select>
+                <input type="number" id="dosingFreq" placeholder="На всеки X дни" data-i18n-placeholder min="1" max="60" value="1" class="bg-slate-700 border border-slate-600 rounded-lg p-2">
+                <input type="time" id="dosingTime" value="18:00" class="bg-slate-700 border border-slate-600 rounded-lg p-2">
+                <button onclick="addDosing()" class="col-span-2 md:col-span-4 bg-cyan-700 hover:bg-cyan-600 text-white rounded-lg py-2 font-medium"><i class="fa-solid fa-floppy-disk mr-1.5"></i><span data-i18n>Запиши дозирането</span></button>
+            </div>
+            <div id="dosingList" class="space-y-2"></div>
+        </section>
+
         <!-- Визуален дневник (Timeline) -->
         <section id="secTimeline" data-tab="more" class="tab-panel bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-md space-y-3">
             <h2 class="text-lg font-semibold flex items-center"><i class="fa-solid fa-images mr-2 text-cyan-400"></i> <span data-i18n>Визуален дневник</span></h2>
@@ -717,32 +724,11 @@
             </div>
         </section>
 
-        <!-- График за дозиране (торове, добавки) -->
-        <section id="secDosing" data-tab="aquarium" class="tab-panel bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-md space-y-3">
-            <div class="flex justify-between items-center">
-                <h2 class="text-lg font-semibold flex items-center"><i class="fa-solid fa-calendar-check mr-2 text-cyan-400"></i> <span data-i18n>График за дозиране</span></h2>
-                <button onclick="toggleDosingForm()" class="text-[11px] px-2.5 py-1.5 rounded-lg border bg-cyan-700 hover:bg-cyan-600 border-cyan-600 text-white transition-all duration-200"><i class="fa-solid fa-plus mr-1"></i><span data-i18n>Добави</span></button>
-            </div>
-            <div id="dosingForm" class="hidden bg-slate-900/60 border border-slate-700 rounded-xl p-3 grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-                <input type="text" id="dosingName" placeholder="Продукт (напр. Tropica Grow)" data-i18n-placeholder class="col-span-2 md:col-span-2 bg-slate-700 border border-slate-600 rounded-lg p-2">
-                <input type="number" id="dosingAmount" placeholder="Доза" data-i18n-placeholder min="0" step="0.1" class="bg-slate-700 border border-slate-600 rounded-lg p-2">
-                <select id="dosingUnit" class="bg-slate-700 border border-slate-600 rounded-lg p-2">
-                    <option value="ml">ml</option>
-                    <option value="g">g</option>
-                    <option value="капки" data-i18n>капки</option>
-                </select>
-                <input type="number" id="dosingFreq" placeholder="На всеки X дни" data-i18n-placeholder min="1" max="60" value="1" class="bg-slate-700 border border-slate-600 rounded-lg p-2">
-                <input type="time" id="dosingTime" value="18:00" class="bg-slate-700 border border-slate-600 rounded-lg p-2">
-                <button onclick="addDosing()" class="col-span-2 md:col-span-4 bg-cyan-700 hover:bg-cyan-600 text-white rounded-lg py-2 font-medium"><i class="fa-solid fa-floppy-disk mr-1.5"></i><span data-i18n>Запиши дозирането</span></button>
-            </div>
-            <div id="dosingList" class="space-y-2"></div>
-        </section>
-
         <!-- Финансов дневник (Бюджет) -->
         <section id="secBudget" data-tab="more" class="tab-panel bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-md space-y-3">
             <div class="flex justify-between items-center">
                 <h2 class="text-lg font-semibold flex items-center"><i class="fa-solid fa-sack-dollar mr-2 text-cyan-400"></i> <span data-i18n>Финансов дневник (Бюджет)</span></h2>
-                <span id="expenseTotal" class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">Общо: 0 лв.</span>
+                <span id="expenseTotal" class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">Общо: 0 €</span>
             </div>
             <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700 grid grid-cols-1 md:grid-cols-4 gap-2 text-xs items-end">
                 <div>
@@ -761,7 +747,7 @@
                     <input type="text" id="expenseDesc" placeholder="напр. Люспи 100г" data-i18n-placeholder class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2">
                 </div>
                 <div>
-                    <label for="expenseAmount" class="block text-slate-400 mb-1" data-i18n>Сума (лв.):</label>
+                    <label for="expenseAmount" class="block text-slate-400 mb-1" data-i18n>Сума (€):</label>
                     <input type="number" id="expenseAmount" min="0" step="0.01" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2">
                 </div>
                 <button onclick="addExpense()" class="bg-cyan-700 hover:bg-cyan-600 text-white px-3 py-2 rounded-lg font-medium transition" data-i18n>Добави разход</button>
@@ -798,7 +784,7 @@
                         <span data-i18n>Почистване на филтър</span>
                     </label>
                     <div id="taskFilterConfirm" class="hidden">
-                        <button onclick="confirmTask('taskFilter', 'Почистване на филтър')" class="text-xs bg-cyan-700 hover:bg-cyan-600 px-2.5 py-1 rounded font-medium transition"><i class="fa-solid fa-check mr-1"></i>${tr('Потвърди / Запиши')}</button>
+                        <button onclick="confirmTask('taskFilter', 'Почистване на филтър')" class="text-xs bg-cyan-700 hover:bg-cyan-600 px-2.5 py-1 rounded font-medium transition"><i class="fa-solid fa-check mr-1"></i><span data-i18n>Потвърди / Запиши</span></button>
                     </div>
                     <p id="taskFilterLast" class="text-[11px] text-slate-500"></p>
                 </div>
@@ -808,7 +794,7 @@
                         <span data-i18n>Подрязване растения</span>
                     </label>
                     <div id="taskPlantsConfirm" class="hidden">
-                        <button onclick="confirmTask('taskPlants', 'Подрязване растения')" class="text-xs bg-cyan-700 hover:bg-cyan-600 px-2.5 py-1 rounded font-medium transition"><i class="fa-solid fa-check mr-1"></i>${tr('Потвърди / Запиши')}</button>
+                        <button onclick="confirmTask('taskPlants', 'Подрязване растения')" class="text-xs bg-cyan-700 hover:bg-cyan-600 px-2.5 py-1 rounded font-medium transition"><i class="fa-solid fa-check mr-1"></i><span data-i18n>Потвърди / Запиши</span></button>
                     </div>
                     <p id="taskPlantsLast" class="text-[11px] text-slate-500"></p>
                 </div>
@@ -818,7 +804,7 @@
                         <span data-i18n>Почистване на стъкла</span>
                     </label>
                     <div id="taskGlassConfirm" class="hidden">
-                        <button onclick="confirmTask('taskGlass', 'Почистване на стъкла')" class="text-xs bg-cyan-700 hover:bg-cyan-600 px-2.5 py-1 rounded font-medium transition"><i class="fa-solid fa-check mr-1"></i>${tr('Потвърди / Запиши')}</button>
+                        <button onclick="confirmTask('taskGlass', 'Почистване на стъкла')" class="text-xs bg-cyan-700 hover:bg-cyan-600 px-2.5 py-1 rounded font-medium transition"><i class="fa-solid fa-check mr-1"></i><span data-i18n>Потвърди / Запиши</span></button>
                     </div>
                     <p id="taskGlassLast" class="text-[11px] text-slate-500"></p>
                 </div>
@@ -828,7 +814,7 @@
                         <span data-i18n>Добавяне на торове</span>
                     </label>
                     <div id="taskFertilizeConfirm" class="hidden">
-                        <button onclick="confirmTask('taskFertilize', 'Добавяне на торове')" class="text-xs bg-cyan-700 hover:bg-cyan-600 px-2.5 py-1 rounded font-medium transition"><i class="fa-solid fa-check mr-1"></i>${tr('Потвърди / Запиши')}</button>
+                        <button onclick="confirmTask('taskFertilize', 'Добавяне на торове')" class="text-xs bg-cyan-700 hover:bg-cyan-600 px-2.5 py-1 rounded font-medium transition"><i class="fa-solid fa-check mr-1"></i><span data-i18n>Потвърди / Запиши</span></button>
                     </div>
                     <p id="taskFertilizeLast" class="text-[11px] text-slate-500"></p>
                 </div>
@@ -1412,11 +1398,34 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.27";
+        const APP_VERSION = "3.6.28";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.28", items: [
+                "Валутата в Финансовия дневник е сменена от лев (лв.) на евро (€)",
+                "Параметрите на водата вече се редактират направо в самите карти (Температура, pH, NH3, NO2, NO3, GH, KH) — \"Редактирай\" ги отключва за писане, \"Запис\" ги заключва обратно, вместо да отваря отделен празен формуляр",
+                "При добавяне на риба/безгръбначно или растение вече излиза видимо съобщение \"Добавено\", а не само вибрация",
+                "Нов аквариум по подразбиране вече се казва \"Нов аквариум\" вместо \"Аквариум 1\"",
+                "Инфо (ⓘ) иконките на \"Параметри на водата\" вече работят и на тъч/инсталираното приложение (отварят обяснението при тап), а на компютър продължават да показват текста и при посочване с мишката",
+                "Литрите на аквариума вече имат собствен бутон \"Редактирай/Запис\", отделно от останалите параметри",
+                "Пуш известията вече покриват и графика за дозиране (торове/добавки), не само смяна на вода, нитрати и рутинна поддръжка",
+                "Наръчникът (Енциклопедия на видовете) вече е чисто справочен — бутонът за директно добавяне в аквариума е премахнат оттам; добавянето продължава да става само през таб \"Добави\"",
+                "Графикът за дозиране е преместен при \"Графици и напомняния\", за да се вижда редом с останалите повтарящи се задачи",
+                "Поправен бутон \"Потвърди / Запиши\" в \"Рутинна поддръжка\" — показваше буквално суров код вместо нормален текст на бутона"
+            ], items_en: [
+                "Expense tracker currency changed from Bulgarian lev (лв.) to euro (€)",
+                "Water parameters are now edited directly in their own cards (Temperature, pH, NH3, NO2, NO3, GH, KH) — \"Edit\" unlocks them for typing, \"Save\" locks them again, instead of opening a separate empty form",
+                "Adding a fish/invertebrate or plant now shows a visible \"Added\" confirmation, not just a vibration",
+                "A new default aquarium is now named \"New aquarium\" instead of \"Aquarium 1\"",
+                "The info (ⓘ) icons on \"Water parameters\" now also work on touch/the installed app (tap to open the explanation), while still showing on hover on desktop as before",
+                "Aquarium liters now has its own \"Edit/Save\" lock button, separate from the other parameters",
+                "Push notifications now also cover the dosing schedule (fertilizers/supplements), not just water changes, nitrates and routine maintenance",
+                "The species guide (encyclopedia) is now purely a reference — the button to add directly to the aquarium was removed from it; adding still happens only via the \"Add\" tab",
+                "The dosing schedule was moved next to \"Schedules & reminders\" so it shows alongside the other recurring reminders",
+                "Fixed the \"Confirm / Save\" button in \"Routine maintenance\" — it was literally showing raw code text instead of a normal button label"
+            ] },
             { v: "3.6.27", items: ["На iPhone вече се показват ясни ръчни инструкции за инсталиране (Safari → Споделяне → \"Добави към начален екран\"), вместо липсващ бутон без обяснение — iOS не поддържа автоматично инсталиране като Android"], items_en: ["On iPhone, clear manual install instructions are now shown (Safari → Share → \"Add to Home Screen\"), instead of a missing button with no explanation — iOS doesn't support automatic installation like Android"] },
             { v: "3.6.26", items: ["Добавен анонимен брояч за това колко пъти приложението е инсталирано като PWA (част от същата анонимна статистика за употреба на функции)"], items_en: ["Added an anonymous counter for how many times the app has been installed as a PWA (part of the same anonymous feature-usage statistics)"] },
             { v: "3.6.25", items: ["Поправена иконата на приложението за Android (\"maskable\" вариант) — върхът и опашката на капката вече не се отрязват от кръглите/квадратните маски на различните телефони"], items_en: ["Fixed the app icon for Android (\"maskable\" variant) — the drop's top and tail no longer get clipped by the circular/square icon masks on different phones"] },
@@ -1673,26 +1682,7 @@
                 <p><i class="fa-solid fa-utensils text-cyan-400 mr-1"></i>${d.type === 'Растение' ? tr('Грижа') : tr('Храна')}: ${tr(d.food)}</p>
                 <p class="border-t border-slate-800 pt-2"><i class="fa-solid fa-handshake text-cyan-400 mr-1"></i>${tr(d.compat)}</p>
                 ${tags.length ? `<div class="flex flex-wrap gap-1.5 pt-1">${tags.join('')}</div>` : ''}
-                <div id="encCandidateWarn${kind === 'plant' ? 'Plant' : 'Animal'}" class="mt-1"></div>
-                <button onclick="addFromEncyclopedia('${kind}', ${idx}, this)" class="mt-2 bg-cyan-700 hover:bg-cyan-600 text-xs px-3 py-2 rounded-lg font-medium transition"><i class="fa-solid fa-plus mr-1.5"></i>${tr('Добави 1 бр. в аквариума')}</button>
             `;
-            renderCandidateWarning('encCandidateWarn' + (kind === 'plant' ? 'Plant' : 'Animal'), d);
-        }
-
-        function addFromEncyclopedia(kind, idx, btn) {
-            const db = kind === 'plant' ? plantsDB : animalsDB;
-            const selected = db[idx];
-            if (!selected) return;
-            const existing = myFishList.find(x => x.name === selected.name);
-            if (existing) { existing.count += 1; existing.updatedAt = Date.now(); } else myFishList.push({ ...selected, count: 1, addedAt: Date.now(), updatedAt: Date.now() });
-            updateMyInhabitants();
-            vibrate(15);
-            saveData();
-            if (btn) {
-                const old = btn.innerHTML;
-                btn.innerHTML = `<i class="fa-solid fa-check mr-1.5"></i>${tr('Добавено')}`;
-                setTimeout(() => { btn.innerHTML = old; }, 1200);
-            }
         }
 
         function showAnimalDetails() {
@@ -1767,6 +1757,7 @@
             vibrate(15);
             saveData();
             logFeatureUse('animalAdded');
+            showToast(`${tr('Добавено:')} ${speciesName(selected.name)}`);
         }
 
         function addPlantToAquarium() {
@@ -1788,6 +1779,7 @@
             vibrate(15);
             saveData();
             logFeatureUse('plantAdded');
+            showToast(`${tr('Добавено:')} ${speciesName(selected.name)}`);
         }
 
         function updateMyInhabitants() {
@@ -2480,7 +2472,7 @@
             const t = store.tanks[store.active];
             const list = (t && t.expenses) || [];
             const total = list.reduce((s, e) => s + e.amount, 0);
-            totalEl.textContent = `${tr('Общо:')} ${total.toFixed(2)} лв.`;
+            totalEl.textContent = `${tr('Общо:')} ${total.toFixed(2)} €`;
             if (!list.length) { box.innerHTML = `<div class="flex flex-col items-center gap-2 text-center text-slate-500 py-6"><i class="fa-solid fa-receipt text-2xl text-slate-600"></i><p class="text-sm">${tr('Все още няма записани разходи.')}<br>${tr('Добавете първия си разход, за да следите бюджета.')}</p></div>`; return; }
             box.innerHTML = list.slice().reverse().map((e) => {
                 const realIdx = list.indexOf(e);
@@ -2488,7 +2480,7 @@
                 <div class="flex justify-between items-center bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 text-xs">
                     <span><span class="text-cyan-300">${tr(e.category)}</span>${e.desc ? ' — ' + e.desc.replace(/</g, '&lt;') : ''} <span class="text-slate-500">(${new Date(e.t).toLocaleDateString(locale())})</span></span>
                     <span class="flex items-center gap-2">
-                        <strong class="text-slate-200">${e.amount.toFixed(2)} лв.</strong>
+                        <strong class="text-slate-200">${e.amount.toFixed(2)} €</strong>
                         <button onclick="deleteExpense(${realIdx})" title="${tr('Изтрий')}" aria-label="${tr('Изтрий')}" class="text-red-400 hover:text-red-300"><i class="fa-solid fa-trash"></i></button>
                     </span>
                 </div>`;
@@ -2606,39 +2598,95 @@
             setTimeout(() => {
                 const el = document.getElementById('secParams');
                 if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                const form = document.getElementById('paramEditForm');
-                if (form && form.classList.contains('hidden')) toggleParamEdit();
+                if (!paramsEditing) toggleParamEdit();
             }, 50);
         }
 
-        function toggleParamEdit() {
-            const form = document.getElementById('paramEditForm');
-            const opening = form.classList.contains('hidden');
-            if (opening) {
-                const t = store.tanks[store.active];
-                document.getElementById('inTemp').value = t.temp || '';
-                document.getElementById('inPH').value = t.ph || '';
-                document.getElementById('inNH3').value = t.nh3 || '';
-                document.getElementById('inNO2').value = t.no2 || '';
-                document.getElementById('inNO3').value = t.no3 || '';
-                document.getElementById('inGH').value = t.gh || '';
-                document.getElementById('inKH').value = t.kh || '';
-            }
-            form.classList.toggle('hidden');
+        // ---------- Параметри на водата: редакция направо в картите (без отделен панел) ----------
+        const PARAM_VAL_IDS = ['valTemp', 'valPH', 'valNH3', 'valNO2', 'valNO3', 'valGH', 'valKH'];
+        let paramsEditing = false;
+
+        function paramKeydownGuard(e) {
+            if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
         }
 
-        function saveParams() {
-            document.getElementById('valTemp').innerText = document.getElementById('inTemp').value || '—';
-            document.getElementById('valPH').innerText = document.getElementById('inPH').value || '—';
-            document.getElementById('valNH3').innerText = document.getElementById('inNH3').value || '—';
-            document.getElementById('valNO2').innerText = document.getElementById('inNO2').value || '—';
-            document.getElementById('valNO3').innerText = document.getElementById('inNO3').value || '—';
-            document.getElementById('valGH').innerText = document.getElementById('inGH').value || '—';
-            document.getElementById('valKH').innerText = document.getElementById('inKH').value || '—';
-            toggleParamEdit();
-            recordHistory();
-            updateCapacity();
-            saveData();
+        function toggleParamEdit() {
+            paramsEditing = !paramsEditing;
+            const btnIcon = document.getElementById('paramEditBtnIcon');
+            const btnLabel = document.getElementById('paramEditBtnLabel');
+            PARAM_VAL_IDS.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.setAttribute('contenteditable', paramsEditing ? 'true' : 'false');
+                if (paramsEditing) {
+                    el.classList.add('paramVal-editing');
+                    el.removeEventListener('keydown', paramKeydownGuard);
+                    el.addEventListener('keydown', paramKeydownGuard);
+                } else {
+                    el.classList.remove('paramVal-editing');
+                    // Чистим стойността: само число (или тире, ако е празно/невалидно),
+                    // за да не остане случаен текст/нов ред от contenteditable полето.
+                    const raw = (el.innerText || '').trim().replace(',', '.');
+                    const num = parseFloat(raw);
+                    el.innerText = isFinite(num) ? String(num) : '—';
+                }
+            });
+            syncParamEditBtnLabel();
+            if (paramsEditing) {
+                setTimeout(() => { const f = document.getElementById('valTemp'); if (f) { f.focus(); document.execCommand && document.execCommand('selectAll', false, null); } }, 30);
+            } else {
+                recordHistory();
+                updateCapacity();
+                saveData();
+                showToast(tr('Параметрите са запазени.'));
+            }
+        }
+
+        // Пази етикета на бутона "Редактирай"/"Запис" в правилния език и режим —
+        // отделна функция, за да може да се пренарисува и при смяна на езика,
+        // без да се чупи системата за превод (data-i18n) на самия бутон.
+        // ---------- Литри на аквариума: отделно заключване/отключване (т.7) ----------
+        let aqLitersEditing = false;
+
+        function toggleAqLitersEdit() {
+            aqLitersEditing = !aqLitersEditing;
+            const input = document.getElementById('aqLiters');
+            if (input) {
+                input.disabled = !aqLitersEditing;
+                if (aqLitersEditing) { input.focus(); input.select(); }
+            }
+            syncAqLitersEditBtnLabel();
+            if (!aqLitersEditing) {
+                updateCapacity();
+                saveData();
+                showToast(tr('Литрите са запазени.'));
+            }
+        }
+
+        function syncAqLitersEditBtnLabel() {
+            const btnIcon = document.getElementById('aqLitersEditBtnIcon');
+            const btnLabel = document.getElementById('aqLitersEditBtnLabel');
+            if (!btnIcon || !btnLabel) return;
+            if (aqLitersEditing) {
+                btnIcon.className = 'fa-solid fa-floppy-disk mr-1';
+                btnLabel.textContent = tr('Запис');
+            } else {
+                btnIcon.className = 'fa-solid fa-pen mr-1';
+                btnLabel.textContent = tr('Редактирай');
+            }
+        }
+
+        function syncParamEditBtnLabel() {
+            const btnIcon = document.getElementById('paramEditBtnIcon');
+            const btnLabel = document.getElementById('paramEditBtnLabel');
+            if (!btnIcon || !btnLabel) return;
+            if (paramsEditing) {
+                btnIcon.className = 'fa-solid fa-floppy-disk mr-1';
+                btnLabel.textContent = tr('Запис');
+            } else {
+                btnIcon.className = 'fa-solid fa-pen mr-1';
+                btnLabel.textContent = tr('Редактирай');
+            }
         }
 
         // ---------- История на параметрите (мини графики, без външни библиотеки) ----------
@@ -3181,6 +3229,7 @@
             "Данни и резервно копие": "Data & backup",
             // Чести бутони/етикети
             "Запиши": "Save", "Запиши / Запиши": "Save", "Редактирай": "Edit", "Изтрий": "Delete", "Отказ": "Cancel", "Продължи": "Continue",
+            "Запис": "Save", "Параметрите са запазени.": "Parameters saved.", "Литрите са запазени.": "Liters saved.",
             "Потвърди": "Confirm", "Потвърди / Запиши": "Confirm / Save", "Добави аквариум": "Add aquarium",
             "Преименувай": "Rename", "Изтрий аквариума": "Delete aquarium", "Експорт (JSON)": "Export (JSON)", "Импорт (JSON)": "Import (JSON)",
             "Нов аквариум": "New aquarium", "Нитрати (NO3)": "Nitrates (NO3)",
@@ -3412,6 +3461,7 @@
             "Всичко е наред": "All good",
             "Просрочена задача:": "Overdue task:",
             "Просрочени задачи:": "Overdue tasks:",
+            "Време е за дозиране:": "Time to dose:",
             "Подрязване растения": "Trim plants", "Записано:": "Logged:", "Все още няма запис.": "No record yet.", "Последна поддръжка:": "Latest maintenance:",
             "Още няма записи в дневника.": "No journal entries yet.",
             "Добавете бележка или снимка по-горе, за да проследите развитието на аквариума.": "Add a note or photo above to track your aquarium's progress.",
@@ -3421,7 +3471,7 @@
             "Добавете първия си разход, за да следите бюджета.": "Add your first expense to track your budget.",
             "Категория:": "Category:",
             "Описание:": "Description:",
-            "Сума (лв.):": "Amount (BGN):",
+            "Сума (€):": "Amount (€):",
             "Добави разход": "Add expense",
             "Храна": "Food",
             "Тестове": "Tests",
@@ -4065,6 +4115,8 @@
             if (typeof renderEquipment === 'function') renderEquipment();
             if (typeof renderMiniStatus === 'function') renderMiniStatus();
             if (typeof updateSyncStatus === 'function') updateSyncStatus();
+            if (typeof syncParamEditBtnLabel === 'function') syncParamEditBtnLabel();
+            if (typeof syncAqLitersEditBtnLabel === 'function') syncAqLitersEditBtnLabel();
             saveData();
         }
 
@@ -4979,7 +5031,7 @@
             };
             if (kind === 'add') go('secAdd');
             else if (kind === 'water') go('waterAlert', 'waterChangePct');
-            else if (kind === 'params') { document.getElementById('paramEditForm').classList.remove('hidden'); go('paramEditForm', 'inTemp'); }
+            else if (kind === 'params') { if (!paramsEditing) toggleParamEdit(); go('secParams', 'valTemp'); }
             else if (kind === 'note') go('timelineNote', 'timelineNote');
             else if (kind === 'expense') go('expenseDesc', 'expenseDesc');
             else if (kind === 'diagnosis') openDiagnosisModal();
@@ -5116,6 +5168,11 @@
             document.getElementById('valNO3').innerText = t.no3 || '—';
             document.getElementById('valGH').innerText = t.gh || '—';
             document.getElementById('valKH').innerText = t.kh || '—';
+            // При смяна на аквариум заключваме обратно двата отключваеми panel-а
+            // (параметри + литри), за да не остане "забравено" отворено поле за редакция.
+            if (typeof paramsEditing !== 'undefined' && paramsEditing) { paramsEditing = false; PARAM_VAL_IDS.forEach(id => { const el = document.getElementById(id); if (el) { el.setAttribute('contenteditable', 'false'); el.classList.remove('paramVal-editing'); } }); syncParamEditBtnLabel(); }
+            if (typeof aqLitersEditing !== 'undefined' && aqLitersEditing) { aqLitersEditing = false; syncAqLitersEditBtnLabel(); }
+            document.getElementById('aqLiters').disabled = true;
             document.getElementById('taskFilter').checked = false;
             document.getElementById('taskPlants').checked = false;
             document.getElementById('taskGlass').checked = false;
@@ -5170,7 +5227,7 @@
             // стандартното "Аквариум N" (което може да е на различен език от
             // текущо избрания, ако е било създадено по-рано) — потребителят
             // може да приеме предложеното име или да въведе свое.
-            const defaultName = (currentLang === "en" ? "Aquarium " : "Аквариум ") + (store.tanks.length + 1);
+            const defaultName = currentLang === "en" ? "New aquarium" : "Нов аквариум";
             openTankNameModal("add", defaultName);
         }
 
@@ -5330,7 +5387,7 @@
             const raws = data && Array.isArray(data.tanks) ? data.tanks : [];
             store.tanks = raws.map((t, i) => cleanTank(t || {}, "Аквариум " + (i + 1)));
             if (!store.tanks.length) {
-                store.tanks.push(newTank((currentLang === "en" ? "Aquarium 1" : "Аквариум 1")));
+                store.tanks.push(newTank((currentLang === "en" ? "New aquarium" : "Нов аквариум")));
                 // Съвсем прясна инсталация (никога не е имало запазени данни) —
                 // ще предложим на потребителя да кръсти аквариума си веднага
                 // след като интерфейсът се зареди напълно (вижте извикването
@@ -5440,6 +5497,17 @@
             }
         });
 
+        // Инфо (ⓘ) иконките на "Параметри на водата" (т.6): на компютър/лаптоп текстът
+        // продължава да излиза при hover чрез нативния title атрибут, както досега —
+        // но на тъч устройства (инсталираното приложение, телефон) hover никога не се
+        // случва, затова тук добавяме и отваряне на текста при тап/клик върху иконката.
+        document.addEventListener('click', function (e) {
+            const icon = e.target.closest && e.target.closest('.paramInfoIcon');
+            if (!icon) return;
+            const info = icon.getAttribute('data-info') || icon.getAttribute('title') || '';
+            if (info) showAppAlert(tr(info), 'info');
+        });
+
         function toggleNotifications() {
             if (!("Notification" in window)) { showToast("Браузърът не поддържа известия.", 'warn'); return; }
             if (!notifyEnabled) {
@@ -5466,12 +5534,23 @@
             if (!notifyEnabled || !("Notification" in window) || Notification.permission !== "granted") return;
             const today = new Date().toDateString();
             if (lastNotifiedDay === today) return;
+            const t = store.tanks[store.active];
             const daysLeft = Math.ceil((waterDue - Date.now()) / DAY_MS);
             const no3 = parseFloat(document.getElementById('valNO3').innerText) || 0;
             let body = null;
-            if (daysLeft <= 0) body = tr("Време е за смяна на водата в аквариум „") + (store.tanks[store.active] ? store.tanks[store.active].name : '') + "“.";
+            if (daysLeft <= 0) body = tr("Време е за смяна на водата в аквариум „") + (t ? t.name : '') + "“.";
             else if (no3 > 40) body = `${tr('Нитратите са високи')} (${no3} mg/l) — ${tr('обмисли по-ранна смяна на водата.')}`;
-            else { const od = overdueLabels(); if (od.length) body = tr("Просрочени задачи:") + " " + od.map(l => tr(l)).join(", ") + "."; }
+            else {
+                // Дозиране (торове/добавки) — същата логика за "просрочено", каквата
+                // се използва и за видимия статус в списъка (dosingDueInfo).
+                const dueDosing = ((t && t.dosing) || []).filter(d => {
+                    if (!d.enabled || !d.lastDone) return false;
+                    const diff = Math.ceil((d.lastDone + d.freqDays * DAY_MS - Date.now()) / DAY_MS);
+                    return diff <= 0;
+                });
+                if (dueDosing.length) body = tr("Време е за дозиране:") + " " + dueDosing.map(d => d.name).join(", ") + ".";
+                else { const od = overdueLabels(); if (od.length) body = tr("Просрочени задачи:") + " " + od.map(l => tr(l)).join(", ") + "."; }
+            }
             if (body) {
                 try { new Notification("AquaAssist", { body, icon: "icons/icon-192.png" }); } catch (e) {}
                 lastNotifiedDay = today;
