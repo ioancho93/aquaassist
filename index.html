@@ -380,6 +380,10 @@
             <button id="installBtn" onclick="installApp()" title="Инсталирай приложението" class="hidden w-full flex items-center justify-center gap-2 bg-cyan-700 hover:bg-cyan-600 text-xs rounded-lg px-3 py-2.5 border border-cyan-600 text-white transition-all duration-200" aria-label="Инсталирай приложението">
                 <svg style="width:16px;height:16px;display:block;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg><span data-i18n>Инсталирай приложението</span>
             </button>
+            <div id="iosInstallHint" class="hidden w-full text-[11px] text-slate-400 bg-slate-700/60 border border-slate-600 rounded-lg px-3 py-2.5 leading-snug">
+                <span class="flex items-center gap-1.5 text-slate-300 font-medium mb-0.5"><i class="fa-solid fa-circle-info"></i><span data-i18n>Инсталиране на iPhone</span></span>
+                <span data-i18n>Отвори тази страница в Safari, после Споделяне</span> <i class="fa-solid fa-arrow-up-from-bracket"></i> → <span data-i18n>"Добави към начален екран"</span>.
+            </div>
         </div>
     </header>
 
@@ -1408,11 +1412,12 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.26";
+        const APP_VERSION = "3.6.27";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.27", items: ["На iPhone вече се показват ясни ръчни инструкции за инсталиране (Safari → Споделяне → \"Добави към начален екран\"), вместо липсващ бутон без обяснение — iOS не поддържа автоматично инсталиране като Android"], items_en: ["On iPhone, clear manual install instructions are now shown (Safari → Share → \"Add to Home Screen\"), instead of a missing button with no explanation — iOS doesn't support automatic installation like Android"] },
             { v: "3.6.26", items: ["Добавен анонимен брояч за това колко пъти приложението е инсталирано като PWA (част от същата анонимна статистика за употреба на функции)"], items_en: ["Added an anonymous counter for how many times the app has been installed as a PWA (part of the same anonymous feature-usage statistics)"] },
             { v: "3.6.25", items: ["Поправена иконата на приложението за Android (\"maskable\" вариант) — върхът и опашката на капката вече не се отрязват от кръглите/квадратните маски на различните телефони"], items_en: ["Fixed the app icon for Android (\"maskable\" variant) — the drop's top and tail no longer get clipped by the circular/square icon masks on different phones"] },
             { v: "3.6.24", items: ["Добавена анонимна статистика за употреба на функции (само общи бройки — без лична информация), обновена политика за поверителност"], items_en: ["Added anonymous feature-usage statistics (only aggregate counts — no personal information), updated privacy policy"] },
@@ -3143,6 +3148,9 @@
         const I18N = {
             // Хедър / настройки
             "Смарт помощник за вашия аквариум": "Smart assistant for your aquarium",
+            "Инсталиране на iPhone": "Install on iPhone",
+            "Отвори тази страница в Safari, после Споделяне": "Open this page in Safari, then Share",
+            "\"Добави към начален екран\"": "\"Add to Home Screen\"",
             "Тема": "Theme",
             "Фонова снимка": "Background photo",
             "Качи снимка": "Upload photo",
@@ -5351,6 +5359,17 @@
                 navigator.serviceWorker.register("service-worker.js").catch(() => {});
             });
         }
+
+        // iOS (Safari и др.) никога не праща beforeinstallprompt — няма автоматичен бутон за инсталиране.
+        // Показваме ръчни инструкции вместо бутона, само ако все още не е инсталирано (standalone режим).
+        (function showIosInstallHintIfNeeded() {
+            const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+            if (isIos && !isStandalone) {
+                const hint = document.getElementById('iosInstallHint');
+                if (hint) hint.classList.remove('hidden');
+            }
+        })();
 
         let deferredInstallPrompt = null;
         window.addEventListener("beforeinstallprompt", (e) => {
