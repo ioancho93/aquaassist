@@ -340,12 +340,15 @@
                 </div>
                 <div class="flex items-center rounded-xl border border-slate-600 divide-x divide-slate-600 overflow-hidden">
                     <button onclick="addTank()" title="Нов аквариум" data-i18n-title class="bg-slate-700/80 hover:bg-cyan-900/60 text-xs w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center transition-all duration-200 active:scale-90 text-cyan-300" aria-label="Нов аквариум"><svg style="width:16px;height:16px;display:block;flex-shrink:0;margin:auto;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" class="w-4 h-4"><path d="M12 5v14M5 12h14"/></svg></button>
-                    <button onclick="renameTank()" title="Преименувай" data-i18n-title class="bg-slate-700/80 hover:bg-cyan-900/60 text-xs w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center transition-all duration-200 active:scale-90 text-cyan-300" aria-label="Преименувай"><svg style="width:16px;height:16px;display:block;flex-shrink:0;margin:auto;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
-                    <button onclick="deleteTank()" title="Изтрий аквариума" data-i18n-title class="bg-slate-700/80 hover:bg-red-900/60 text-xs w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center transition-all duration-200 active:scale-90 text-red-400" aria-label="Изтрий аквариума"><svg style="width:16px;height:16px;display:block;flex-shrink:0;margin:auto;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-9 0 1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"/></svg></button>
                 </div>
-                <div class="flex items-center rounded-xl border border-slate-600 divide-x divide-slate-600 overflow-hidden">
-                    <button onclick="exportData()" title="Експорт (JSON)" data-i18n-title class="bg-slate-700/80 hover:bg-cyan-900/60 text-xs w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center transition-all duration-200 active:scale-90 text-cyan-300" aria-label="Експорт (JSON)"><svg style="width:16px;height:16px;display:block;flex-shrink:0;margin:auto;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 19h16"/></svg></button>
-                    <button onclick="document.getElementById('importFile').click()" title="Импорт (JSON)" data-i18n-title class="bg-slate-700/80 hover:bg-cyan-900/60 text-xs w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center transition-all duration-200 active:scale-90 text-cyan-300" aria-label="Импорт (JSON)"><svg style="width:16px;height:16px;display:block;flex-shrink:0;margin:auto;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 15V3m0 0-4 4m4-4 4 4M4 19h16"/></svg></button>
+                <div class="relative shrink-0">
+                    <button id="tankMenuBtn" onclick="toggleTankMenu()" title="Още действия" data-i18n-title class="bg-slate-700/80 hover:bg-cyan-900/60 text-xs w-10 h-10 sm:w-8 sm:h-8 rounded-xl border border-slate-600 flex items-center justify-center transition-all duration-200 active:scale-90 text-cyan-300" aria-label="Още действия"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                    <div id="tankMenuDropdown" class="hidden absolute top-full right-0 mt-2 w-48 bg-slate-800 border border-slate-600 rounded-xl shadow-xl z-[70] overflow-hidden text-sm">
+                        <button onclick="toggleTankMenu(false); renameTank();" class="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-slate-700 text-cyan-300 text-left"><i class="fa-solid fa-pen w-4"></i><span data-i18n>Преименувай</span></button>
+                        <button onclick="toggleTankMenu(false); exportData();" class="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-slate-700 text-cyan-300 text-left"><i class="fa-solid fa-download w-4"></i><span data-i18n>Експорт (JSON)</span></button>
+                        <button onclick="toggleTankMenu(false); document.getElementById('importFile').click();" class="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-slate-700 text-cyan-300 text-left"><i class="fa-solid fa-upload w-4"></i><span data-i18n>Импорт (JSON)</span></button>
+                        <button onclick="toggleTankMenu(false); deleteTank();" class="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-red-900/40 text-red-400 text-left border-t border-slate-700"><i class="fa-solid fa-trash w-4"></i><span data-i18n>Изтрий аквариума</span></button>
+                    </div>
                 </div>
                 <input type="file" id="importFile" accept=".json,application/json" class="hidden" onchange="importData(this)">
                 <div class="relative flex items-center rounded-xl border border-slate-600 overflow-hidden shrink-0">
@@ -1408,11 +1411,16 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.30";
+        const APP_VERSION = "3.6.31";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.31", items: [
+                "Редът с името на аквариума вече остава подреден при по-дълги имена — преименуване/експорт/импорт/изтриване се преместиха в ново \"⋮\" меню, а \"+\" (нов аквариум) остава на видимо място"
+            ], items_en: [
+                "The aquarium name row now stays tidy with longer names — rename/export/import/delete moved into a new \"⋮\" menu, while \"+\" (new aquarium) stays visible"
+            ] },
             { v: "3.6.30", items: [
                 "Toast известията (напр. \"Добавено: ...\") вече изглеждат по-сдържано и професионално — тъмна стъклена плочка с малка цветна икона, вместо едноцветен крещящ зелен/жълт бар"
             ], items_en: [
@@ -5570,6 +5578,24 @@
                 panel.classList.add('hidden');
                 document.getElementById('settingsBackdrop').classList.add('hidden');
                 document.body.style.overflow = '';
+            }
+        });
+
+        // "⋮" меню с по-рядко ползваните действия за аквариума (преименувай/експорт/
+        // импорт/изтрий) — държи реда с името на аквариума компактен и подреден,
+        // независимо колко дълго е името.
+        function toggleTankMenu(force) {
+            const dd = document.getElementById('tankMenuDropdown');
+            if (!dd) return;
+            const open = typeof force === 'boolean' ? force : dd.classList.contains('hidden');
+            dd.classList.toggle('hidden', !open);
+        }
+        document.addEventListener('click', function (e) {
+            const dd = document.getElementById('tankMenuDropdown');
+            const btn = document.getElementById('tankMenuBtn');
+            if (!dd || dd.classList.contains('hidden')) return;
+            if (!dd.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+                toggleTankMenu(false);
             }
         });
 
