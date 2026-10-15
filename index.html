@@ -256,8 +256,8 @@
         }
         .paramVal-editing:focus { outline-style: solid; }
 
-        /* Литри на аквариума — заключено/отключено поле (т.7) */
-        #aqLiters:disabled { opacity: .6; cursor: not-allowed; }
+        /* Литри на аквариума / калкулатор по размери — заключено/отключено поле (т.7) */
+        #aqLiters:disabled, #aqLength:disabled, #aqWidth:disabled, #aqHeight:disabled { opacity: .6; cursor: not-allowed; }
         /* Семантичните "добре/успешно" зелени елементи НЕ трябва да следват акцента на темата —
            те означават "здраве/успех", не бранд цвят. ID-базираните селектори тук имат по-висок
            приоритет от общите body[data-accent] .клас правила по-горе и връщат истинско зелено. */
@@ -530,19 +530,24 @@
             </div>
 
             <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700">
-                <p class="text-xs text-slate-400 mb-2"><i class="fa-solid fa-ruler-combined mr-1.5 text-cyan-400"></i><span data-i18n>Калкулатор за обем по размери (за правоъгълен/куб аквариум)</span></p>
+                <div class="flex items-center justify-between gap-2 mb-2">
+                    <p class="text-xs text-slate-400"><i class="fa-solid fa-ruler-combined mr-1.5 text-cyan-400"></i><span data-i18n>Калкулатор за обем по размери (за правоъгълен/куб аквариум)</span></p>
+                    <button type="button" id="calcDimsEditBtn" onclick="toggleCalcDimsEdit()" class="shrink-0 text-[11px] bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded border border-slate-600 text-cyan-300 transition">
+                        <i id="calcDimsEditBtnIcon" class="fa-solid fa-pen mr-1"></i> <span id="calcDimsEditBtnLabel" data-i18n>Редактирай</span>
+                    </button>
+                </div>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs items-end">
                     <div>
                         <label for="aqLength" class="block text-slate-400 mb-1" data-i18n>Дължина (см):</label>
-                        <input type="number" id="aqLength" min="0" class="w-full bg-slate-700 p-2 rounded border border-slate-600">
+                        <input type="number" id="aqLength" min="0" disabled class="w-full bg-slate-700 p-2 rounded border border-slate-600">
                     </div>
                     <div>
                         <label for="aqWidth" class="block text-slate-400 mb-1" data-i18n>Ширина (см):</label>
-                        <input type="number" id="aqWidth" min="0" class="w-full bg-slate-700 p-2 rounded border border-slate-600">
+                        <input type="number" id="aqWidth" min="0" disabled class="w-full bg-slate-700 p-2 rounded border border-slate-600">
                     </div>
                     <div>
                         <label for="aqHeight" class="block text-slate-400 mb-1" data-i18n>Височина (см):</label>
-                        <input type="number" id="aqHeight" min="0" class="w-full bg-slate-700 p-2 rounded border border-slate-600">
+                        <input type="number" id="aqHeight" min="0" disabled class="w-full bg-slate-700 p-2 rounded border border-slate-600">
                     </div>
                     <button onclick="calcVolume()" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-cyan-300 px-3 py-2 rounded font-medium transition" data-i18n>Изчисли</button>
                 </div>
@@ -667,7 +672,14 @@
                     <option value="капки" data-i18n>капки</option>
                 </select>
                 <input type="number" id="dosingFreq" placeholder="На всеки X дни" data-i18n-placeholder min="1" max="60" value="1" class="bg-slate-700 border border-slate-600 rounded-lg p-2">
-                <input type="time" id="dosingTime" value="18:00" class="bg-slate-700 border border-slate-600 rounded-lg p-2">
+                <div>
+                    <label for="dosingDate" class="block text-slate-400 mb-1" data-i18n>Последно на:</label>
+                    <input type="date" id="dosingDate" title="Промени, ако първото дозиране е било по-рано" data-i18n-title class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2">
+                </div>
+                <div>
+                    <label for="dosingTime" class="block text-slate-400 mb-1" data-i18n>Час:</label>
+                    <input type="time" id="dosingTime" value="18:00" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2">
+                </div>
                 <button onclick="addDosing()" class="col-span-2 md:col-span-4 bg-cyan-700 hover:bg-cyan-600 text-white rounded-lg py-2 font-medium"><i class="fa-solid fa-floppy-disk mr-1.5"></i><span data-i18n>Запиши дозирането</span></button>
             </div>
             <div id="dosingList" class="space-y-2"></div>
@@ -1043,7 +1055,7 @@
             </span>
         </div>
         <p class="text-left text-[10px] text-slate-600 select-none">AquaAssist · <span data-i18n>версия</span> <span id="footerVersion"></span> · <span data-i18n>Създадено от</span> <span class="text-slate-500">Yoan Spasov</span></p>
-        <p class="text-left text-[10px] text-slate-700 select-none" lang="bg">AquaAssist е познато и като Аква Асистент, АкваАсистент, Аква Ассист или Акваасист.</p>
+        <p class="text-left text-[10px] text-slate-700 select-none" data-i18n>AquaAssist е познато и като Аква Асистент, АкваАсистент, Аква Ассист или Акваасист.</p>
     </footer>
 
         <!-- Плаващ бутон за бързи действия (FAB) — само на мобилен -->
@@ -1398,11 +1410,20 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.28";
+        const APP_VERSION = "3.6.29";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.29", items: [
+                "Полетата на калкулатора за обем по размери (дължина/ширина/височина) вече се заключват и отключват с бутон \"Редактирай/Запис\", както при литрите",
+                "В графика за дозиране вече може да се зададе и дата (не само час) за първото/последното дозиране",
+                "Текстът \"AquaAssist е познато и като...\" в долния колонтитул вече следва избрания език, вместо да е само на български"
+            ], items_en: [
+                "The volume-by-dimensions calculator fields (length/width/height) now lock/unlock with an \"Edit/Save\" button, same as the liters field",
+                "The dosing schedule form now also lets you set a date (not just a time) for the first/last dosing",
+                "The \"AquaAssist is also known as...\" footer text now follows the selected language instead of always being in Bulgarian"
+            ] },
             { v: "3.6.28", items: [
                 "Валутата в Финансовия дневник е сменена от лев (лв.) на евро (€)",
                 "Параметрите на водата вече се редактират направо в самите карти (Температура, pH, NH3, NO2, NO3, GH, KH) — \"Редактирай\" ги отключва за писане, \"Запис\" ги заключва обратно, вместо да отваря отделен празен формуляр",
@@ -2489,7 +2510,13 @@
 
         // ---------- График за дозиране (торове, добавки) ----------
         function toggleDosingForm() {
-            document.getElementById('dosingForm').classList.toggle('hidden');
+            const form = document.getElementById('dosingForm');
+            const opening = form.classList.contains('hidden');
+            if (opening) {
+                const dd = document.getElementById('dosingDate');
+                if (dd && !dd.value) dd.value = todayDateStr();
+            }
+            form.classList.toggle('hidden');
         }
 
         function addDosing() {
@@ -2498,13 +2525,18 @@
             const unit = document.getElementById('dosingUnit').value;
             const freqDays = Math.min(Math.max(parseInt(document.getElementById('dosingFreq').value) || 1, 1), 60);
             const time = document.getElementById('dosingTime').value || '18:00';
+            const dateStr = document.getElementById('dosingDate').value || todayDateStr();
             if (!name || isNaN(amount) || amount <= 0) { showToast('Въведи поне продукт и доза.', 'warn'); return; }
+            const [y, m, d] = dateStr.split('-').map(Number);
+            const [hh, mm] = time.split(':').map(Number);
+            const lastDone = new Date(y, m - 1, d, hh || 0, mm || 0).getTime();
             const t = store.tanks[store.active];
             if (!Array.isArray(t.dosing)) t.dosing = [];
-            t.dosing.push({ id: 'd_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7), name, amount, unit, freqDays, time, enabled: true, lastDone: 0 });
+            t.dosing.push({ id: 'd_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7), name, amount, unit, freqDays, time, enabled: true, lastDone });
             document.getElementById('dosingName').value = '';
             document.getElementById('dosingAmount').value = '';
             document.getElementById('dosingFreq').value = '1';
+            document.getElementById('dosingDate').value = '';
             toggleDosingForm();
             renderDosing();
             saveData();
@@ -2668,6 +2700,37 @@
             const btnLabel = document.getElementById('aqLitersEditBtnLabel');
             if (!btnIcon || !btnLabel) return;
             if (aqLitersEditing) {
+                btnIcon.className = 'fa-solid fa-floppy-disk mr-1';
+                btnLabel.textContent = tr('Запис');
+            } else {
+                btnIcon.className = 'fa-solid fa-pen mr-1';
+                btnLabel.textContent = tr('Редактирай');
+            }
+        }
+
+        // ---------- Калкулатор за обем по размери: отделно заключване/отключване ----------
+        let calcDimsEditing = false;
+
+        function toggleCalcDimsEdit() {
+            calcDimsEditing = !calcDimsEditing;
+            ['aqLength', 'aqWidth', 'aqHeight'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.disabled = !calcDimsEditing;
+            });
+            syncCalcDimsEditBtnLabel();
+            if (calcDimsEditing) {
+                const f = document.getElementById('aqLength'); if (f) f.focus();
+            } else {
+                saveData();
+                showToast(tr('Размерите са запазени.'));
+            }
+        }
+
+        function syncCalcDimsEditBtnLabel() {
+            const btnIcon = document.getElementById('calcDimsEditBtnIcon');
+            const btnLabel = document.getElementById('calcDimsEditBtnLabel');
+            if (!btnIcon || !btnLabel) return;
+            if (calcDimsEditing) {
                 btnIcon.className = 'fa-solid fa-floppy-disk mr-1';
                 btnLabel.textContent = tr('Запис');
             } else {
@@ -3229,7 +3292,9 @@
             "Данни и резервно копие": "Data & backup",
             // Чести бутони/етикети
             "Запиши": "Save", "Запиши / Запиши": "Save", "Редактирай": "Edit", "Изтрий": "Delete", "Отказ": "Cancel", "Продължи": "Continue",
-            "Запис": "Save", "Параметрите са запазени.": "Parameters saved.", "Литрите са запазени.": "Liters saved.",
+            "Запис": "Save", "Параметрите са запазени.": "Parameters saved.", "Литрите са запазени.": "Liters saved.", "Размерите са запазени.": "Dimensions saved.",
+            "Последно на:": "Last on:", "Час:": "Time:", "Промени, ако първото дозиране е било по-рано": "Change if the first dosing was earlier",
+            "AquaAssist е познато и като Аква Асистент, АкваАсистент, Аква Ассист или Акваасист.": "AquaAssist is also known as Aqua Assist, AquaAssistant, or Aqua Asistent.",
             "Потвърди": "Confirm", "Потвърди / Запиши": "Confirm / Save", "Добави аквариум": "Add aquarium",
             "Преименувай": "Rename", "Изтрий аквариума": "Delete aquarium", "Експорт (JSON)": "Export (JSON)", "Импорт (JSON)": "Import (JSON)",
             "Нов аквариум": "New aquarium", "Нитрати (NO3)": "Nitrates (NO3)",
@@ -4117,6 +4182,7 @@
             if (typeof updateSyncStatus === 'function') updateSyncStatus();
             if (typeof syncParamEditBtnLabel === 'function') syncParamEditBtnLabel();
             if (typeof syncAqLitersEditBtnLabel === 'function') syncAqLitersEditBtnLabel();
+            if (typeof syncCalcDimsEditBtnLabel === 'function') syncCalcDimsEditBtnLabel();
             saveData();
         }
 
@@ -5173,6 +5239,8 @@
             if (typeof paramsEditing !== 'undefined' && paramsEditing) { paramsEditing = false; PARAM_VAL_IDS.forEach(id => { const el = document.getElementById(id); if (el) { el.setAttribute('contenteditable', 'false'); el.classList.remove('paramVal-editing'); } }); syncParamEditBtnLabel(); }
             if (typeof aqLitersEditing !== 'undefined' && aqLitersEditing) { aqLitersEditing = false; syncAqLitersEditBtnLabel(); }
             document.getElementById('aqLiters').disabled = true;
+            if (typeof calcDimsEditing !== 'undefined' && calcDimsEditing) { calcDimsEditing = false; syncCalcDimsEditBtnLabel(); }
+            ['aqLength', 'aqWidth', 'aqHeight'].forEach(id => { const el = document.getElementById(id); if (el) el.disabled = true; });
             document.getElementById('taskFilter').checked = false;
             document.getElementById('taskPlants').checked = false;
             document.getElementById('taskGlass').checked = false;
