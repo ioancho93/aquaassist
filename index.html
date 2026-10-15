@@ -270,8 +270,6 @@
         #healthBadge.text-emerald-200 { color: #a7f3d0; }
         #waterAlert.bg-emerald-950 { background-color: #022c22; }
         #waterAlert.border-emerald-700 { border-color: #047857; }
-        .aqua-toast.bg-emerald-600\/95 { background-color: rgba(5,150,105,0.95); }
-        .aqua-toast.border-emerald-400\/40 { border-color: rgba(52,211,153,0.4); }
 
         /* Лек пулсиращ пръстен около иконката за синхронизация — дискретна подсказка
            за нов потребител, докато още няма sync код. Изчезва автоматично след това. */
@@ -1410,11 +1408,16 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.29";
+        const APP_VERSION = "3.6.30";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.30", items: [
+                "Toast известията (напр. \"Добавено: ...\") вече изглеждат по-сдържано и професионално — тъмна стъклена плочка с малка цветна икона, вместо едноцветен крещящ зелен/жълт бар"
+            ], items_en: [
+                "Toast notifications (e.g. \"Added: ...\") now look more subtle and professional — a dark glass pill with a small colored icon badge, instead of a loud solid green/amber bar"
+            ] },
             { v: "3.6.29", items: [
                 "Полетата на калкулатора за обем по размери (дължина/ширина/височина) вече се заключват и отключват с бутон \"Редактирай/Запис\", както при литрите",
                 "В графика за дозиране вече може да се зададе и дата (не само час) за първото/последното дозиране",
@@ -5170,10 +5173,15 @@
             msg = tr(msg);
             const warn = type === 'warn';
             const el = document.createElement('div');
-            el.className = "aqua-toast fixed top-4 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2.5 px-4 py-2.5 rounded-xl shadow-lg text-sm font-medium text-white border backdrop-blur-sm " +
-                (warn ? "bg-amber-600/95 border-amber-400/40" : "bg-emerald-600/95 border-emerald-400/40");
-            el.innerHTML = `<i class="fa-solid ${warn ? 'fa-triangle-exclamation' : 'fa-circle-check'}"></i><span></span>`;
-            el.querySelector('span').textContent = msg;
+            // По-сдържан, "професионален" вид: тъмна стъклена плочка (в тон с останалото
+            // приложение), с малък цветен бадж за иконата, вместо едноцветен крещящ бар.
+            el.className = "aqua-toast fixed top-4 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2.5 pl-2 pr-4 py-2 rounded-full shadow-xl shadow-black/30 text-sm font-medium text-slate-100 border border-slate-700/80 bg-slate-900/95 backdrop-blur-sm";
+            el.innerHTML = `
+                <span class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${warn ? 'bg-amber-500/15 text-amber-400' : 'bg-emerald-500/15 text-emerald-400'}">
+                    <i class="fa-solid ${warn ? 'fa-triangle-exclamation' : 'fa-check'} text-xs"></i>
+                </span>
+                <span></span>`;
+            el.querySelector('span:last-child').textContent = msg;
             document.body.appendChild(el);
             setTimeout(() => {
                 el.style.transition = 'opacity .3s ease, transform .3s ease';
