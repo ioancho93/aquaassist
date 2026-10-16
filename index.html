@@ -1019,15 +1019,16 @@
 
                 <div id="syncNoCode" class="space-y-2">
                     <div class="flex gap-2">
-                        <input type="text" id="syncNickname" placeholder="само латиница, напр. yoan" data-i18n-placeholder oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '')" pattern="[a-zA-Z0-9]+" class="flex-1 bg-slate-700 border border-slate-600 rounded-lg p-2 text-xs">
+                        <input type="text" id="syncNickname" placeholder="незадължително, само латиница" data-i18n-placeholder oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '')" pattern="[a-zA-Z0-9]+" class="flex-1 bg-slate-700 border border-slate-600 rounded-lg p-2 text-xs">
                         <button onclick="generateSyncCode()" class="bg-cyan-700 hover:bg-cyan-600 text-xs px-3 py-2 rounded-lg font-medium text-white shrink-0" data-i18n>Създай код</button>
                     </div>
+                    <p class="text-[10px] text-slate-500" data-i18n>Ако оставиш полето празно, ще получиш автоматично генерирано случайно име.</p>
                     <button onclick="showSyncLoginForm()" class="text-[11px] text-cyan-400 hover:text-cyan-300 underline" data-i18n>Вече имам код от друго устройство</button>
                 </div>
 
                 <div id="syncLoginForm" class="hidden space-y-2">
                     <div class="flex gap-2">
-                        <input type="text" id="syncCodeInput" placeholder="напр. yoan-4f2a9c" oninput="this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '')" pattern="[a-zA-Z0-9-]+" class="flex-1 bg-slate-700 border border-slate-600 rounded-lg p-2 text-xs">
+                        <input type="text" id="syncCodeInput" placeholder="напр. guppy-4f2a9c" oninput="this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '')" pattern="[a-zA-Z0-9-]+" class="flex-1 bg-slate-700 border border-slate-600 rounded-lg p-2 text-xs">
                         <button onclick="downloadFromCloud()" class="bg-cyan-700 hover:bg-cyan-600 text-xs px-3 py-2 rounded-lg font-medium text-white shrink-0" data-i18n>Изтегли</button>
                     </div>
                     <button onclick="hideSyncLoginForm()" class="text-[11px] text-slate-500 hover:text-slate-400 underline" data-i18n>Назад</button>
@@ -1421,11 +1422,16 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.35";
+        const APP_VERSION = "3.6.36";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.36", items: [
+                "Кодът за синхронизация вече не изисква лично име — ако полето за псевдоним се остави празно, се генерира случайна аквариумна дума (напр. \"guppy-4f2a9c\")"
+            ], items_en: [
+                "The sync code no longer requires a personal name — leaving the nickname field empty generates a random aquarium-themed word instead (e.g. \"guppy-4f2a9c\")"
+            ] },
             { v: "3.6.35", items: [
                 "Поправка: \"Сподели аквариум (само преглед)\" вече отваря истинското меню за споделяне (Viber, Messenger, SMS и т.н.), вместо само да копира линка"
             ], items_en: [
@@ -3633,6 +3639,7 @@
             "Незадължително. Без имейл и парола — само код, който пазиш сам.": "Optional. No email or password — just a code you keep yourself.",
             "Избери си псевдоним...": "Choose a nickname...",
             "само латиница, напр. yoan": "Latin letters only, e.g. yoan",
+            "незадължително, само латиница": "optional, Latin letters only", "Ако оставиш полето празно, ще получиш автоматично генерирано случайно име.": "If you leave this field empty, you'll get an automatically generated random name.",
             "Данните в облака изглеждат невалидни или празни. Нищо не е приложено.": "The data in the cloud looks invalid or empty. Nothing was applied.",
             "Данните са заменени успешно. Приложението ще се презареди сега.": "The data was replaced successfully. The app will reload now.",
             "Грешка при изтегляне:": "Download error:",
@@ -3817,7 +3824,7 @@
             "Въведи кода на друго устройство през „Вече имам код от друго устройство\", за да изтеглиш данните си.": "Enter the code on another device via \"I already have a code from another device\" to download your data.",
             "AquaAssist не може да възстанови този код вместо теб, ако го загубиш.": "AquaAssist cannot recover this code for you if you lose it.",
             "Резервният файл е свален.": "Backup file downloaded.",
-            "напр. yoan-4f2a9c": "e.g. yoan-4f2a9c",
+            "напр. yoan-4f2a9c": "e.g. yoan-4f2a9c", "напр. guppy-4f2a9c": "e.g. guppy-4f2a9c",
             "Изтегли": "Download",
             "Назад": "Back",
             "Копирай": "Copy",
@@ -4641,11 +4648,15 @@
             document.getElementById('syncNoCode').classList.remove('hidden');
         }
 
+        // Аквариумно-тематични думи за автоматично генерирания код, когато потребителят
+        // не въведе собствен псевдоним — вместо лично име в кода (напр. "yoan-4f2a9c"),
+        // получава случайна неутрална дума (напр. "guppy-4f2a9c").
+        const SYNC_CODE_WORDS = ['coral', 'guppy', 'tetra', 'betta', 'reef', 'shrimp', 'driftwood', 'angelfish', 'catfish', 'barb', 'danio', 'pleco', 'gourami', 'molly', 'cichlid', 'anemone', 'kelp', 'lagoon', 'bubble', 'current'];
         function generateSyncCode() {
             const raw = (document.getElementById('syncNickname').value || '').trim();
-            if (!raw) { showToast(tr('Въведи псевдоним първо.'), 'warn'); return; }
-            const nick = raw.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20);
-            if (!nick) { showToast(tr('Моля, използвай само латински букви и цифри.'), 'warn'); return; }
+            let nick = raw.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20);
+            if (raw && !nick) { showToast(tr('Моля, използвай само латински букви и цифри.'), 'warn'); return; }
+            if (!nick) nick = SYNC_CODE_WORDS[Math.floor(Math.random() * SYNC_CODE_WORDS.length)];
             const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
             let suffix = '';
             for (let i = 0; i < 6; i++) suffix += chars[Math.floor(Math.random() * chars.length)];
