@@ -341,15 +341,8 @@
                 <div class="flex items-center gap-2 shrink-0 ml-auto">
                     <div class="flex items-center rounded-xl border border-slate-600 divide-x divide-slate-600 overflow-hidden">
                         <button onclick="addTank()" title="Нов аквариум" data-i18n-title class="bg-slate-700/80 hover:bg-cyan-900/60 text-xs w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center transition-all duration-200 active:scale-90 text-cyan-300" aria-label="Нов аквариум"><svg style="width:16px;height:16px;display:block;flex-shrink:0;margin:auto;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" class="w-4 h-4"><path d="M12 5v14M5 12h14"/></svg></button>
-                    </div>
-                    <div class="relative shrink-0">
-                        <button id="tankMenuBtn" onclick="toggleTankMenu()" title="Още действия" data-i18n-title class="bg-slate-700/80 hover:bg-cyan-900/60 text-xs w-10 h-10 sm:w-8 sm:h-8 rounded-xl border border-slate-600 flex items-center justify-center transition-all duration-200 active:scale-90 text-cyan-300" aria-label="Още действия"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-                        <div id="tankMenuDropdown" class="hidden absolute top-full right-0 mt-2 w-48 bg-slate-800 border border-slate-600 rounded-xl shadow-xl z-[70] overflow-hidden text-sm">
-                            <button onclick="toggleTankMenu(false); renameTank();" class="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-slate-700 text-cyan-300 text-left"><i class="fa-solid fa-pen w-4"></i><span data-i18n>Преименувай</span></button>
-                            <button onclick="toggleTankMenu(false); exportData();" class="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-slate-700 text-cyan-300 text-left"><i class="fa-solid fa-download w-4"></i><span data-i18n>Експорт (JSON)</span></button>
-                            <button onclick="toggleTankMenu(false); document.getElementById('importFile').click();" class="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-slate-700 text-cyan-300 text-left"><i class="fa-solid fa-upload w-4"></i><span data-i18n>Импорт (JSON)</span></button>
-                            <button onclick="toggleTankMenu(false); deleteTank();" class="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-red-900/40 text-red-400 text-left border-t border-slate-700"><i class="fa-solid fa-trash w-4"></i><span data-i18n>Изтрий аквариума</span></button>
-                        </div>
+                        <button onclick="renameTank()" title="Преименувай аквариума" data-i18n-title class="bg-slate-700/80 hover:bg-cyan-900/60 text-xs w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center transition-all duration-200 active:scale-90 text-cyan-300" aria-label="Преименувай аквариума"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteTank()" title="Изтрий аквариума" data-i18n-title class="bg-slate-700/80 hover:bg-red-900/60 text-xs w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center transition-all duration-200 active:scale-90 text-red-400" aria-label="Изтрий аквариума"><i class="fa-solid fa-trash"></i></button>
                     </div>
                     <input type="file" id="importFile" accept=".json,application/json" class="hidden" onchange="importData(this)">
                     <div class="relative flex items-center rounded-xl border border-slate-600 overflow-hidden shrink-0">
@@ -388,6 +381,13 @@
                     <button id="removeBgBtn" onclick="removeCustomBackground()" title="Премахни фоновата снимка" data-i18n-title aria-label="Премахни фоновата снимка" class="hidden text-[11px] px-2.5 py-2 rounded-lg border bg-slate-700 hover:bg-red-900/60 border-slate-600 text-red-400 transition-all duration-200"><i class="fa-solid fa-trash"></i></button>
                 </div>
                 <p class="text-[10px] text-slate-500 mt-1" data-i18n>Снимката се пази само на това устройство (IndexedDB).</p>
+            </div>
+            <div class="border-t border-slate-700 pt-3">
+                <p class="text-xs text-slate-400 mb-1.5" data-i18n>Данни на аквариума</p>
+                <div class="flex items-center gap-2">
+                    <button onclick="exportData()" class="flex-1 text-[11px] px-2.5 py-2 rounded-lg border bg-slate-700 hover:bg-slate-600 border-slate-600 text-cyan-300 transition-all duration-200"><i class="fa-solid fa-download mr-1"></i><span data-i18n>Експорт (JSON)</span></button>
+                    <button onclick="document.getElementById('importFile').click()" class="flex-1 text-[11px] px-2.5 py-2 rounded-lg border bg-slate-700 hover:bg-slate-600 border-slate-600 text-cyan-300 transition-all duration-200"><i class="fa-solid fa-upload mr-1"></i><span data-i18n>Импорт (JSON)</span></button>
+                </div>
             </div>
             <button id="notifyBtn" onclick="toggleNotifications()" title="Известия" class="w-full flex items-center justify-between bg-slate-700 hover:bg-slate-600 text-xs rounded-lg px-3 py-2.5 border border-slate-600 text-slate-500 transition-all duration-200" aria-label="Известия">
                 <span class="flex items-center gap-2"><svg style="width:16px;height:16px;display:block;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span data-i18n>Известия</span></span>
@@ -1413,11 +1413,16 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.32";
+        const APP_VERSION = "3.6.33";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.33", items: [
+                "Премахнато е неудобното за телефон \"⋮\" меню — \"+\", преименуване (✏️) и изтриване (🗑️) на аквариума вече са директни бутони в хедъра, а Експорт/Импорт (JSON) се преместиха в Настройки"
+            ], items_en: [
+                "Removed the phone-unfriendly \"⋮\" menu — \"+\", rename (✏️) and delete (🗑️) the aquarium are now direct buttons in the header, while Export/Import (JSON) moved into Settings"
+            ] },
             { v: "3.6.32", items: [
                 "Горната лента вече винаги държи заглавието (AquaAssist) на свой ред и реда с аквариума/иконките под него — вече не се застъпват и не се притискат при по-широк екран"
             ], items_en: [
@@ -3315,6 +3320,7 @@
             "AquaAssist е познато и като Аква Асистент, АкваАсистент, Аква Ассист или Акваасист.": "AquaAssist is also known as Aqua Assist, AquaAssistant, or Aqua Asistent.",
             "Потвърди": "Confirm", "Потвърди / Запиши": "Confirm / Save", "Добави аквариум": "Add aquarium",
             "Преименувай": "Rename", "Изтрий аквариума": "Delete aquarium", "Експорт (JSON)": "Export (JSON)", "Импорт (JSON)": "Import (JSON)",
+            "Данни на аквариума": "Aquarium data", "Преименувай аквариума": "Rename aquarium",
             "Нов аквариум": "New aquarium", "Нитрати (NO3)": "Nitrates (NO3)",
             "Преименувай аквариум": "Rename aquarium", "Име на аквариума": "Aquarium name",
             "Напр. Хол, 120л общ": "E.g. Living room, 120L community",
@@ -5585,24 +5591,6 @@
                 panel.classList.add('hidden');
                 document.getElementById('settingsBackdrop').classList.add('hidden');
                 document.body.style.overflow = '';
-            }
-        });
-
-        // "⋮" меню с по-рядко ползваните действия за аквариума (преименувай/експорт/
-        // импорт/изтрий) — държи реда с името на аквариума компактен и подреден,
-        // независимо колко дълго е името.
-        function toggleTankMenu(force) {
-            const dd = document.getElementById('tankMenuDropdown');
-            if (!dd) return;
-            const open = typeof force === 'boolean' ? force : dd.classList.contains('hidden');
-            dd.classList.toggle('hidden', !open);
-        }
-        document.addEventListener('click', function (e) {
-            const dd = document.getElementById('tankMenuDropdown');
-            const btn = document.getElementById('tankMenuBtn');
-            if (!dd || dd.classList.contains('hidden')) return;
-            if (!dd.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
-                toggleTankMenu(false);
             }
         });
 
