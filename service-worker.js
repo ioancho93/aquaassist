@@ -1,7 +1,7 @@
 // v2: основният файл вече е index.html вместо aquaassistant.html (за чист адрес
 // aquaassist.app без наставка) — смяната на CACHE_NAME изхвърля старото кеширано
 // v1 съдържание, за да не остане "призрачна" стара версия в офлайн кеша.
-const CACHE_NAME = "aquaassistant-cache-v9";
+const CACHE_NAME = "aquaassistant-cache-v10";
 const CORE_ASSETS = [
   "./index.html",
   "./manifest.json",
