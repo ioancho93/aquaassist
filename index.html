@@ -1421,11 +1421,18 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.33";
+        const APP_VERSION = "3.6.34";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.34", items: [
+                "Поправка: нов аквариум без нито едно въведено измерване вече показва \"Няма достатъчно данни\" вместо подвеждащо \"100% Здраве\"",
+                "По-надеждна офлайн работа — стиловете и иконките вече се кешират веднага при инсталация, не само след първо зареждане"
+            ], items_en: [
+                "Fix: a new aquarium with no measurements entered now shows \"Not enough data\" instead of a misleading \"100% Health\"",
+                "More reliable offline mode — styles and icons are now cached right at install time, not only after the first load"
+            ] },
             { v: "3.6.33", items: [
                 "Премахнато е неудобното за телефон \"⋮\" меню — \"+\", преименуване (✏️) и изтриване (🗑️) на аквариума вече са директни бутони в хедъра, а Експорт/Импорт (JSON) се преместиха в Настройки"
             ], items_en: [
@@ -2174,6 +2181,12 @@
             const daysLeft = Math.ceil((waterDue - Date.now()) / DAY_MS);
             const paramProblem = document.getElementById('compatText').children.length > 0;
 
+            // Няма смисъл да твърдим "Отлично състояние / 100% Здраве", ако потребителят
+            // изобщо не е въвел нито едно измерване на водата — иначе съвсем нов аквариум
+            // без данни изглежда подвеждащо "перфектен" от самото начало.
+            const t = store.tanks[store.active];
+            const hasAnyParam = t && [t.temp, t.ph, t.nh3, t.no2, t.no3, t.gh, t.kh].some(v => v !== undefined && v !== null && String(v).trim() !== '');
+
             if (stockingPercent > 90) {
                 title.innerText = tr("Пренаселен аквариум");
                 desc.innerText = tr("Биологичният товар е голям. Препоръчва се по-честа смяна на водата.");
@@ -2195,6 +2208,12 @@
                 badge.innerText = tr("Поддръжка");
                 badge.className = "bg-yellow-900 text-yellow-200 text-xs px-2.5 py-1 rounded-full font-bold";
                 icon.className = "fa-solid fa-droplet text-yellow-400 text-xl animate-pulse";
+            } else if (!hasAnyParam) {
+                title.innerText = tr("Няма достатъчно данни");
+                desc.innerText = tr("Въведи поне едно измерване на водата, за да видиш реална оценка на състоянието.");
+                badge.innerText = tr("Няма данни");
+                badge.className = "bg-slate-700 text-slate-300 text-xs px-2.5 py-1 rounded-full font-bold";
+                icon.className = "fa-solid fa-circle-question text-slate-400 text-xl";
             } else {
                 title.innerText = tr("Отлично състояние");
                 desc.innerText = tr("Всички параметри са в оптимални граници. Обитателите са здрави.");
@@ -3484,6 +3503,7 @@
             "Смяната на 30% от водата е от съществено значение днес.": "A 30% water change is essential today.",
             "Поддръжка": "Maintenance",
             "Отлично състояние": "Excellent condition",
+            "Няма достатъчно данни": "Not enough data", "Въведи поне едно измерване на водата, за да видиш реална оценка на състоянието.": "Enter at least one water measurement to see a real condition assessment.", "Няма данни": "No data",
             "Всички параметри са в оптимални граници. Обитателите са здрави.": "All parameters are within optimal range. Inhabitants are healthy.",
             "100% Здраве": "100% Health",
             "График за поддръжка": "Maintenance schedule",

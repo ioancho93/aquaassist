@@ -1,7 +1,7 @@
 // v2: основният файл вече е index.html вместо aquaassistant.html (за чист адрес
 // aquaassist.app без наставка) — смяната на CACHE_NAME изхвърля старото кеширано
 // v1 съдържание, за да не остане "призрачна" стара версия в офлайн кеша.
-const CACHE_NAME = "aquaassistant-cache-v10";
+const CACHE_NAME = "aquaassistant-cache-v11";
 const CORE_ASSETS = [
   "./index.html",
   "./manifest.json",
@@ -10,10 +10,25 @@ const CORE_ASSETS = [
   "./icons/icon-192-maskable.png",
   "./icons/icon-512-maskable.png"
 ];
+// Критични външни ресурси (CDN) — без тях приложението изглежда счупено офлайн
+// (без стилове/икони). Кешират се веднага при инсталация, не само след първо
+// зареждане, за да работи офлайн дори при прекъснато първо посещение.
+const CDN_ASSETS = [
+  "https://cdn.tailwindcss.com",
+  "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css",
+  "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS)).catch(() => {})
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.all([
+        cache.addAll(CORE_ASSETS).catch(() => {}),
+        // Всеки CDN ресурс поотделно — ако един падне (напр. временно недостъпен),
+        // да не провали кеширането на останалите.
+        ...CDN_ASSETS.map((url) => cache.add(new Request(url, { mode: "no-cors" })).catch(() => {}))
+      ])
+    )
   );
   self.skipWaiting();
 });
