@@ -1421,11 +1421,16 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.34";
+        const APP_VERSION = "3.6.35";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.35", items: [
+                "Поправка: \"Сподели аквариум (само преглед)\" вече отваря истинското меню за споделяне (Viber, Messenger, SMS и т.н.), вместо само да копира линка"
+            ], items_en: [
+                "Fix: \"Share aquarium (view only)\" now opens the real native share menu (Viber, Messenger, SMS, etc.) instead of only copying the link"
+            ] },
             { v: "3.6.34", items: [
                 "Поправка: нов аквариум без нито едно въведено измерване вече показва \"Няма достатъчно данни\" вместо подвеждащо \"100% Здраве\"",
                 "По-надеждна офлайн работа — стиловете и иконките вече се кешират веднага при инсталация, не само след първо зареждане"
@@ -2977,6 +2982,13 @@
             const encoded = encodeURIComponent(JSON.stringify(payload));
             const baseUrl = location.href.split('?')[0].split('#')[0];
             const url = `${baseUrl}?view=${encoded}`;
+            const shareText = `${tr('Виж моя аквариум в AquaAssist:')} ${t.name || ''}`.trim();
+            // На телефон/съвместим браузър отваря родното меню "Сподели" (Viber,
+            // Messenger, SMS и т.н.) — same модел като shareApp()/shareTimelineEntry().
+            if (navigator.share) {
+                navigator.share({ title: 'AquaAssist', text: shareText, url }).catch(() => {});
+                return;
+            }
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(url).then(
                     () => showToast(tr('Линкът е копиран! Изпрати го на приятел.')),
@@ -3633,6 +3645,7 @@
             "Това е само преглед — нищо от тези данни не се запазва на твоето устройство.": "This is just a preview — none of this data is saved on your device.",
             "Затвори": "Close",
             "Линкът е копиран! Изпрати го на приятел.": "Link copied! Send it to a friend.",
+            "Виж моя аквариум в AquaAssist:": "Check out my aquarium on AquaAssist:",
             "Копирай този линк:": "Copy this link:",
             "Невалиден линк за преглед.": "Invalid preview link.",
             "Заключен преглед — не може да се редактира": "Locked preview — cannot be edited",
