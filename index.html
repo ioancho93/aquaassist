@@ -344,7 +344,7 @@
 
         <div class="w-full">
             <div class="flex items-center flex-wrap gap-2 justify-start bg-slate-900/40 border border-white/10 rounded-2xl px-2.5 py-1.5 backdrop-blur-md shadow-inner w-full">
-                <div class="relative min-w-0 flex-1 sm:flex-initial">
+                <div class="relative min-w-[150px] flex-1 sm:flex-initial">
                     <svg style="width:13px;height:13px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="absolute left-2 top-1/2 -translate-y-1/2 text-cyan-400 pointer-events-none"><path d="M2.5 12c3-4 8.5-6.5 13-4.2 2.2 1.1 3.7 2.6 5 4.2-1.3 1.6-2.8 3.1-5 4.2-4.5 2.3-10 -0.2-13-4.2z"/><path d="M19.5 12l3-3.5v7l-3-3.5z"/></svg>
                     <select id="aqSelect" onchange="switchTank(this.value)" class="appearance-none w-full sm:w-auto bg-slate-700 text-xs rounded-lg pl-6 pr-6 py-1.5 border border-slate-600 hover:border-cyan-500/60 transition-all duration-200 focus:outline-none"></select>
                     <svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"><path d="M6 9l6 6 6-6"/></svg>
@@ -1438,11 +1438,16 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.38";
+        const APP_VERSION = "3.6.39";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.39", items: [
+                "Поправено: името на аквариума вече не се реже на телефон (бутоните в хедъра вече падат на нов ред, ако няма достатъчно място)"
+            ], items_en: [
+                "Fixed: the aquarium name no longer gets cut off on phones (the header buttons now wrap to a new line when there isn't enough room)"
+            ] },
             { v: "3.6.38", items: [
                 "Нов калкулатор за разтворен CO2, изчислен автоматично от pH и KH (полезно за растителни аквариуми)",
                 "Техническо: статичен, предварително компилиран CSS вместо външен CDN — по-бързо зареждане и по-надеждна офлайн работа"
