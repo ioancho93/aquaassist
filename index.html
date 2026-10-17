@@ -57,7 +57,10 @@
     <meta name="apple-mobile-web-app-title" content="AquaAssist">
     <link rel="icon" href="icons/icon-192.png">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Статичен, предварително компилиран Tailwind CSS (вместо cdn.tailwindcss.com,
+         което прави runtime компилация в браузъра — не е препоръчано за production и
+         зависи от външен CDN дори офлайн). Генериран от реалния index.html с Tailwind CLI. -->
+    <link rel="stylesheet" href="tailwind.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -613,6 +616,19 @@
                 <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
                     <span class="text-xs text-slate-400" data-i18n>Карбонатна твърдост (KH)</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help paramInfoIcon" tabindex="0" title="KH — карбонатна твърдост, буферира pH. Ориентировъчно оптимално: 3–8 dKH" data-i18n-title data-info="KH — карбонатна твърдост, буферира pH. Ориентировъчно оптимално: 3–8 dKH"></i>
                     <p class="text-xl font-bold text-indigo-300 mt-1"><span id="valKH" class="paramVal" inputmode="decimal">—</span> dKH</p>
+                </div>
+            </div>
+
+            <!-- CO2 калкулатор по pH/KH (т.3.6.38) — само за показване, изчислява се
+                 автоматично от вече въведените pH и KH, не изисква отделно поле. -->
+            <div id="co2Box" class="hidden bg-slate-900/60 border border-slate-700 rounded-xl p-3 flex items-center justify-between gap-3">
+                <div>
+                    <p class="text-xs text-slate-400"><i class="fa-solid fa-bubbles mr-1.5 text-cyan-400"></i><span data-i18n>Разтворен CO2 (по pH/KH)</span></p>
+                    <p class="text-[11px] text-slate-500 mt-0.5" data-i18n>Ориентировъчна стойност, не замества директно измерване.</p>
+                </div>
+                <div class="text-right shrink-0">
+                    <p class="text-xl font-bold mt-1"><span id="valCO2">—</span> <span class="text-xs font-normal text-slate-400">mg/l</span></p>
+                    <span id="co2Badge" class="text-[11px] px-2 py-0.5 rounded-full font-semibold"></span>
                 </div>
             </div>
         </section>
@@ -1422,11 +1438,23 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.36";
+        const APP_VERSION = "3.6.38";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.38", items: [
+                "Нов калкулатор за разтворен CO2, изчислен автоматично от pH и KH (полезно за растителни аквариуми)",
+                "Техническо: статичен, предварително компилиран CSS вместо външен CDN — по-бързо зареждане и по-надеждна офлайн работа"
+            ], items_en: [
+                "New dissolved CO2 calculator, computed automatically from pH and KH (useful for planted tanks)",
+                "Technical: static, pre-built CSS instead of an external CDN — faster loading and more reliable offline use"
+            ] },
+            { v: "3.6.37", items: [
+                "Техническо: данните вече пазят версия на структурата си — за по-безопасни бъдещи обновявания без риск за съществуващите аквариуми"
+            ], items_en: [
+                "Technical: saved data now tracks its own structure version — for safer future updates without risk to existing aquariums"
+            ] },
             { v: "3.6.36", items: [
                 "Кодът за синхронизация вече не изисква лично име — ако полето за псевдоним се остави празно, се генерира случайна аквариумна дума (напр. \"guppy-4f2a9c\")"
             ], items_en: [
@@ -2730,6 +2758,7 @@
             } else {
                 recordHistory();
                 updateCapacity();
+                updateCO2Display();
                 saveData();
                 showToast(tr('Параметрите са запазени.'));
             }
@@ -2797,6 +2826,39 @@
             } else {
                 btnIcon.className = 'fa-solid fa-pen mr-1';
                 btnLabel.textContent = tr('Редактирай');
+            }
+        }
+
+        // ---------- CO2 калкулатор по pH/KH (т.3.6.38) ----------
+        // Формула: CO2 (mg/l) ≈ 3 × KH(dKH) × 10^(7 - pH) — стандартна апроксимация
+        // на карбонатното равновесие, използвана масово за растителни аквариуми.
+        function updateCO2Display() {
+            const box = document.getElementById('co2Box');
+            if (!box) return;
+            const ph = parseFloat(document.getElementById('valPH').innerText);
+            const kh = parseFloat(document.getElementById('valKH').innerText);
+            if (!isFinite(ph) || !isFinite(kh) || ph <= 0 || kh <= 0) {
+                box.classList.add('hidden');
+                return;
+            }
+            const co2 = 3 * kh * Math.pow(10, 7 - ph);
+            if (!isFinite(co2) || co2 <= 0 || co2 > 500) {
+                // При нереалистични комбинации (напр. много ниско pH) не показваме подвеждащо число.
+                box.classList.add('hidden');
+                return;
+            }
+            box.classList.remove('hidden');
+            document.getElementById('valCO2').innerText = co2 < 10 ? co2.toFixed(1) : Math.round(co2);
+            const badge = document.getElementById('co2Badge');
+            if (co2 < 10) {
+                badge.textContent = tr('Ниско за растения');
+                badge.className = 'text-[11px] px-2 py-0.5 rounded-full font-semibold bg-amber-900/60 text-amber-300';
+            } else if (co2 <= 30) {
+                badge.textContent = tr('Добро ниво');
+                badge.className = 'text-[11px] px-2 py-0.5 rounded-full font-semibold bg-emerald-900/60 text-emerald-300';
+            } else {
+                badge.textContent = tr('Опасно за рибите');
+                badge.className = 'text-[11px] px-2 py-0.5 rounded-full font-semibold bg-red-900/60 text-red-300';
             }
         }
 
@@ -3300,6 +3362,13 @@
 
         // ---------- Няколко аквариума (LocalStorage v2, безопасно четене/запис) ----------
         const STORAGE_V2 = "aquaAssistantState_v2";
+        // Версия на СТРУКТУРАТА на записаните данни (различно от APP_VERSION,
+        // който е версия на самото приложение/UI). Пазим я вътре в записа, за да
+        // можем в бъдеще безопасно да преобразуваме стари записи към нова форма
+        // (напр. преименуване на поле), без да счупим данните на съществуващи
+        // потребители. Всяка бъдеща промяна в структурата на tanks/settings
+        // трябва да добави стъпка в migrateData() по-долу и да вдигне числото.
+        const DATA_SCHEMA_VERSION = 1;
         const STORAGE_V1 = "aquaAssistantState";
         // Запомняме дали вече е имало реално записани данни ОЩЕ ТУК, преди
         // каквато и да е инициализация (напр. changeTheme()) да е успяла да
@@ -3366,6 +3435,11 @@
             "Потвърди": "Confirm", "Потвърди / Запиши": "Confirm / Save", "Добави аквариум": "Add aquarium",
             "Преименувай": "Rename", "Изтрий аквариума": "Delete aquarium", "Експорт (JSON)": "Export (JSON)", "Импорт (JSON)": "Import (JSON)",
             "Данни на аквариума": "Aquarium data", "Преименувай аквариума": "Rename aquarium",
+            "Разтворен CO2 (по pH/KH)": "Dissolved CO2 (from pH/KH)",
+            "Ориентировъчна стойност, не замества директно измерване.": "An estimate — not a substitute for a direct CO2 test.",
+            "Ниско за растения": "Low for plants",
+            "Добро ниво": "Good level",
+            "Опасно за рибите": "Dangerous for fish",
             "Нов аквариум": "New aquarium", "Нитрати (NO3)": "Nitrates (NO3)",
             "Преименувай аквариум": "Rename aquarium", "Име на аквариума": "Aquarium name",
             "Напр. Хол, 120л общ": "E.g. Living room, 120L community",
@@ -4892,7 +4966,7 @@
                 showToast(tr('Качване...'));
                 captureTank(); // улавя най-актуалните стойности от екрана в store.tanks, преди да качим
                 const payload = {
-                    tanks: store.tanks, active: store.active, updatedAt: Date.now(),
+                    schemaVersion: DATA_SCHEMA_VERSION, tanks: store.tanks, active: store.active, updatedAt: Date.now(),
                     settings: { theme: currentTheme, lang: currentLang, notify: notifyEnabled }
                 };
                 await firebase.firestore().collection('syncCodes').doc(mySyncCode).set(payload);
@@ -4939,7 +5013,7 @@
                 // Пишем директно в localStorage, БЕЗ saveData()/captureTank() —
                 // те биха презаписали новите изтеглени данни със старите, все още показани на екрана.
                 const st = data.settings || {};
-                localStorage.setItem(STORAGE_V2, JSON.stringify({ theme: st.theme || currentTheme, active: newActive, tanks: newTanks }));
+                localStorage.setItem(STORAGE_V2, JSON.stringify({ schemaVersion: DATA_SCHEMA_VERSION, theme: st.theme || currentTheme, active: newActive, tanks: newTanks }));
                 if (st.lang === 'en' || st.lang === 'bg') { try { localStorage.setItem(LANG_KEY, st.lang); } catch (e) {} }
                 if (typeof st.notify === 'boolean') { try { localStorage.setItem(NOTIFY_KEY, st.notify ? "1" : "0"); } catch (e) {} }
                 showAppAlert(tr('Данните са заменени успешно. Приложението ще се презареди сега.'), 'success', () => location.reload());
@@ -5315,6 +5389,7 @@
             document.getElementById('valNO3').innerText = t.no3 || '—';
             document.getElementById('valGH').innerText = t.gh || '—';
             document.getElementById('valKH').innerText = t.kh || '—';
+            updateCO2Display();
             // При смяна на аквариум заключваме обратно двата отключваеми panel-а
             // (параметри + литри), за да не остане "забравено" отворено поле за редакция.
             if (typeof paramsEditing !== 'undefined' && paramsEditing) { paramsEditing = false; PARAM_VAL_IDS.forEach(id => { const el = document.getElementById(id); if (el) { el.setAttribute('contenteditable', 'false'); el.classList.remove('paramVal-editing'); } }); syncParamEditBtnLabel(); }
@@ -5485,7 +5560,7 @@
             try {
                 if (!store.tanks.length) return;
                 captureTank();
-                localStorage.setItem(STORAGE_V2, JSON.stringify({ theme: currentTheme, active: store.active, tanks: store.tanks }));
+                localStorage.setItem(STORAGE_V2, JSON.stringify({ schemaVersion: DATA_SCHEMA_VERSION, theme: currentTheme, active: store.active, tanks: store.tanks }));
                 try { localStorage.setItem(HAS_DATA_KEY, "1"); } catch (e) {}
             } catch (e) {
                 if (!storageWarned && e && (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014)) {
@@ -5493,6 +5568,21 @@
                     showToast('Хранилището е пълно! Направи експорт и изтрий стари снимки.', 'warn');
                 }
             }
+        }
+
+        // Преобразува стари записи от по-ранна версия на структурата (schemaVersion)
+        // към текущата, стъпка по стъпка — всяка бъдеща промяна на формата на
+        // tanks/settings добавя нов "if (v < N)" блок тук, вместо да чупи стари
+        // данни на вече инсталирали приложението потребители. Записи без
+        // schemaVersion се третират като версия 1 (текущия формат отпреди
+        // въвеждането на самото поле).
+        function migrateData(data) {
+            if (!data) return data;
+            let v = data.schemaVersion || 1;
+            // Пример за бъдеща стъпка:
+            // if (v < 2) { /* преобразувай data тук */ v = 2; }
+            data.schemaVersion = DATA_SCHEMA_VERSION;
+            return data;
         }
 
         function loadData() {
@@ -5509,6 +5599,7 @@
                     }
                 }
             } catch (e) { data = null; readFailed = true; }
+            data = migrateData(data);
 
             // Ако нямаме данни сега, но маркерът казва, че преди е имало записани
             // данни на това устройство — това почти сигурно е временен проблем с
