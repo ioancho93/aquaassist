@@ -1089,12 +1089,12 @@
         <!-- Плаващ бутон за бързи действия (FAB) — само на мобилен -->
     <div id="fabWrap" class="md:hidden fixed right-4 z-40 flex flex-col items-end" style="bottom: max(1rem, env(safe-area-inset-bottom));">
         <div id="fabMenu" class="hidden flex-col items-end gap-2 mb-3">
-            <button onclick="fabGo('add')" class="flex items-center gap-2 bg-slate-800/95 border border-white/10 backdrop-blur-md text-sm text-slate-100 px-3.5 py-2 rounded-full shadow-lg active:scale-95 transition-all duration-200"><i class="fa-solid fa-fish text-cyan-400"></i>Добави обитател</button>
-            <button onclick="fabGo('water')" class="flex items-center gap-2 bg-slate-800/95 border border-white/10 backdrop-blur-md text-sm text-slate-100 px-3.5 py-2 rounded-full shadow-lg active:scale-95 transition-all duration-200"><i class="fa-solid fa-droplet text-cyan-400"></i>Отчети смяна на вода</button>
-            <button onclick="fabGo('params')" class="flex items-center gap-2 bg-slate-800/95 border border-white/10 backdrop-blur-md text-sm text-slate-100 px-3.5 py-2 rounded-full shadow-lg active:scale-95 transition-all duration-200"><i class="fa-solid fa-flask text-cyan-400"></i>Запиши параметри</button>
-            <button onclick="fabGo('note')" class="flex items-center gap-2 bg-slate-800/95 border border-white/10 backdrop-blur-md text-sm text-slate-100 px-3.5 py-2 rounded-full shadow-lg active:scale-95 transition-all duration-200"><i class="fa-solid fa-camera-retro text-cyan-400"></i>Бележка / снимка</button>
-            <button onclick="fabGo('expense')" class="flex items-center gap-2 bg-slate-800/95 border border-white/10 backdrop-blur-md text-sm text-slate-100 px-3.5 py-2 rounded-full shadow-lg active:scale-95 transition-all duration-200"><i class="fa-solid fa-receipt text-cyan-400"></i>Нов разход</button>
-            <button onclick="fabGo('diagnosis')" class="flex items-center gap-2 bg-slate-800/95 border border-white/10 backdrop-blur-md text-sm text-slate-100 px-3.5 py-2 rounded-full shadow-lg active:scale-95 transition-all duration-200"><i class="fa-solid fa-stethoscope text-amber-400"></i>Диагностика на здравето</button>
+            <button onclick="fabGo('add')" class="flex items-center gap-2 bg-slate-800/95 border border-white/10 backdrop-blur-md text-sm text-slate-100 px-3.5 py-2 rounded-full shadow-lg active:scale-95 transition-all duration-200"><i class="fa-solid fa-fish text-cyan-400"></i><span data-i18n>Добави обитател</span></button>
+            <button onclick="fabGo('water')" class="flex items-center gap-2 bg-slate-800/95 border border-white/10 backdrop-blur-md text-sm text-slate-100 px-3.5 py-2 rounded-full shadow-lg active:scale-95 transition-all duration-200"><i class="fa-solid fa-droplet text-cyan-400"></i><span data-i18n>Отчети смяна на вода</span></button>
+            <button onclick="fabGo('params')" class="flex items-center gap-2 bg-slate-800/95 border border-white/10 backdrop-blur-md text-sm text-slate-100 px-3.5 py-2 rounded-full shadow-lg active:scale-95 transition-all duration-200"><i class="fa-solid fa-flask text-cyan-400"></i><span data-i18n>Запиши параметри</span></button>
+            <button onclick="fabGo('note')" class="flex items-center gap-2 bg-slate-800/95 border border-white/10 backdrop-blur-md text-sm text-slate-100 px-3.5 py-2 rounded-full shadow-lg active:scale-95 transition-all duration-200"><i class="fa-solid fa-camera-retro text-cyan-400"></i><span data-i18n>Бележка / снимка</span></button>
+            <button onclick="fabGo('expense')" class="flex items-center gap-2 bg-slate-800/95 border border-white/10 backdrop-blur-md text-sm text-slate-100 px-3.5 py-2 rounded-full shadow-lg active:scale-95 transition-all duration-200"><i class="fa-solid fa-receipt text-cyan-400"></i><span data-i18n>Нов разход</span></button>
+            <button onclick="fabGo('diagnosis')" class="flex items-center gap-2 bg-slate-800/95 border border-white/10 backdrop-blur-md text-sm text-slate-100 px-3.5 py-2 rounded-full shadow-lg active:scale-95 transition-all duration-200"><i class="fa-solid fa-stethoscope text-amber-400"></i><span data-i18n>Диагностика на здравето</span></button>
         </div>
         <button id="fabBtn" onclick="toggleFab()" aria-label="Бързи действия" class="w-14 h-14 rounded-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-lg flex items-center justify-center active:scale-90 transition-all duration-200"><i id="fabIcon" class="fa-solid fa-plus text-xl transition-transform duration-300"></i></button>
     </div>
@@ -1444,9 +1444,9 @@
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
             { v: "3.6.41", items: [
-                "Поправени 5 места с непреведен текст, останал на български в английския режим (напомняния, сравнение на аквариуми, предупреждения за съвместимост, графика на параметри)"
+                "Поправени места с непреведен текст, останал на български в английския режим (напомняния, сравнение на аквариуми, предупреждения за съвместимост, графика на параметри, плаващото меню за бързи действия)"
             ], items_en: [
-                "Fixed 5 spots where Bulgarian text was left untranslated in English mode (reminders, aquarium comparison, compatibility warnings, parameter history chart)"
+                "Fixed spots where Bulgarian text was left untranslated in English mode (reminders, aquarium comparison, compatibility warnings, parameter history chart, floating quick-actions menu)"
             ] },
             { v: "3.6.40", items: [
                 "По-кратко подразбиращо се име на нов аквариум (\"Аквариум\" вместо \"Нов аквариум\"), за да се събира изцяло в падащото меню на по-тесни телефони"
@@ -3748,6 +3748,11 @@
             "Докладвай бъг": "Report a bug",
             "Контакт": "Contact",
             "Диагностика на здравето": "Health diagnosis",
+            "Добави обитател": "Add inhabitant",
+            "Отчети смяна на вода": "Log water change",
+            "Запиши параметри": "Record parameters",
+            "Бележка / снимка": "Note / photo",
+            "Нов разход": "New expense",
             "Провери симптоми": "Check symptoms",
             "Това не замества консултация с ветеринар или опитен аквариумист — само общ ориентир по избраните симптоми.": "This does not replace consulting a vet or an experienced fishkeeper — it's only a general pointer based on the symptoms you pick.",
             "Какво забелязваш? (отбележи всичко подходящо)": "What do you notice? (check everything that applies)",
