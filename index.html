@@ -296,6 +296,79 @@
             100% { opacity: 0; transform: translateY(-4px); }
         }
         #syncHeaderTooltip.sync-tooltip-show { display: block; animation: syncTooltipFade 4.5s ease-in-out forwards; }
+
+        /* Диагностика на здравето — пренаписан UI: групирани симптоми, "чипове" вместо
+           голи чекбоксове, залепен бутон "Провери" докато се скролира списъкът, и
+           значки за сила на съвпадението в резултатите. Custom CSS (не Tailwind utility
+           класове), за да работи веднага без ребилд на tailwind.css. */
+        .diag-cat-heading {
+            font-size: 11px;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: #94a3b8;
+            margin: 14px 0 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid rgba(148, 163, 184, .15);
+        }
+        .diag-cat-heading:first-child { margin-top: 0; }
+        .diag-chip {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(51, 65, 85, .5);
+            border: 1px solid #475569;
+            border-radius: 9999px;
+            padding: 8px 14px;
+            font-size: 13px;
+            line-height: 1.3;
+            color: #cbd5e1;
+            cursor: pointer;
+            transition: background .15s, border-color .15s, color .15s;
+            margin-bottom: 7px;
+        }
+        .diag-chip:hover { border-color: #64748b; }
+        .diag-chip.is-checked {
+            background: rgba(120, 53, 15, .35);
+            border-color: #d97706;
+            color: #fcd34d;
+        }
+        .diag-chip input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+            margin: 0;
+        }
+        .diag-chip i.diag-chip-check {
+            flex-shrink: 0;
+            width: 14px;
+            text-align: center;
+            color: #d97706;
+            opacity: 0;
+            transition: opacity .15s;
+        }
+        .diag-chip.is-checked i.diag-chip-check { opacity: 1; }
+        .diag-sticky-bar {
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+            background: #1e293b;
+            padding-top: 10px;
+            margin-top: 2px;
+            box-shadow: 0 -10px 14px -6px rgba(0, 0, 0, .45);
+        }
+        .diag-match-badge {
+            flex-shrink: 0;
+            font-size: 11px;
+            line-height: 1.4;
+            padding: 2px 9px;
+            border-radius: 9999px;
+            border: 1px solid;
+            white-space: nowrap;
+        }
+        .diag-match-strong { background: rgba(217, 119, 6, .22); border-color: #d97706; color: #fcd34d; }
+        .diag-match-possible { background: rgba(71, 85, 105, .35); border-color: #475569; color: #94a3b8; }
     </style>
     <!-- Firebase (само за облачна синхронизация с код, без регистрация) -->
     <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
@@ -1157,16 +1230,18 @@
     <!-- Проверка на симптоми — статичен справочник, работи изцяло офлайн, без AI/сървър.
          НЕ е медицинска/ветеринарна диагноза, а само ориентир по избрани симптоми. -->
     <div id="diagnosisModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
-        <div class="bg-slate-800 border border-amber-700 rounded-2xl p-5 max-w-md w-full max-h-[85vh] overflow-y-auto">
-            <div class="flex items-center justify-between mb-3">
+        <div class="bg-slate-800 border border-amber-700 rounded-2xl p-5 max-w-md w-full max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between mb-3 shrink-0">
                 <h3 class="text-lg font-bold text-amber-300"><i class="fa-solid fa-stethoscope mr-2"></i><span data-i18n>Провери симптоми</span></h3>
                 <button onclick="closeDiagnosisModal()" class="text-slate-400 hover:text-white text-xl leading-none">&times;</button>
             </div>
-            <p class="text-[11px] text-amber-200 bg-amber-950/60 border border-amber-800 rounded-lg p-2.5 mb-3 leading-relaxed"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i><span data-i18n>Това не замества консултация с ветеринар или опитен аквариумист — само общ ориентир по избраните симптоми.</span></p>
-            <p class="text-xs text-slate-400 mb-2" data-i18n>Какво забелязваш? (отбележи всичко подходящо)</p>
-            <div id="symptomChecklist" class="grid grid-cols-1 gap-1.5 text-sm mb-3"></div>
-            <button type="button" onclick="runDiagnosis()" class="w-full bg-amber-700 hover:bg-amber-600 text-white text-sm py-2 rounded-lg font-medium"><i class="fa-solid fa-magnifying-glass mr-1.5"></i><span data-i18n>Провери</span></button>
-            <div id="diagnosisResults" class="mt-3 space-y-2"></div>
+            <p class="text-[11px] text-amber-200 bg-amber-950/60 border border-amber-800 rounded-lg p-2.5 mb-3 leading-relaxed shrink-0"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i><span data-i18n>Това не замества консултация с ветеринар или опитен аквариумист — само общ ориентир по избраните симптоми.</span></p>
+            <p class="text-xs text-slate-400 mb-2 shrink-0" data-i18n>Какво забелязваш? (отбележи всичко подходящо)</p>
+            <div class="flex-1 overflow-y-auto pr-1">
+                <div id="symptomChecklist" class="text-sm"></div>
+                <button type="button" id="runDiagnosisBtn" onclick="runDiagnosis()" class="diag-sticky-bar w-full bg-amber-700 hover:bg-amber-600 text-white text-sm py-2 rounded-lg font-medium"><i class="fa-solid fa-magnifying-glass mr-1.5"></i><span data-i18n>Провери</span><span id="diagCheckCount"></span></button>
+                <div id="diagnosisResults" class="mt-3 space-y-2 pb-1"></div>
+            </div>
         </div>
     </div>
 
@@ -1310,35 +1385,38 @@
         // ---------- Проверка на симптоми — статичен справочник (без AI/сървър, работи офлайн) ----------
         // НЕ е медицинска диагноза — само ориентировъчно съвпадение по избрани симптоми.
         const SYMPTOMS = [
-            { id: 's1', label: 'Бели точици по тялото или перките' },
-            { id: 's2', label: 'Разръфани или изгнили краища на перките' },
-            { id: 's3', label: 'Подут корем, люспите стърчат като шишарка' },
-            { id: 's4', label: 'Учестено дишане, чести посещения на повърхността' },
-            { id: 's5', label: 'Летаргия — крие се, не плува, отказва храна' },
-            { id: 's6', label: 'Бели пухкави влакна по тялото' },
-            { id: 's7', label: 'Златист или кадифен прах по тялото' },
-            { id: 's8', label: 'Трие се в декорации или камъни' },
-            { id: 's9', label: 'Хлътнал корем въпреки хранене' },
-            { id: 's10', label: 'Издути, изпъкнали очи' },
-            { id: 's11', label: 'Зачервени ивици или петна по тялото' },
-            { id: 's12', label: 'Плува накриво или трудно пази равновесие' },
-            { id: 's13', label: 'Мътни или побелели очи' },
-            { id: 's14', label: 'Бяла плесенна линия около устата' },
-            { id: 's15', label: 'Видими "червейчета" или израстъци, забити в кожата' },
-            { id: 's16', label: 'Малки движещи се точки по кожата или хрилете' },
-            { id: 's17', label: 'Прекомерна лигавица/слуз по тялото' },
-            { id: 's18', label: 'Загуба на цвят, избледняване' },
-            { id: 's19', label: 'Раздразнени хрилни капачета, бързо движение на хрилете' },
-            { id: 's20', label: 'Дупчици или ями по главата, особено около очите' },
-            { id: 's21', label: 'Подуване, не изхвърля изпражнения' },
-            { id: 's22', label: 'Перките са притиснати плътно към тялото' },
-            { id: 's23', label: 'Черни точки по тялото или перките' },
-            { id: 's24', label: 'Проблем с линеенето при скариди' },
-            { id: 's25', label: '"Карфиолоподобни" бели/сиви израстъци по перките или тялото' },
-            { id: 's26', label: 'Избледняване покрай страничната линия на тялото' },
-            { id: 's27', label: 'Зачервени, подути или "изгорели" на вид хриле' },
-            { id: 's28', label: 'Подут корем без хранене, но без накъдрени люспи' }
+            { id: 's1', label: 'Бели точици по тялото или перките', category: 'Кожа и тяло' },
+            { id: 's2', label: 'Разръфани или изгнили краища на перките', category: 'Перки' },
+            { id: 's3', label: 'Подут корем, люспите стърчат като шишарка', category: 'Корем и храносмилане' },
+            { id: 's4', label: 'Учестено дишане, чести посещения на повърхността', category: 'Хриле и дишане' },
+            { id: 's5', label: 'Летаргия — крие се, не плува, отказва храна', category: 'Поведение' },
+            { id: 's6', label: 'Бели пухкави влакна по тялото', category: 'Кожа и тяло' },
+            { id: 's7', label: 'Златист или кадифен прах по тялото', category: 'Кожа и тяло' },
+            { id: 's8', label: 'Трие се в декорации или камъни', category: 'Поведение' },
+            { id: 's9', label: 'Хлътнал корем въпреки хранене', category: 'Корем и храносмилане' },
+            { id: 's10', label: 'Издути, изпъкнали очи', category: 'Очи' },
+            { id: 's11', label: 'Зачервени ивици или петна по тялото', category: 'Кожа и тяло' },
+            { id: 's12', label: 'Плува накриво или трудно пази равновесие', category: 'Поведение' },
+            { id: 's13', label: 'Мътни или побелели очи', category: 'Очи' },
+            { id: 's14', label: 'Бяла плесенна линия около устата', category: 'Уста и глава' },
+            { id: 's15', label: 'Видими "червейчета" или израстъци, забити в кожата', category: 'Видими паразити' },
+            { id: 's16', label: 'Малки движещи се точки по кожата или хрилете', category: 'Видими паразити' },
+            { id: 's17', label: 'Прекомерна лигавица/слуз по тялото', category: 'Кожа и тяло' },
+            { id: 's18', label: 'Загуба на цвят, избледняване', category: 'Кожа и тяло' },
+            { id: 's19', label: 'Раздразнени хрилни капачета, бързо движение на хрилете', category: 'Хриле и дишане' },
+            { id: 's20', label: 'Дупчици или ями по главата, особено около очите', category: 'Уста и глава' },
+            { id: 's21', label: 'Подуване, не изхвърля изпражнения', category: 'Корем и храносмилане' },
+            { id: 's22', label: 'Перките са притиснати плътно към тялото', category: 'Перки' },
+            { id: 's23', label: 'Черни точки по тялото или перките', category: 'Кожа и тяло' },
+            { id: 's24', label: 'Проблем с линеенето при скариди', category: 'Скариди' },
+            { id: 's25', label: '"Карфиолоподобни" бели/сиви израстъци по перките или тялото', category: 'Кожа и тяло' },
+            { id: 's26', label: 'Избледняване покрай страничната линия на тялото', category: 'Кожа и тяло' },
+            { id: 's27', label: 'Зачервени, подути или "изгорели" на вид хриле', category: 'Хриле и дишане' },
+            { id: 's28', label: 'Подут корем без хранене, но без накъдрени люспи', category: 'Корем и храносмилане' }
         ];
+
+        // Ред, в който се показват категориите в списъка със симптоми.
+        const SYMPTOM_CATEGORIES = ['Кожа и тяло', 'Перки', 'Хриле и дишане', 'Очи', 'Уста и глава', 'Корем и храносмилане', 'Поведение', 'Видими паразити', 'Скариди'];
 
         const DIAGNOSES = [
             { id: 'ich', name: 'Ихтиофтириус (бяла точка)', symptoms: ['s1', 's8'], action: 'Повиши постепенно температурата до 28-29°C (ако видовете го понасят) и приложи подходящ медикамент против ихтиофтириус. Силно заразно — следи и другите обитатели.' },
@@ -1375,16 +1453,41 @@
         function renderSymptomChecklist() {
             const box = document.getElementById('symptomChecklist');
             if (!box) return;
-            box.innerHTML = SYMPTOMS.map(s => `
-                <label class="flex items-start gap-2 text-slate-300 hover:text-slate-100 cursor-pointer">
-                    <input type="checkbox" value="${s.id}" onchange="toggleSymptom('${s.id}', this.checked)" class="mt-0.5 shrink-0">
-                    <span>${tr(s.label)}</span>
-                </label>
-            `).join('');
+            let html = '';
+            SYMPTOM_CATEGORIES.forEach(cat => {
+                const items = SYMPTOMS.filter(s => s.category === cat);
+                if (!items.length) return;
+                html += `<div class="diag-cat-heading">${tr(cat)}</div>`;
+                items.forEach(s => {
+                    const checked = selectedSymptoms.has(s.id);
+                    html += `
+                        <label class="diag-chip${checked ? ' is-checked' : ''}">
+                            <input type="checkbox" value="${s.id}" ${checked ? 'checked' : ''} onchange="toggleSymptom('${s.id}', this.checked, this)">
+                            <i class="fa-solid fa-circle-check diag-chip-check"></i>
+                            <span>${tr(s.label)}</span>
+                        </label>
+                    `;
+                });
+            });
+            box.innerHTML = html;
+            updateDiagnosisCheckLabel();
         }
 
-        function toggleSymptom(id, checked) {
+        function toggleSymptom(id, checked, el) {
             if (checked) selectedSymptoms.add(id); else selectedSymptoms.delete(id);
+            if (el) {
+                const chip = el.closest('.diag-chip');
+                if (chip) chip.classList.toggle('is-checked', checked);
+            }
+            updateDiagnosisCheckLabel();
+        }
+
+        // Брояч направо в бутона "Провери" (напр. "Провери (3)"), за да се вижда
+        // веднага колко симптома са избрани — без да се чупи превода на самата дума.
+        function updateDiagnosisCheckLabel() {
+            const countEl = document.getElementById('diagCheckCount');
+            if (!countEl) return;
+            countEl.textContent = selectedSymptoms.size ? ` (${selectedSymptoms.size})` : '';
         }
 
         function openDiagnosisModal() {
@@ -1412,12 +1515,21 @@
                 box.innerHTML = `<p class="text-sm text-slate-500 text-center py-2">${tr('Няма съвпадение с нищо от справочника. Наблюдавай рибата и провери параметрите на водата.')}</p>`;
                 return;
             }
-            box.innerHTML = matches.slice(0, 5).map(({ d, count }) => `
+            box.innerHTML = matches.slice(0, 5).map(({ d, count }) => {
+                const ratio = count / d.symptoms.length;
+                const strong = ratio >= 0.5;
+                const badgeCls = strong ? 'diag-match-badge diag-match-strong' : 'diag-match-badge diag-match-possible';
+                const badgeLabel = strong ? tr('Силно съвпадение') : tr('Възможно съвпадение');
+                return `
                 <div class="bg-slate-900/60 border border-slate-700 rounded-lg p-3 text-sm space-y-1">
-                    <p class="font-semibold text-amber-300">${tr(d.name)}</p>
+                    <div class="flex items-center justify-between gap-2">
+                        <p class="font-semibold text-amber-300">${tr(d.name)}</p>
+                        <span class="${badgeCls}">${badgeLabel}</span>
+                    </div>
                     <p class="text-slate-300">${tr(d.action)}</p>
                 </div>
-            `).join('');
+            `;
+            }).join('');
             logFeatureUse('diagnosisRun');
         }
 
@@ -1438,11 +1550,16 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.41";
+        const APP_VERSION = "3.6.42";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.42", items: [
+                "Преработен интерфейс на диагностиката на здравето: симптомите вече са групирани по категория, изглеждат като избираеми \"чипове\", заглавието и предупреждението остават фиксирани докато скролираш, бутонът \"Провери\" остава видим с брояч на избраните симптоми, а резултатите показват и сила на съвпадението"
+            ], items_en: [
+                "Redesigned health diagnosis screen: symptoms are now grouped by category, shown as selectable \"chips\", the title and warning stay fixed while scrolling, the \"Check\" button stays visible with a live count of selected symptoms, and results now show a match-strength badge"
+            ] },
             { v: "3.6.41", items: [
                 "Поправени места с непреведен текст, останал на български в английския режим (напомняния, сравнение на аквариуми, предупреждения за съвместимост, графика на параметри, плаващото меню за бързи действия)"
             ], items_en: [
@@ -3748,6 +3865,17 @@
             "Докладвай бъг": "Report a bug",
             "Контакт": "Contact",
             "Диагностика на здравето": "Health diagnosis",
+            "Кожа и тяло": "Skin & body",
+            "Перки": "Fins",
+            "Хриле и дишане": "Gills & breathing",
+            "Очи": "Eyes",
+            "Уста и глава": "Mouth & head",
+            "Корем и храносмилане": "Abdomen & digestion",
+            "Поведение": "Behavior",
+            "Видими паразити": "Visible parasites",
+            "Скариди": "Shrimp",
+            "Силно съвпадение": "Strong match",
+            "Възможно съвпадение": "Possible match",
             "Добави обитател": "Add inhabitant",
             "Отчети смяна на вода": "Log water change",
             "Запиши параметри": "Record parameters",
