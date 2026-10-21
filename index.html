@@ -2279,8 +2279,8 @@
             if (dismissed || (st.step1 && st.step2)) { card.classList.add('hidden'); return; }
             card.classList.remove('hidden');
             const steps = [
-                { done: st.step1, label: 'Запиши първия си тест на водата', action: "gettingStartedGo('add')" },
-                { done: st.step2, label: 'Добави риба или растение', action: "gettingStartedGo('inhabitants')" },
+                { done: st.step1, label: 'Запиши първия си тест на водата', action: "gettingStartedGo('aquarium')" },
+                { done: st.step2, label: 'Добави риба или растение', action: "gettingStartedGo('add')" },
                 { done: st.step3, label: 'Пробвай диагностика на здравето (по избор)', action: "openDiagnosisModal()" }
             ];
             box.innerHTML = steps.map(s => `
