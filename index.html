@@ -369,6 +369,60 @@
         }
         .diag-match-strong { background: rgba(217, 119, 6, .22); border-color: #d97706; color: #fcd34d; }
         .diag-match-possible { background: rgba(71, 85, 105, .35); border-color: #475569; color: #94a3b8; }
+
+        /* Карта "Първи стъпки" за съвсем нов потребител на таб "Начало". Custom CSS
+           (не Tailwind utility класове), за да работи веднага без ребилд на tailwind.css. */
+        .gs-card {
+            position: relative;
+            background: #1e293b;
+            border: 1px solid rgba(14, 116, 144, .5);
+            border-radius: 14px;
+            padding: 14px 16px;
+            box-shadow: 0 4px 10px -4px rgba(0, 0, 0, .4);
+            margin-bottom: 4px;
+        }
+        .gs-card-close {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            color: #64748b;
+            font-size: 20px;
+            line-height: 1;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .gs-card-close:hover { color: #fff; }
+        .gs-card-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #a5f3fc;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 0 10px;
+            padding-right: 20px;
+        }
+        .gs-steps { display: flex; flex-direction: column; gap: 6px; }
+        .gs-step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            text-align: left;
+            background: rgba(15, 23, 42, .5);
+            border: none;
+            border-radius: 10px;
+            padding: 9px 12px;
+            font-size: 12px;
+            color: #e2e8f0;
+            cursor: pointer;
+            transition: background .15s;
+        }
+        .gs-step:hover { background: rgba(15, 23, 42, .8); }
+        .gs-step i { flex-shrink: 0; width: 14px; text-align: center; color: #475569; }
+        .gs-step.is-done i { color: #34d399; }
+        .gs-step.is-done span { color: #64748b; text-decoration: line-through; }
     </style>
     <!-- Firebase (само за облачна синхронизация с код, без регистрация) -->
     <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
@@ -513,6 +567,13 @@
                         <p class="text-xs text-cyan-300 leading-relaxed" data-i18n>Безплатно приложение за аквариум — следи параметрите на водата, обитателите, съвместимостта и поддръжката, с вграден наръчник и диагностика на здравето. Без регистрация — всички данни остават на твоето устройство.</p>
                     </div>
                 </div>
+            </div>
+            <!-- Карта "Първи стъпки" — за ориентиране на съвсем нов потребител. Показва се,
+                 докато не са изпълнени поне стъпки 1 и 2 (или докато не бъде затворена ръчно). -->
+            <div id="gettingStartedCard" class="hidden gs-card">
+                <button type="button" onclick="dismissGettingStarted()" class="gs-card-close" aria-label="Затвори">&times;</button>
+                <h3 class="gs-card-title"><i class="fa-solid fa-list-check"></i><span data-i18n>Първи стъпки</span></h3>
+                <div id="gettingStartedSteps" class="gs-steps"></div>
             </div>
             <h2 class="text-sm font-semibold text-slate-400 flex items-center px-1"><i class="fa-solid fa-gauge-high mr-2 text-cyan-400"></i> <span data-i18n>Моментен статус</span></h2>
             <div id="miniStatus" class="grid grid-cols-2 md:grid-cols-4 gap-2"></div>
@@ -1534,6 +1595,8 @@
             }).join('');
             box.scrollIntoView({ behavior: 'smooth', block: 'start' });
             logFeatureUse('diagnosisRun');
+            try { localStorage.setItem('gsDiagnosisTried', '1'); } catch (e) {}
+            renderGettingStarted();
         }
 
         // Правила за съвместимост, генерирани от особеностите на видовете
@@ -1553,11 +1616,16 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.43";
+        const APP_VERSION = "3.6.44";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.44", items: [
+                "Нова карта \"Първи стъпки\" на таб \"Начало\" за съвсем нови потребители — кратък чеклист (запиши първи тест, добави обитател, пробвай диагностика), който изчезва автоматично щом е изпълнен"
+            ], items_en: [
+                "New \"Getting started\" card on the Home tab for brand-new users — a short checklist (record a first test, add an inhabitant, try diagnosis) that disappears automatically once completed"
+            ] },
             { v: "3.6.43", items: [
                 "Диагностика на здравето: резултатите вече се показват автоматично (плавно скролиране) веднага след натискане на \"Провери\", без да се налага ръчно скролиране за да ги видиш"
             ], items_en: [
@@ -2186,6 +2254,51 @@
             updateParamColors();
             renderWaterAlert();
             updateOverallHealth(percent);
+            renderGettingStarted();
+        }
+
+        // ---------- Карта "Първи стъпки" (onboarding за съвсем нов потребител) ----------
+        function gettingStartedState() {
+            const t = store.tanks[store.active];
+            let diagnosisTried = false;
+            try { diagnosisTried = localStorage.getItem('gsDiagnosisTried') === '1'; } catch (e) {}
+            return {
+                step1: !!(t && t.history && t.history.length > 0),
+                step2: !!(t && t.fish && t.fish.length > 0),
+                step3: diagnosisTried
+            };
+        }
+
+        function renderGettingStarted() {
+            const card = document.getElementById('gettingStartedCard');
+            const box = document.getElementById('gettingStartedSteps');
+            if (!card || !box) return;
+            let dismissed = false;
+            try { dismissed = localStorage.getItem('gsDismissed') === '1'; } catch (e) {}
+            const st = gettingStartedState();
+            if (dismissed || (st.step1 && st.step2)) { card.classList.add('hidden'); return; }
+            card.classList.remove('hidden');
+            const steps = [
+                { done: st.step1, label: 'Запиши първия си тест на водата', action: "gettingStartedGo('add')" },
+                { done: st.step2, label: 'Добави риба или растение', action: "gettingStartedGo('inhabitants')" },
+                { done: st.step3, label: 'Пробвай диагностика на здравето (по избор)', action: "openDiagnosisModal()" }
+            ];
+            box.innerHTML = steps.map(s => `
+                <button type="button" class="gs-step${s.done ? ' is-done' : ''}" onclick="${s.action}">
+                    <i class="fa-solid ${s.done ? 'fa-circle-check' : 'fa-circle'}"></i>
+                    <span>${tr(s.label)}</span>
+                </button>
+            `).join('');
+        }
+
+        function gettingStartedGo(tabName) {
+            switchTab(tabName);
+        }
+
+        function dismissGettingStarted() {
+            try { localStorage.setItem('gsDismissed', '1'); } catch (e) {}
+            const card = document.getElementById('gettingStartedCard');
+            if (card) card.classList.add('hidden');
         }
 
         // Позволява директно въвеждане на литри вместо проценти — автоматично преизчислява %
@@ -3873,6 +3986,10 @@
             "Докладвай бъг": "Report a bug",
             "Контакт": "Contact",
             "Диагностика на здравето": "Health diagnosis",
+            "Първи стъпки": "Getting started",
+            "Запиши първия си тест на водата": "Record your first water test",
+            "Добави риба или растение": "Add a fish or plant",
+            "Пробвай диагностика на здравето (по избор)": "Try the health diagnosis tool (optional)",
             "Кожа и тяло": "Skin & body",
             "Перки": "Fins",
             "Хриле и дишане": "Gills & breathing",
@@ -5979,6 +6096,7 @@
         setInterval(renderWaterAlert, 60 * 1000);
         applyStoredBackground();
         applyTranslations();
+        renderGettingStarted();
         renderLangSwitch();
         initSyncUI();
         maybeShowSyncTooltip();
