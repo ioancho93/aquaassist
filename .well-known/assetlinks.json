@@ -3,6 +3,9 @@
   "target": {
     "namespace": "android_app",
     "package_name": "app.aquaassist.twa",
-    "sha256_cert_fingerprints": ["75:49:80:DE:68:C7:DB:9E:D5:DE:2D:22:14:DB:06:43:C1:B3:AC:15:D2:50:B0:DA:A6:A7:F1:35:43:5E:AD:3C"]
+    "sha256_cert_fingerprints": [
+      "FA:5A:E5:19:B6:22:2F:DE:88:61:D1:6B:37:BB:10:2A:BC:8F:38:E5:66:28:DE:67:5F:8D:08:FB:3F:75:AE:12",
+      "75:49:80:DE:68:C7:DB:9E:D5:DE:2D:22:14:DB:06:43:C1:B3:AC:15:D2:50:B0:DA:A6:A7:F1:35:43:5E:AD:3C"
+    ]
   }
 }]
