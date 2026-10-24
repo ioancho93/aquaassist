@@ -3,7 +3,9 @@
 // v1 съдържание, за да не остане "призрачна" стара версия в офлайн кеша.
 // v22: Font Awesome вече е локален файл (fontawesome/) вместо cdnjs.cloudflare.com —
 // същата причина като Tailwind по-горе (v15): да не зависи от външен CDN.
-const CACHE_NAME = "aquaassistant-cache-v22";
+// v23: Компактен избор на аквариум (index.html) — нова версия на CACHE_NAME, за
+// да вземат потребителите веднага новия HTML вместо стария кеширан.
+const CACHE_NAME = "aquaassistant-cache-v23";
 const CORE_ASSETS = [
   "./index.html",
   "./manifest.json",
