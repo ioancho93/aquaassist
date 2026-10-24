@@ -154,6 +154,46 @@
         body[data-theme="coral"] { background-image: radial-gradient(ellipse 90% 55% at 50% -10%, rgba(244,63,94,0.16), transparent 60%), radial-gradient(ellipse 80% 50% at 85% 100%, rgba(190,18,60,0.35), transparent 70%); background-attachment: fixed; }
         body[data-theme="abyss"] { background-image: radial-gradient(ellipse 90% 55% at 50% -10%, rgba(99,102,241,0.18), transparent 60%), radial-gradient(ellipse 80% 50% at 15% 100%, rgba(74,4,78,0.4), transparent 70%); background-attachment: fixed; }
         body[data-theme="jungle"] { background-image: radial-gradient(ellipse 90% 55% at 50% -10%, rgba(163,230,53,0.14), transparent 60%), radial-gradient(ellipse 80% 50% at 85% 100%, rgba(69,26,3,0.55), transparent 70%); background-attachment: fixed; }
+        body[data-theme="light"] { background-image: radial-gradient(ellipse 90% 55% at 50% -10%, rgba(34,211,238,0.10), transparent 60%), radial-gradient(ellipse 80% 50% at 85% 100%, rgba(226,232,240,0.6), transparent 70%); background-attachment: fixed; }
+
+        /* ---------- Светла тема: преоцветява слейт картите/текста (т.4) ----------
+           Останалите теми само сменят фона на <body> и декоративния градиент
+           по-горе — вътрешните карти/бутони си остават bg-slate-* (тъмни), защото
+           изглеждат добре върху тъмен body. Светлата тема обаче трябва тези карти
+           да станат светли, затова преоцветяваме всички използвани slate класове
+           в приложението, скопирано само под body[data-theme="light"]. */
+        body[data-theme="light"] .bg-slate-800,
+        body[data-theme="light"] .bg-slate-900 { background-color: #ffffff; }
+        body[data-theme="light"] .bg-slate-800\/80 { background-color: rgba(255,255,255,0.88); }
+        body[data-theme="light"] .bg-slate-800\/95 { background-color: rgba(255,255,255,0.97); }
+        body[data-theme="light"] .bg-slate-900\/40 { background-color: rgba(226,232,240,0.55); }
+        body[data-theme="light"] .bg-slate-900\/60 { background-color: rgba(226,232,240,0.8); }
+        body[data-theme="light"] .bg-slate-900\/95 { background-color: rgba(226,232,240,0.97); }
+        body[data-theme="light"] .bg-slate-700,
+        body[data-theme="light"] .bg-slate-700\/40,
+        body[data-theme="light"] .bg-slate-700\/50,
+        body[data-theme="light"] .bg-slate-700\/60,
+        body[data-theme="light"] .bg-slate-700\/80 { background-color: #e2e8f0; }
+        body[data-theme="light"] .bg-slate-600,
+        body[data-theme="light"] .bg-slate-500 { background-color: #cbd5e1; }
+        body[data-theme="light"] .hover\:bg-slate-600:hover { background-color: #cbd5e1; }
+        body[data-theme="light"] .hover\:bg-slate-800:hover { background-color: #f1f5f9; }
+        body[data-theme="light"] .text-slate-100,
+        body[data-theme="light"] .text-slate-200 { color: #0f172a; }
+        body[data-theme="light"] .text-slate-300 { color: #1e293b; }
+        body[data-theme="light"] .text-slate-400,
+        body[data-theme="light"] .text-slate-500 { color: #64748b; }
+        body[data-theme="light"] .border-slate-600,
+        body[data-theme="light"] .border-slate-600\/60,
+        body[data-theme="light"] .border-slate-700,
+        body[data-theme="light"] .border-slate-700\/50,
+        body[data-theme="light"] .border-slate-700\/80,
+        body[data-theme="light"] .border-slate-800,
+        body[data-theme="light"] .divide-slate-600,
+        body[data-theme="light"] .divide-slate-700 { border-color: #cbd5e1; }
+        body[data-theme="light"] #topBar header.bg-slate-800,
+        body[data-theme="light"] nav.bg-slate-800 { box-shadow: 0 12px 34px -14px rgba(100,116,139,0.25), inset 0 1px 0 0 rgba(255,255,255,0.6); }
+
         /* ===== Премиум UI слой (само визуален, не пипа функционалност) ===== */
         /* Кара браузъра да рисува собствените си контроли (падащо меню на
            input type="time"/"date", скролбар и т.н.) в тъмен стил вместо
@@ -474,6 +514,7 @@
 
         <div class="w-full">
             <div class="flex items-center flex-wrap gap-2 justify-start bg-slate-900/40 border border-white/10 rounded-2xl px-2.5 py-1.5 backdrop-blur-md shadow-inner w-full">
+                <img id="headerAvatarImg" class="hidden w-7 h-7 rounded-full object-cover border border-cyan-500/40 shrink-0" alt="">
                 <div class="relative shrink-0 max-w-full">
                     <svg style="width:13px;height:13px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="absolute left-2 top-1/2 -translate-y-1/2 text-cyan-400 pointer-events-none"><path d="M2.5 12c3-4 8.5-6.5 13-4.2 2.2 1.1 3.7 2.6 5 4.2-1.3 1.6-2.8 3.1-5 4.2-4.5 2.3-10 -0.2-13-4.2z"/><path d="M19.5 12l3-3.5v7l-3-3.5z"/></svg>
                     <select id="aqSelect" onchange="switchTank(this.value)" class="appearance-none w-auto max-w-full bg-slate-700 text-xs rounded-lg pl-6 pr-6 py-1.5 border border-slate-600 hover:border-cyan-500/60 transition-all duration-200 focus:outline-none"></select>
@@ -511,7 +552,7 @@
             </div>
             <div>
                 <p class="text-xs text-slate-400 mb-1.5" data-i18n>Тема</p>
-                <select id="themeSelect" class="hidden"><option value="ocean">Океанско Синьо</option><option value="plant">Растителен Зелен</option><option value="dark">Тъмен Нощен</option><option value="coral">Коралов Риф</option><option value="abyss">Дълбоко Море</option><option value="jungle">Сладководна Джунгла</option></select>
+                <select id="themeSelect" class="hidden"><option value="ocean">Океанско Синьо</option><option value="plant">Растителен Зелен</option><option value="dark">Тъмен Нощен</option><option value="coral">Коралов Риф</option><option value="abyss">Дълбоко Море</option><option value="jungle">Сладководна Джунгла</option><option value="light">Светла</option></select>
                 <div id="themeSwatches" class="grid grid-cols-3 gap-1.5"></div>
             </div>
             <div class="border-t border-slate-700 pt-3">
@@ -649,6 +690,23 @@
                 <span class="flex items-center"><i class="fa-solid fa-sliders mr-2 text-cyan-400"></i> <span data-i18n>Конфигурация на аквариума</span></span>
                 <span id="stockingBadge" class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">Капацитет: 0%</span>
             </h2>
+
+            <!-- Снимка на аквариума (т.5) — пази се само локално в IndexedDB, не се синхронизира между устройства -->
+            <div class="flex items-center gap-3 bg-slate-900/60 border border-slate-700 rounded-xl p-3">
+                <div id="tankAvatarPreview" class="w-14 h-14 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center overflow-hidden shrink-0">
+                    <i class="fa-solid fa-fish text-slate-500"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs text-slate-400" data-i18n>Снимка на аквариума</p>
+                    <p class="text-[10px] text-slate-500" data-i18n>Снимката се пази само на това устройство (IndexedDB).</p>
+                </div>
+                <div class="flex gap-2 shrink-0">
+                    <input type="file" id="tankAvatarFile" accept="image/*" class="hidden" onchange="setTankAvatar(this.files[0]); this.value='';">
+                    <button type="button" onclick="document.getElementById('tankAvatarFile').click()" class="text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1.5 rounded border border-slate-600 text-cyan-300 transition"><i class="fa-solid fa-camera mr-1"></i> <span data-i18n>Избери снимка</span></button>
+                    <button type="button" id="tankAvatarRemoveBtn" onclick="removeTankAvatar()" class="hidden text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1.5 rounded border border-slate-600 text-red-300 transition"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <label for="aqType" class="block text-sm text-slate-400 mb-1" data-i18n>Вид аквариум:</label>
@@ -728,35 +786,35 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                 <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
                     <span class="text-xs text-slate-400" data-i18n>Температура</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help paramInfoIcon" tabindex="0" title="Температура на водата. Оптимално: 24–26 °C" data-i18n-title data-info="Температура на водата. Оптимално: 24–26 °C"></i>
-                    <p class="text-xl font-bold text-cyan-300 mt-1"><span id="valTemp" class="paramVal" inputmode="decimal">—</span> °C</p>
+                    <p class="text-xl font-bold text-cyan-300 mt-1"><span id="valTemp" class="paramVal" inputmode="decimal">—</span> °C <span id="trendTemp" class="paramTrend text-xs font-semibold"></span></p>
                 </div>
                 <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
                     <span class="text-xs text-slate-400" data-i18n>pH ниво</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help paramInfoIcon" tabindex="0" title="pH — киселинност на водата. Оптимално: 6.5 – 7.5" data-i18n-title data-info="pH — киселинност на водата. Оптимално: 6.5 – 7.5"></i>
-                    <p class="text-xl font-bold text-green-300 mt-1"><span id="valPH" class="paramVal" inputmode="decimal">—</span> <span class="text-xs font-normal text-slate-400">pH</span></p>
+                    <p class="text-xl font-bold text-green-300 mt-1"><span id="valPH" class="paramVal" inputmode="decimal">—</span> <span class="text-xs font-normal text-slate-400">pH</span> <span id="trendPH" class="paramTrend text-xs font-semibold"></span></p>
                 </div>
                 <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
                     <span class="text-xs text-slate-400" data-i18n>Амоняк (NH3)</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help paramInfoIcon" tabindex="0" title="NH3/NH4 — токсичен отпадък от рибите. Оптимално: 0 mg/l" data-i18n-title data-info="NH3/NH4 — токсичен отпадък от рибите. Оптимално: 0 mg/l"></i>
-                    <p class="text-xl font-bold text-emerald-300 mt-1"><span id="valNH3" class="paramVal" inputmode="decimal">—</span> mg/l</p>
+                    <p class="text-xl font-bold text-emerald-300 mt-1"><span id="valNH3" class="paramVal" inputmode="decimal">—</span> mg/l <span id="trendNH3" class="paramTrend text-xs font-semibold"></span></p>
                 </div>
                 <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
                     <span class="text-xs text-slate-400" data-i18n>Нитрити (NO2)</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help paramInfoIcon" tabindex="0" title="NO2 — междинен токсичен продукт от азотния цикъл. Оптимално: 0 mg/l" data-i18n-title data-info="NO2 — междинен токсичен продукт от азотния цикъл. Оптимално: 0 mg/l"></i>
-                    <p class="text-xl font-bold text-red-300 mt-1"><span id="valNO2" class="paramVal" inputmode="decimal">—</span> mg/l</p>
+                    <p class="text-xl font-bold text-red-300 mt-1"><span id="valNO2" class="paramVal" inputmode="decimal">—</span> mg/l <span id="trendNO2" class="paramTrend text-xs font-semibold"></span></p>
                 </div>
                 <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
                     <span class="text-xs text-slate-400" data-i18n>Нитрати (NO3)</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help paramInfoIcon" tabindex="0" title="NO3 — краен продукт от азотния цикъл. Оптимално: 10–25 mg/l" data-i18n-title data-info="NO3 — краен продукт от азотния цикъл. Оптимално: 10–25 mg/l"></i>
-                    <p class="text-xl font-bold text-yellow-300 mt-1"><span id="valNO3" class="paramVal" inputmode="decimal">—</span> mg/l</p>
+                    <p class="text-xl font-bold text-yellow-300 mt-1"><span id="valNO3" class="paramVal" inputmode="decimal">—</span> mg/l <span id="trendNO3" class="paramTrend text-xs font-semibold"></span></p>
                 </div>
                 <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
                     <span class="text-xs text-slate-400" data-i18n>Обща твърдост (GH)</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help paramInfoIcon" tabindex="0" title="GH — обща твърдост на водата. Ориентировъчно оптимално: 4–12 dGH" data-i18n-title data-info="GH — обща твърдост на водата. Ориентировъчно оптимално: 4–12 dGH"></i>
-                    <p class="text-xl font-bold text-blue-300 mt-1"><span id="valGH" class="paramVal" inputmode="decimal">—</span> dGH</p>
+                    <p class="text-xl font-bold text-blue-300 mt-1"><span id="valGH" class="paramVal" inputmode="decimal">—</span> dGH <span id="trendGH" class="paramTrend text-xs font-semibold"></span></p>
                 </div>
                 <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
                     <span class="text-xs text-slate-400" data-i18n>Карбонатна твърдост (KH)</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help paramInfoIcon" tabindex="0" title="KH — карбонатна твърдост, буферира pH. Ориентировъчно оптимално: 3–8 dKH" data-i18n-title data-info="KH — карбонатна твърдост, буферира pH. Ориентировъчно оптимално: 3–8 dKH"></i>
-                    <p class="text-xl font-bold text-indigo-300 mt-1"><span id="valKH" class="paramVal" inputmode="decimal">—</span> dKH</p>
+                    <p class="text-xl font-bold text-indigo-300 mt-1"><span id="valKH" class="paramVal" inputmode="decimal">—</span> dKH <span id="trendKH" class="paramTrend text-xs font-semibold"></span></p>
                 </div>
                 <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
                     <span class="text-xs text-slate-400" data-i18n>Хлор (Cl2)</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help paramInfoIcon" tabindex="0" title="Cl2 — хлор от чешмяната вода, токсичен за рибите. Оптимално: 0 mg/l (неутрализирай с антихлор)" data-i18n-title data-info="Cl2 — хлор от чешмяната вода, токсичен за рибите. Оптимално: 0 mg/l (неутрализирай с антихлор)"></i>
-                    <p class="text-xl font-bold text-teal-300 mt-1"><span id="valCl2" class="paramVal" inputmode="decimal">—</span> mg/l</p>
+                    <p class="text-xl font-bold text-teal-300 mt-1"><span id="valCl2" class="paramVal" inputmode="decimal">—</span> mg/l <span id="trendCl2" class="paramTrend text-xs font-semibold"></span></p>
                 </div>
             </div>
 
@@ -1676,11 +1734,20 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.48";
+        const APP_VERSION = "3.6.49";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.49", items: [
+                "Нова светла тема (в Настройки → Тема)",
+                "Снимка на аквариума — показва се до името горе и в конфигурацията (пази се само локално)",
+                "Индикатор нагоре/надолу до параметрите на водата, спрямо предишния запис"
+            ], items_en: [
+                "New light theme (in Settings → Theme)",
+                "Aquarium photo — shown next to the name up top and in the config section (stored locally only)",
+                "Up/down indicator next to water parameters, compared to the previous entry"
+            ] },
             { v: "3.6.48", items: [
                 "Премахнато отделното изтриване на записи от историята на параметрите — вече само \"Изтрий записи\" за дневника на водата/обитателите, достъпно от хедъра на двата дневника"
             ], items_en: [
@@ -2803,6 +2870,75 @@
 
         function newPhotoId() { return 'ph_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8); }
 
+        // ---------- Снимка (аватар) на аквариума (т.5) — пази се в същата IndexedDB,
+        // само локално на това устройство, не се пренася при облачна синхронизация. ----------
+        function setTankAvatar(file) {
+            if (!file) return;
+            const t = store.tanks[store.active];
+            if (!t) return;
+            const img = new Image();
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                img.onload = () => {
+                    const maxW = 300;
+                    const scale = Math.min(1, maxW / img.width);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.round(img.width * scale);
+                    canvas.height = Math.round(img.height * scale);
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    const id = t.avatarId || newPhotoId();
+                    photoPut(id, dataUrl).then(ok => {
+                        if (ok) {
+                            t.avatarId = id;
+                            saveData();
+                            renderTankAvatar(dataUrl);
+                            showToast(tr('Снимката на аквариума е запазена.'));
+                        } else {
+                            showToast(tr('Неуспешно запазване на снимката'), 'warn');
+                        }
+                    });
+                };
+                img.onerror = () => showToast(tr('Невалидна снимка'), 'warn');
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeTankAvatar() {
+            const t = store.tanks[store.active];
+            if (!t || !t.avatarId) return;
+            photoDelete(t.avatarId).then(() => {
+                delete t.avatarId;
+                saveData();
+                renderTankAvatar(null);
+                showToast(tr('Снимката на аквариума е премахната.'));
+            });
+        }
+
+        // Рисува снимката (или placeholder-а) в двете места, където се показва —
+        // хедъра и картата с конфигурация — от вече заредения dataUrl (или null).
+        function renderTankAvatar(dataUrl) {
+            const header = document.getElementById('headerAvatarImg');
+            const preview = document.getElementById('tankAvatarPreview');
+            const removeBtn = document.getElementById('tankAvatarRemoveBtn');
+            if (header) { header.src = dataUrl || ''; header.classList.toggle('hidden', !dataUrl); }
+            if (preview) {
+                preview.innerHTML = dataUrl
+                    ? `<img src="${dataUrl}" class="w-full h-full object-cover" alt="">`
+                    : `<i class="fa-solid fa-fish text-slate-500"></i>`;
+            }
+            if (removeBtn) removeBtn.classList.toggle('hidden', !dataUrl);
+        }
+
+        // Зарежда снимката на текущия аквариум от IndexedDB — извиква се при смяна
+        // на аквариум/зареждане на приложението.
+        function loadTankAvatar() {
+            const t = store.tanks[store.active];
+            if (!t || !t.avatarId) { renderTankAvatar(null); return; }
+            photoGet(t.avatarId).then(url => renderTankAvatar(url || null));
+        }
+
         // Еднократно мигрира стари записи (снимка вградена директно в LocalStorage) към IndexedDB
         async function migrateLegacyPhotos() {
             let changed = false;
@@ -3340,7 +3476,32 @@
                 t.history.push(snapshot);
             }
             if (t.history.length > 30) t.history = t.history.slice(-30);
-            renderHistoryCharts(); renderInsights();
+            renderHistoryCharts(); renderInsights(); renderParamTrends();
+        }
+
+        // ---------- Индикатор нагоре/надолу до параметрите (спрямо предишния различен ден) ----------
+        const PARAM_TREND_IDS = [
+            ['temp', 'trendTemp'], ['ph', 'trendPH'], ['nh3', 'trendNH3'], ['no2', 'trendNO2'],
+            ['no3', 'trendNO3'], ['gh', 'trendGH'], ['kh', 'trendKH'], ['cl2', 'trendCl2']
+        ];
+
+        function renderParamTrends() {
+            const t = store.tanks[store.active];
+            const hist = (t && t.history) || [];
+            const curr = hist.length >= 1 ? hist[hist.length - 1] : null;
+            const prev = hist.length >= 2 ? hist[hist.length - 2] : null;
+            PARAM_TREND_IDS.forEach(([key, id]) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (!curr || !prev) { el.innerHTML = ''; el.title = ''; return; }
+                const diff = (curr[key] || 0) - (prev[key] || 0);
+                if (!isFinite(diff) || Math.abs(diff) < 0.01) { el.innerHTML = ''; el.title = ''; return; }
+                const up = diff > 0;
+                const abs = Math.abs(diff);
+                const diffStr = abs < 10 ? (Math.round(abs * 10) / 10) : Math.round(abs);
+                el.innerHTML = `<i class="fa-solid ${up ? 'fa-arrow-up text-amber-400' : 'fa-arrow-down text-sky-400'}"></i> ${diffStr}`;
+                el.title = tr('Спрямо предишния запис');
+            });
         }
 
         async function clearHistory() {
@@ -3770,13 +3931,14 @@
             dark: "bg-black text-neutral-200 min-h-screen transition-colors duration-300 pb-6",
             coral: "bg-stone-950 text-rose-50 min-h-screen transition-colors duration-300 pb-6",
             abyss: "bg-indigo-950 text-indigo-100 min-h-screen transition-colors duration-300 pb-6",
-            jungle: "bg-stone-900 text-lime-50 min-h-screen transition-colors duration-300 pb-6"
+            jungle: "bg-stone-900 text-lime-50 min-h-screen transition-colors duration-300 pb-6",
+            light: "bg-slate-50 text-slate-900 min-h-screen transition-colors duration-300 pb-6"
         };
-        const themeLabels = { ocean: "Океанско Синьо", plant: "Растителен Зелен", dark: "Тъмен Нощен", coral: "Коралов Риф", abyss: "Дълбоко Море", jungle: "Сладководна Джунгла" };
+        const themeLabels = { ocean: "Океанско Синьо", plant: "Растителен Зелен", dark: "Тъмен Нощен", coral: "Коралов Риф", abyss: "Дълбоко Море", jungle: "Сладководна Джунгла", light: "Светла" };
         const themeAccent = { coral: "coral", abyss: "abyss", jungle: "jungle" };
 
         function themeFlash(theme) {
-            const colors = { ocean: '34,211,238', plant: '16,185,129', dark: '148,163,184', coral: '244,63,94', abyss: '99,102,241', jungle: '245,158,11' };
+            const colors = { ocean: '34,211,238', plant: '16,185,129', dark: '148,163,184', coral: '244,63,94', abyss: '99,102,241', jungle: '245,158,11', light: '148,163,184' };
             const c = colors[theme] || '34,211,238';
             const el = document.createElement('div');
             el.style.cssText = `position:fixed;inset:0;z-index:70;pointer-events:none;background:radial-gradient(circle at 85% 0%, rgba(${c},0.4), transparent 60%);opacity:0;transition:opacity .45s ease;`;
@@ -3788,7 +3950,7 @@
         function renderThemeSwatches() {
             const box = document.getElementById('themeSwatches');
             if (!box) return;
-            const dot = { ocean: '#22d3ee', plant: '#10b981', dark: '#94a3b8', coral: '#f43f5e', abyss: '#6366f1', jungle: '#f59e0b' };
+            const dot = { ocean: '#22d3ee', plant: '#10b981', dark: '#94a3b8', coral: '#f43f5e', abyss: '#6366f1', jungle: '#f59e0b', light: '#e2e8f0' };
             box.innerHTML = Object.keys(themeClasses).map(id => `
                 <button onclick="changeTheme('${id}', true)" title="${tr(themeLabels[id])}" class="flex flex-col items-center gap-1 p-2 rounded-lg border transition-all duration-200 ${id === currentTheme ? 'border-cyan-400 bg-slate-700' : 'border-slate-700 hover:border-slate-600'}" aria-label="${tr(themeLabels[id])}">
                     <span class="w-5 h-5 rounded-full border border-white/20" style="background:${dot[id]}"></span>
@@ -3855,6 +4017,12 @@
             "Фонова снимка": "Background photo",
             "Качи снимка": "Upload photo",
             "Снимката се пази само на това устройство (IndexedDB).": "The photo is stored only on this device (IndexedDB).",
+            "Снимка на аквариума": "Aquarium photo",
+            "Избери снимка": "Choose photo",
+            "Снимката на аквариума е запазена.": "The aquarium photo has been saved.",
+            "Снимката на аквариума е премахната.": "The aquarium photo has been removed.",
+            "Спрямо предишния запис": "Compared to the previous entry",
+            "Светла": "Light",
             "Известия": "Notifications",
             "Включи": "Enable", "Включени": "Enabled", "Известията са включени": "Notifications are enabled",
             "Инсталирай приложението": "Install the app",
@@ -4870,6 +5038,9 @@
             ["taskFilter", "taskPlants", "taskGlass", "taskFertilize"].forEach(k => { if (typeof r[k] === "boolean") t[k] = r[k]; });
             if (typeof r.waterDue === "number") t.waterDue = r.waterDue;
             if (r.waterChangedToday) t.waterChangedToday = r.waterChangedToday;
+            // Снимката живее само в локалната IndexedDB на устройството (не се синхронизира) —
+            // пазим само референцията; на друго устройство просто няма да намери снимка по нея.
+            if (typeof r.avatarId === "string" && r.avatarId) t.avatarId = r.avatarId;
             if (Array.isArray(r.history)) t.history = r.history.filter(h => h && typeof h.t === "number").slice(-30).map(h => ({
                 t: h.t, temp: parseFloat(h.temp) || 0, ph: parseFloat(h.ph) || 0, nh3: parseFloat(h.nh3) || 0,
                 no2: parseFloat(h.no2) || 0, no3: parseFloat(h.no3) || 0, gh: parseFloat(h.gh) || 0, kh: parseFloat(h.kh) || 0,
@@ -5934,6 +6105,8 @@
             document.getElementById('valKH').innerText = t.kh || '—';
             document.getElementById('valCl2').innerText = t.cl2 || '—';
             updateCO2Display();
+            renderParamTrends();
+            loadTankAvatar();
             // При смяна на аквариум заключваме обратно двата отключваеми panel-а
             // (параметри + литри), за да не остане "забравено" отворено поле за редакция.
             if (typeof paramsEditing !== 'undefined' && paramsEditing) { paramsEditing = false; PARAM_VAL_IDS.forEach(id => { const el = document.getElementById(id); if (el) { el.setAttribute('contenteditable', 'false'); el.classList.remove('paramVal-editing'); } }); syncParamEditBtnLabel(); }
@@ -6240,7 +6413,7 @@
             });
         }
 
-        const themeColorHex = { ocean: "#0f172a", plant: "#09090b", dark: "#000000", coral: "#0c0a09", abyss: "#1e1b4b", jungle: "#1c1917" };
+        const themeColorHex = { ocean: "#0f172a", plant: "#09090b", dark: "#000000", coral: "#0c0a09", abyss: "#1e1b4b", jungle: "#1c1917", light: "#f8fafc" };
 
         function vibrate(ms) {
             try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
