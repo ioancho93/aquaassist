@@ -788,6 +788,12 @@
         </section>
 
 
+        <!-- Дневник на обитателите (кога какво е добавено/премахнато) -->
+        <section id="secInhabitantLog" data-tab="history" class="tab-panel bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-md space-y-3">
+            <h2 class="text-lg font-semibold flex items-center"><i class="fa-solid fa-fish mr-2 text-cyan-400"></i> <span data-i18n>Дневник на обитателите</span></h2>
+            <div id="inhabitantLogList" class="space-y-2 max-h-64 overflow-y-auto"></div>
+        </section>
+
         <!-- Анализ и прогнози -->
         <section id="secInsights" data-tab="history" class="tab-panel bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-md space-y-4">
             <h2 class="text-lg font-semibold flex items-center"><i class="fa-solid fa-wand-magic-sparkles mr-2 text-cyan-400"></i> <span data-i18n>Анализ и прогнози</span></h2>
@@ -2094,6 +2100,7 @@
             } else {
                 myFishList.push({ ...selected, count: count, addedAt: Date.now(), updatedAt: Date.now() });
             }
+            logInhabitantChange(selected, 'added', count);
 
             updateMyInhabitants();
             refreshSelects();
@@ -2116,6 +2123,7 @@
             } else {
                 myFishList.push({ ...selected, count: count, addedAt: Date.now(), updatedAt: Date.now() });
             }
+            logInhabitantChange(selected, 'added', count);
 
             updateMyInhabitants();
             refreshSelects();
@@ -2135,6 +2143,7 @@
 
             renderInhabitantGroup('myAnimalsEmpty', 'myAnimalsPicker', 'myAnimalsSelect', 'myAnimalsDetail', animals, false);
             renderInhabitantGroup('myPlantsEmpty', 'myPlantsPicker', 'myPlantsSelect', 'myPlantsDetail', plants, true);
+            renderInhabitantLog();
 
             updateCapacity();
             checkCompatibility();
@@ -2239,9 +2248,29 @@
         }
 
         async function removeItem(i) {
-            if (!myFishList[i]) return;
-            if (!await showAppConfirm(`${tr('Да изтрия ли')} „${myFishList[i].name.split(' (')[0]}“ ${tr('от аквариума?')}`)) return;
-            myFishList.splice(i, 1);
+            const it = myFishList[i];
+            if (!it) return;
+            const shortName = it.name.split(' (')[0];
+
+            if (it.count <= 1) {
+                if (!await showAppConfirm(`${tr('Да изтрия ли')} „${shortName}“ ${tr('от аквариума?')}`)) return;
+                logInhabitantChange(it, 'removed', it.count || 1);
+                myFishList.splice(i, 1);
+                updateMyInhabitants();
+                saveData();
+                return;
+            }
+
+            const qty = await showQuantityPrompt(shortName, it.count);
+            if (qty === null) return;
+            if (qty >= it.count) {
+                logInhabitantChange(it, 'removed', it.count);
+                myFishList.splice(i, 1);
+            } else {
+                logInhabitantChange(it, 'removed', qty);
+                it.count -= qty;
+                it.updatedAt = Date.now();
+            }
             updateMyInhabitants();
             saveData();
         }
@@ -3005,6 +3034,30 @@
             }).join('');
         }
 
+        // ---------- Дневник на обитателите: кога е добавен/премахнат вид (без бележката — тя не се пази тук) ----------
+        function logInhabitantChange(item, action, count) {
+            const t = store.tanks[store.active];
+            if (!t) return;
+            if (!Array.isArray(t.inhabitantLog)) t.inhabitantLog = [];
+            t.inhabitantLog.push({ name: item.name, type: item.type || '', action, count: count || 1, t: Date.now() });
+            if (t.inhabitantLog.length > 60) t.inhabitantLog = t.inhabitantLog.slice(-60);
+        }
+
+        function renderInhabitantLog() {
+            const box = document.getElementById('inhabitantLogList');
+            if (!box) return;
+            const t = store.tanks[store.active];
+            const log = (t && t.inhabitantLog) || [];
+            if (!log.length) { box.innerHTML = `<div class="flex flex-col items-center gap-2 text-center text-slate-500 py-6"><i class="fa-solid fa-clock-rotate-left text-2xl text-slate-600"></i><p class="text-sm">${tr('Все още няма записи за добавяне или премахване на обитатели.')}</p></div>`; return; }
+            box.innerHTML = log.slice().reverse().map(e => {
+                const added = e.action === 'added';
+                return `<div class="flex justify-between items-center bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 text-xs">
+                    <span><i class="fa-solid ${added ? 'fa-plus text-emerald-400' : 'fa-minus text-red-400'} mr-1.5"></i>${speciesName(e.name)} — ${e.count} ${tr('бр.')}</span>
+                    <span class="text-slate-400">${new Date(e.t).toLocaleString(locale())}</span>
+                </div>`;
+            }).join('');
+        }
+
         function renderWaterChangeLog() {
             const box = document.getElementById('waterChangeLogList');
             if (!box) return;
@@ -3723,6 +3776,11 @@
             "Параметри на водата": "Water parameters",
             "История на параметрите": "Parameter history",
             "Дневник на смените на водата": "Water change log",
+            "Дневник на обитателите": "Inhabitant log",
+            "Все още няма записи за добавяне или премахване на обитатели.": "No inhabitant additions or removals recorded yet.",
+            "Колко да премахна от": "How many to remove from",
+            "общо": "out of",
+            "Премахни": "Remove",
             "Анализ и прогнози": "Analysis & forecasts",
             "Графици и напомняния": "Schedules & reminders",
             "Визуален дневник": "Visual journal",
@@ -4697,7 +4755,7 @@
                 temp: "", ph: "", nh3: "", no2: "", no3: "", gh: "", kh: "", cl2: "",
                 taskFilter: false, taskPlants: false, taskGlass: false, taskFertilize: false,
                 waterDue: Date.now() + 5 * DAY_MS, waterChangedToday: false,
-                fish: [], history: [], maintenanceLog: [], waterChangeLog: [],
+                fish: [], history: [], maintenanceLog: [], waterChangeLog: [], inhabitantLog: [],
                 timeline: [], expenses: [], dosing: [],
                 cycle: { on: false, startedAt: 0 }, intervals: {},
                 equipment: { filter: { model: "", notes: "" }, light: { model: "", hours: "", notes: "" }, heater: { model: "", notes: "" }, pump: { model: "", notes: "" } }
@@ -4719,6 +4777,7 @@
             if (r.cycle && typeof r.cycle === "object") t.cycle = { on: !!r.cycle.on, startedAt: Number(r.cycle.startedAt) || 0 };
             if (r.intervals && typeof r.intervals === "object") Object.keys(r.intervals).forEach(k => { const v = parseInt(r.intervals[k]); if (v >= 1 && v <= 365) t.intervals[k] = v; });
             if (Array.isArray(r.waterChangeLog)) t.waterChangeLog = r.waterChangeLog.filter(e => e && typeof e.t === "number").slice(-30).map(e => ({ t: e.t, percent: parseFloat(e.percent) || 0 }));
+            if (Array.isArray(r.inhabitantLog)) t.inhabitantLog = r.inhabitantLog.filter(e => e && typeof e.t === "number" && typeof e.name === "string" && (e.action === "added" || e.action === "removed")).slice(-60).map(e => ({ name: String(e.name).slice(0, 80), type: String(e.type || '').slice(0, 20), action: e.action, count: Math.max(1, parseInt(e.count) || 1), t: e.t }));
             if (Array.isArray(r.timeline)) t.timeline = r.timeline.filter(e => e && typeof e.t === "number").slice(-40).map(e => ({ t: e.t, note: String(e.note || '').slice(0, 500), photoId: typeof e.photoId === "string" ? e.photoId : null, photo: (!e.photoId && typeof e.photo === "string") ? e.photo : null }));
             if (Array.isArray(r.expenses)) t.expenses = r.expenses.filter(e => e && typeof e.t === "number").slice(-100).map(e => ({ t: e.t, category: String(e.category || 'Друго').slice(0, 40), desc: String(e.desc || '').slice(0, 120), amount: parseFloat(e.amount) || 0 }));
             if (Array.isArray(r.dosing)) t.dosing = r.dosing.filter(d => d && typeof d.id === "string").slice(0, 30).map(d => ({
@@ -5652,6 +5711,48 @@
                 overlay.addEventListener('click', (e) => { if (e.target === overlay) finish(false); });
                 document.addEventListener('keydown', onKey);
                 document.body.appendChild(overlay);
+            });
+        }
+
+        // Диалог за избор на бройка при премахване на обитател с повече от 1 бр.
+        // По подразбиране е цялата бройка (= изтрива целия запис), но може да се намали.
+        function showQuantityPrompt(shortName, maxCount) {
+            return new Promise((resolve) => {
+                const overlay = document.createElement('div');
+                overlay.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4';
+                overlay.innerHTML = `
+                    <div class="bg-slate-800 border border-red-700 rounded-2xl p-5 max-w-sm w-full text-sm">
+                        <div class="flex items-start gap-3 mb-3">
+                            <i class="fa-solid fa-trash text-red-400 text-xl mt-0.5"></i>
+                            <p class="text-slate-200 leading-relaxed" id="qtyPromptMsg"></p>
+                        </div>
+                        <div class="flex items-center gap-2 mb-4">
+                            <button type="button" data-act="dec" class="w-9 h-9 shrink-0 rounded-lg bg-slate-700 hover:bg-slate-600 border border-slate-600 text-slate-200"><i class="fa-solid fa-minus"></i></button>
+                            <input type="number" id="qtyPromptInput" min="1" max="${maxCount}" value="${maxCount}" class="flex-1 text-center bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-sm focus:outline-none focus:border-red-400">
+                            <button type="button" data-act="inc" class="w-9 h-9 shrink-0 rounded-lg bg-slate-700 hover:bg-slate-600 border border-slate-600 text-slate-200"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <div class="flex gap-2">
+                            <button type="button" data-act="cancel" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm py-2 rounded-lg font-medium">${tr('Отказ')}</button>
+                            <button type="button" data-act="ok" class="flex-1 bg-red-700 hover:bg-red-600 text-white text-sm py-2 rounded-lg font-medium">${tr('Премахни')}</button>
+                        </div>
+                    </div>`;
+                overlay.querySelector('#qtyPromptMsg').textContent = `${tr('Колко да премахна от')} „${shortName}“? (${tr('общо')} ${maxCount} ${tr('бр.')})`;
+                const input = overlay.querySelector('#qtyPromptInput');
+                const clamp = () => {
+                    let v = parseInt(input.value) || 1;
+                    input.value = Math.max(1, Math.min(v, maxCount));
+                };
+                overlay.querySelector('[data-act="dec"]').addEventListener('click', () => { input.value = Math.max(1, (parseInt(input.value) || 1) - 1); });
+                overlay.querySelector('[data-act="inc"]').addEventListener('click', () => { input.value = Math.min(maxCount, (parseInt(input.value) || 1) + 1); });
+                input.addEventListener('blur', clamp);
+                const finish = (result) => { overlay.remove(); document.removeEventListener('keydown', onKey); resolve(result); };
+                const onKey = (e) => { if (e.key === 'Escape') finish(null); };
+                overlay.querySelector('[data-act="cancel"]').addEventListener('click', () => finish(null));
+                overlay.querySelector('[data-act="ok"]').addEventListener('click', () => { clamp(); finish(parseInt(input.value) || 1); });
+                overlay.addEventListener('click', (e) => { if (e.target === overlay) finish(null); });
+                document.addEventListener('keydown', onKey);
+                document.body.appendChild(overlay);
+                setTimeout(() => input.focus(), 50);
             });
         }
 
