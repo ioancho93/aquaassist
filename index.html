@@ -1127,7 +1127,7 @@
                 </div>
                 <div id="myAnimalsPicker" class="hidden space-y-2">
                     <select id="myAnimalsSelect" onchange="onMyInhabitantSelect('animal')" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-400"></select>
-                    <ul id="myAnimalsDetail" class="divide-y divide-slate-700/60 text-sm"></ul>
+                    <ul id="myAnimalsDetail" class="hidden divide-y divide-slate-700/60 text-sm"></ul>
                 </div>
             </div>
 
@@ -1142,7 +1142,7 @@
                 </div>
                 <div id="myPlantsPicker" class="hidden space-y-2">
                     <select id="myPlantsSelect" onchange="onMyInhabitantSelect('plant')" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-400"></select>
-                    <ul id="myPlantsDetail" class="divide-y divide-slate-700/60 text-sm"></ul>
+                    <ul id="myPlantsDetail" class="hidden divide-y divide-slate-700/60 text-sm"></ul>
                 </div>
             </div>
         </section>
@@ -2158,14 +2158,22 @@
             pickerEl.classList.remove('hidden');
 
             let selName = isPlant ? selPlantName : selAnimalName;
-            if (!list.some(it => it.name === selName)) selName = list[0].name;
+            if (selName && !list.some(it => it.name === selName)) selName = null;
             if (isPlant) selPlantName = selName; else selAnimalName = selName;
 
-            selectEl.innerHTML = list.map(item => {
+            const placeholder = `<option value="" ${selName ? '' : 'selected'}>— ${tr('Избери')} —</option>`;
+            const options = list.map(item => {
                 const nameAttr = item.name.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
                 return `<option value="${nameAttr}" ${item.name === selName ? 'selected' : ''}>${speciesName(item.name)} — ${item.count} ${tr('бр.')}</option>`;
             }).join('');
+            selectEl.innerHTML = placeholder + options;
 
+            if (!selName) {
+                detailEl.innerHTML = '';
+                detailEl.classList.add('hidden');
+                return;
+            }
+            detailEl.classList.remove('hidden');
             const item = list.find(it => it.name === selName);
             detailEl.innerHTML = inhabitantRow(item, myFishList.indexOf(item), isPlant);
         }
@@ -2200,7 +2208,10 @@
                     <textarea id="invNote_${i}" rows="2" placeholder="${tr('Бележка...')}" class="w-full bg-slate-900/60 border border-slate-700 rounded px-2 py-1.5 text-[11px] text-slate-300 focus:outline-none focus:border-${accent}-400 resize-none">${noteVal}</textarea>
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <p class="text-[10px] text-slate-500 flex-1 min-w-[10rem]">${meta}</p>
-                        <button onclick="saveItem(${i})" class="text-[11px] px-2.5 py-1 rounded-lg border transition-all duration-200 active:scale-95 bg-${accent}-700 hover:bg-${accent}-600 border-${accent}-600 text-white"><i class="fa-solid fa-floppy-disk mr-1"></i>${tr('Запиши')}</button>
+                        <div class="flex gap-1.5">
+                            <button onclick="saveItem(${i})" class="text-[11px] px-2.5 py-1 rounded-lg border transition-all duration-200 active:scale-95 bg-${accent}-700 hover:bg-${accent}-600 border-${accent}-600 text-white"><i class="fa-solid fa-floppy-disk mr-1"></i>${tr('Запиши')}</button>
+                            <button onclick="removeItem(${i})" class="text-[11px] px-2.5 py-1 rounded-lg border transition-all duration-200 active:scale-95 bg-slate-700 hover:bg-red-900/60 border-slate-600 text-red-400"><i class="fa-solid fa-trash mr-1"></i>${tr('Изтрий')}</button>
+                        </div>
                     </div>
                 </li>`;
         }
