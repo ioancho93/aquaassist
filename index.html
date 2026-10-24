@@ -1121,12 +1121,14 @@
                     <span class="flex items-center"><i class="fa-solid fa-fish mr-2"></i> <span data-i18n>Риби и Безгръбначни</span></span>
                     <button type="button" onclick="openDiagnosisModal()" class="text-[11px] font-normal text-amber-300 hover:text-amber-200 underline inline-flex items-center gap-1"><i class="fa-solid fa-stethoscope"></i><span data-i18n>Диагностика на здравето</span></button>
                 </h3>
-                <ul id="myAnimalsList" class="divide-y divide-slate-700/60 text-sm">
-                    <li class="py-8 flex flex-col items-center gap-2 text-center text-slate-500">
-                        <i class="fa-solid fa-fish text-3xl text-slate-600"></i>
-                        <p class="text-sm"><span data-i18n>Все още няма добавени риби в инвентара.</span><br><span data-i18n>Добавете първата си рибка, за да започнете.</span></p>
-                    </li>
-                </ul>
+                <div id="myAnimalsEmpty" class="py-8 flex flex-col items-center gap-2 text-center text-slate-500">
+                    <i class="fa-solid fa-fish text-3xl text-slate-600"></i>
+                    <p class="text-sm"><span data-i18n>Все още няма добавени риби в инвентара.</span><br><span data-i18n>Добавете първата си рибка, за да започнете.</span></p>
+                </div>
+                <div id="myAnimalsPicker" class="hidden space-y-2">
+                    <select id="myAnimalsSelect" onchange="onMyInhabitantSelect('animal')" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-400"></select>
+                    <ul id="myAnimalsDetail" class="divide-y divide-slate-700/60 text-sm"></ul>
+                </div>
             </div>
 
             <!-- Раздел 2: Растения -->
@@ -1134,12 +1136,14 @@
                 <h3 class="text-sm font-semibold text-emerald-300 flex items-center border-b border-slate-700 pb-1">
                     <i class="fa-solid fa-leaf mr-2"></i> <span data-i18n>Растения и Флора</span>
                 </h3>
-                <ul id="myPlantsList" class="divide-y divide-slate-700/60 text-sm">
-                    <li class="py-8 flex flex-col items-center gap-2 text-center text-slate-500">
-                        <i class="fa-solid fa-leaf text-3xl text-slate-600"></i>
-                        <p class="text-sm"><span data-i18n>Все още няма добавени растения.</span><br><span data-i18n>Добавете първото си растение, за да започнете.</span></p>
-                    </li>
-                </ul>
+                <div id="myPlantsEmpty" class="py-8 flex flex-col items-center gap-2 text-center text-slate-500">
+                    <i class="fa-solid fa-leaf text-3xl text-slate-600"></i>
+                    <p class="text-sm"><span data-i18n>Все още няма добавени растения.</span><br><span data-i18n>Добавете първото си растение, за да започнете.</span></p>
+                </div>
+                <div id="myPlantsPicker" class="hidden space-y-2">
+                    <select id="myPlantsSelect" onchange="onMyInhabitantSelect('plant')" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-400"></select>
+                    <ul id="myPlantsDetail" class="divide-y divide-slate-700/60 text-sm"></ul>
+                </div>
             </div>
         </section>
 
@@ -2121,34 +2125,56 @@
             showToast(`${tr('Добавено:')} ${speciesName(selected.name)}`);
         }
 
-        function updateMyInhabitants() {
-            const animalsList = document.getElementById('myAnimalsList');
-            const plantsList = document.getElementById('myPlantsList');
+        // Избран вид (по име) във всяко от двете падащи менюта в "Обитатели" — пази се между презаписванията,
+        // за да не скача списъкът обратно на първия ред при добавяне/редакция на бележка.
+        let selAnimalName = null, selPlantName = null;
 
+        function updateMyInhabitants() {
             const animals = myFishList.filter(item => item.type !== "Растение");
             const plants = myFishList.filter(item => item.type === "Растение");
 
-            if (animals.length === 0) {
-                animalsList.innerHTML = `<li class="py-8 flex flex-col items-center gap-2 text-center text-slate-500">
-                        <i class="fa-solid fa-fish text-3xl text-slate-600"></i>
-                        <p class="text-sm">${tr('Все още няма добавени риби в инвентара.')}<br>${tr('Добавете първата си рибка, за да започнете.')}</p>
-                    </li>`;
-            } else {
-                animalsList.innerHTML = animals.map(item => inhabitantRow(item, myFishList.indexOf(item), false)).join('');
-            }
-
-            if (plants.length === 0) {
-                plantsList.innerHTML = `<li class="py-8 flex flex-col items-center gap-2 text-center text-slate-500">
-                        <i class="fa-solid fa-leaf text-3xl text-slate-600"></i>
-                        <p class="text-sm">${tr('Все още няма добавени растения.')}<br>${tr('Добавете първото си растение, за да започнете.')}</p>
-                    </li>`;
-            } else {
-                plantsList.innerHTML = plants.map(item => inhabitantRow(item, myFishList.indexOf(item), true)).join('');
-            }
+            renderInhabitantGroup('myAnimalsEmpty', 'myAnimalsPicker', 'myAnimalsSelect', 'myAnimalsDetail', animals, false);
+            renderInhabitantGroup('myPlantsEmpty', 'myPlantsPicker', 'myPlantsSelect', 'myPlantsDetail', plants, true);
 
             updateCapacity();
             checkCompatibility();
             refreshSelects();
+        }
+
+        function renderInhabitantGroup(emptyId, pickerId, selectId, detailId, list, isPlant) {
+            const emptyEl = document.getElementById(emptyId);
+            const pickerEl = document.getElementById(pickerId);
+            const selectEl = document.getElementById(selectId);
+            const detailEl = document.getElementById(detailId);
+            if (!emptyEl || !pickerEl || !selectEl || !detailEl) return;
+
+            if (list.length === 0) {
+                emptyEl.classList.remove('hidden');
+                pickerEl.classList.add('hidden');
+                if (isPlant) selPlantName = null; else selAnimalName = null;
+                return;
+            }
+            emptyEl.classList.add('hidden');
+            pickerEl.classList.remove('hidden');
+
+            let selName = isPlant ? selPlantName : selAnimalName;
+            if (!list.some(it => it.name === selName)) selName = list[0].name;
+            if (isPlant) selPlantName = selName; else selAnimalName = selName;
+
+            selectEl.innerHTML = list.map(item => {
+                const nameAttr = item.name.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+                return `<option value="${nameAttr}" ${item.name === selName ? 'selected' : ''}>${speciesName(item.name)} — ${item.count} ${tr('бр.')}</option>`;
+            }).join('');
+
+            const item = list.find(it => it.name === selName);
+            detailEl.innerHTML = inhabitantRow(item, myFishList.indexOf(item), isPlant);
+        }
+
+        function onMyInhabitantSelect(kind) {
+            const isPlant = kind === 'plant';
+            const selectEl = document.getElementById(isPlant ? 'myPlantsSelect' : 'myAnimalsSelect');
+            if (isPlant) selPlantName = selectEl.value; else selAnimalName = selectEl.value;
+            updateMyInhabitants();
         }
 
         // ---------- Обитатели: Запиши / Редактирай / Изтрий (с дата и час) ----------
