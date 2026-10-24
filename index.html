@@ -751,6 +751,10 @@
                     <span class="text-xs text-slate-400" data-i18n>Карбонатна твърдост (KH)</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help paramInfoIcon" tabindex="0" title="KH — карбонатна твърдост, буферира pH. Ориентировъчно оптимално: 3–8 dKH" data-i18n-title data-info="KH — карбонатна твърдост, буферира pH. Ориентировъчно оптимално: 3–8 dKH"></i>
                     <p class="text-xl font-bold text-indigo-300 mt-1"><span id="valKH" class="paramVal" inputmode="decimal">—</span> dKH</p>
                 </div>
+                <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
+                    <span class="text-xs text-slate-400" data-i18n>Хлор (Cl2)</span> <i class="fa-solid fa-circle-info text-slate-500 cursor-help paramInfoIcon" tabindex="0" title="Cl2 — хлор от чешмяната вода, токсичен за рибите. Оптимално: 0 mg/l (неутрализирай с антихлор)" data-i18n-title data-info="Cl2 — хлор от чешмяната вода, токсичен за рибите. Оптимално: 0 mg/l (неутрализирай с антихлор)"></i>
+                    <p class="text-xl font-bold text-teal-300 mt-1"><span id="valCl2" class="paramVal" inputmode="decimal">—</span> mg/l</p>
+                </div>
             </div>
 
             <!-- CO2 калкулатор по pH/KH (т.3.6.38) — само за показване, изчислява се
@@ -2439,7 +2443,8 @@
             valNO2: [[0, 0], [0, 0.25]],
             valNO3: [[0, 25], [0, 50]],
             valGH: [[4, 12], [2, 16]],
-            valKH: [[3, 8], [1, 12]]
+            valKH: [[3, 8], [1, 12]],
+            valCl2: [[0, 0], [0, 0.3]]
         };
 
         let dangerParams = new Set();
@@ -2477,7 +2482,7 @@
             // изобщо не е въвел нито едно измерване на водата — иначе съвсем нов аквариум
             // без данни изглежда подвеждащо "перфектен" от самото начало.
             const t = store.tanks[store.active];
-            const hasAnyParam = t && [t.temp, t.ph, t.nh3, t.no2, t.no3, t.gh, t.kh].some(v => v !== undefined && v !== null && String(v).trim() !== '');
+            const hasAnyParam = t && [t.temp, t.ph, t.nh3, t.no2, t.no3, t.gh, t.kh, t.cl2].some(v => v !== undefined && v !== null && String(v).trim() !== '');
 
             if (stockingPercent > 90) {
                 title.innerText = tr("Пренаселен аквариум");
@@ -2977,7 +2982,7 @@
         }
 
         // ---------- Параметри на водата: редакция направо в картите (без отделен панел) ----------
-        const PARAM_VAL_IDS = ['valTemp', 'valPH', 'valNH3', 'valNO2', 'valNO3', 'valGH', 'valKH'];
+        const PARAM_VAL_IDS = ['valTemp', 'valPH', 'valNH3', 'valNO2', 'valNO3', 'valGH', 'valKH', 'valCl2'];
         let paramsEditing = false;
 
         function paramKeydownGuard(e) {
@@ -3140,7 +3145,8 @@
                 no2: parseFloat(document.getElementById('valNO2').innerText) || 0,
                 no3: parseFloat(document.getElementById('valNO3').innerText) || 0,
                 gh: parseFloat(document.getElementById('valGH').innerText) || 0,
-                kh: parseFloat(document.getElementById('valKH').innerText) || 0
+                kh: parseFloat(document.getElementById('valKH').innerText) || 0,
+                cl2: parseFloat(document.getElementById('valCl2').innerText) || 0
             });
             if (t.history.length > 30) t.history = t.history.slice(-30);
             renderHistoryCharts(); renderInsights();
@@ -3154,7 +3160,7 @@
         }
 
         let historyRange = 0;
-        const HIST_ZONES = { temp: 'valTemp', ph: 'valPH', nh3: 'valNH3', no2: 'valNO2', no3: 'valNO3', gh: 'valGH', kh: 'valKH' };
+        const HIST_ZONES = { temp: 'valTemp', ph: 'valPH', nh3: 'valNH3', no2: 'valNO2', no3: 'valNO3', gh: 'valGH', kh: 'valKH', cl2: 'valCl2' };
 
         function sparkline(points, w, h, zone) {
             if (points.length < 2) return '';
@@ -3211,10 +3217,10 @@
             const t = store.tanks[store.active];
             const rows = (t && t.history) || [];
             if (!rows.length) { showToast('Няма история за експорт.', 'warn'); return; }
-            const head = ['Дата', 'Час', 'Температура', 'pH', 'NH3', 'NO2', 'NO3', 'GH', 'KH'];
+            const head = ['Дата', 'Час', 'Температура', 'pH', 'NH3', 'NO2', 'NO3', 'GH', 'KH', 'Cl2'];
             const lines = [head.join(',')].concat(rows.map(e => {
                 const d = new Date(e.t);
-                return [d.toLocaleDateString(locale()), d.toLocaleTimeString(locale()), e.temp, e.ph, e.nh3, e.no2, e.no3, e.gh, e.kh].join(',');
+                return [d.toLocaleDateString(locale()), d.toLocaleTimeString(locale()), e.temp, e.ph, e.nh3, e.no2, e.no3, e.gh, e.kh, e.cl2].join(',');
             }));
             const blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
             const a = document.createElement('a');
@@ -3297,7 +3303,7 @@
             captureTank();
             const payload = {
                 n: t.name, ty: t.aqType, l: t.aqLiters, sh: t.aqShape,
-                temp: t.temp, ph: t.ph, nh3: t.nh3, no2: t.no2, no3: t.no3, gh: t.gh, kh: t.kh,
+                temp: t.temp, ph: t.ph, nh3: t.nh3, no2: t.no2, no3: t.no3, gh: t.gh, kh: t.kh, cl2: t.cl2,
                 f: (t.fish || []).map(f => [f.name, f.count])
             };
             const encoded = encodeURIComponent(JSON.stringify(payload));
@@ -3392,6 +3398,7 @@
                     ${row('NO3', d.no3, ' mg/l')}
                     ${row('GH', d.gh, ' dGH')}
                     ${row('KH', d.kh, ' dKH')}
+                    ${row('Cl2', d.cl2, ' mg/l')}
                     <div class="pt-2">
                         <p class="text-slate-400 mb-1">${tr('Обитатели')}:</p>
                         <ul class="list-disc list-inside space-y-0.5">${fishRows || '<li class="text-slate-500">' + tr('Няма добавени') + '</li>'}</ul>
@@ -3435,7 +3442,8 @@
                 ['no2', 'Нитрити (mg/l)', 'text-red-400'],
                 ['no3', 'Нитрати (mg/l)', 'text-yellow-400'],
                 ['gh', 'Обща твърдост (dGH)', 'text-blue-400'],
-                ['kh', 'Карбонатна твърдост (dKH)', 'text-indigo-400']
+                ['kh', 'Карбонатна твърдост (dKH)', 'text-indigo-400'],
+                ['cl2', 'Хлор (mg/l)', 'text-teal-400']
             ];
             box.innerHTML = series.map(([k, label, color]) => {
                 const pts = h.map(e => ({ v: e[k], l: new Date(e.t).toLocaleString(locale()) }));
@@ -4252,12 +4260,15 @@
             "GH — обща твърдост на водата. Ориентировъчно оптимално: 4–12 dGH": "GH — general water hardness. Roughly optimal: 4–12 dGH",
             "Карбонатна твърдост (KH)": "Carbonate hardness (KH)",
             "KH — карбонатна твърдост, буферира pH. Ориентировъчно оптимално: 3–8 dKH": "KH — carbonate hardness, buffers pH. Roughly optimal: 3–8 dKH",
+            "Хлор (Cl2)": "Chlorine (Cl2)",
+            "Cl2 — хлор от чешмяната вода, токсичен за рибите. Оптимално: 0 mg/l (неутрализирай с антихлор)": "Cl2 — chlorine from tap water, toxic to fish. Optimal: 0 mg/l (neutralize with a dechlorinator)",
             "Temp (°C):": "Temp (°C):",
             "NH3 (mg/l):": "NH3 (mg/l):",
             "NO2 (mg/l):": "NO2 (mg/l):",
             "NO3 (mg/l):": "NO3 (mg/l):",
             "GH (dGH):": "GH (dGH):",
             "KH (dKH):": "KH (dKH):",
+            "Cl2 (mg/l):": "Cl2 (mg/l):",
             "Запази стойностите": "Save values",
             "Изчисти": "Clear",
             "Все още няма достатъчно история.": "Not enough history yet.",
@@ -4270,6 +4281,7 @@
             "Нитрати (mg/l)": "Nitrate (mg/l)",
             "Обща твърдост (dGH)": "General hardness (dGH)",
             "Карбонатна твърдост (dKH)": "Carbonate hardness (dKH)",
+            "Хлор (mg/l)": "Chlorine (mg/l)",
             "Интервалът е в дни. Статусът се смята от последния потвърден запис в „Рутинна поддръжка“ и „Дневник на смените на водата“.": "The interval is in days. Status is calculated from the last confirmed entry in „Routine maintenance“ and „Water change log“.",
             "Сравни аквариуми": "Compare aquariums",
             "Всичко": "All",
@@ -4634,7 +4646,7 @@
             return {
                 name, aqType: "Общ аквариум (Community)", aqShape: "Правоъгълен",
                 aqLiters: "0", aqLength: "", aqWidth: "", aqHeight: "",
-                temp: "", ph: "", nh3: "", no2: "", no3: "", gh: "", kh: "",
+                temp: "", ph: "", nh3: "", no2: "", no3: "", gh: "", kh: "", cl2: "",
                 taskFilter: false, taskPlants: false, taskGlass: false, taskFertilize: false,
                 waterDue: Date.now() + 5 * DAY_MS, waterChangedToday: false,
                 fish: [], history: [], maintenanceLog: [], waterChangeLog: [],
@@ -4646,13 +4658,14 @@
 
         function cleanTank(r, name) {
             const t = newTank(typeof r.name === "string" && r.name ? r.name.slice(0, 40) : name);
-            ["aqType", "aqShape", "aqLiters", "aqLength", "aqWidth", "aqHeight", "temp", "ph", "nh3", "no2", "no3", "gh", "kh"].forEach(k => { if (r[k] !== undefined && r[k] !== null && r[k] !== "") t[k] = String(r[k]); });
+            ["aqType", "aqShape", "aqLiters", "aqLength", "aqWidth", "aqHeight", "temp", "ph", "nh3", "no2", "no3", "gh", "kh", "cl2"].forEach(k => { if (r[k] !== undefined && r[k] !== null && r[k] !== "") t[k] = String(r[k]); });
             ["taskFilter", "taskPlants", "taskGlass", "taskFertilize"].forEach(k => { if (typeof r[k] === "boolean") t[k] = r[k]; });
             if (typeof r.waterDue === "number") t.waterDue = r.waterDue;
             if (r.waterChangedToday) t.waterChangedToday = r.waterChangedToday;
             if (Array.isArray(r.history)) t.history = r.history.filter(h => h && typeof h.t === "number").slice(-30).map(h => ({
                 t: h.t, temp: parseFloat(h.temp) || 0, ph: parseFloat(h.ph) || 0, nh3: parseFloat(h.nh3) || 0,
-                no2: parseFloat(h.no2) || 0, no3: parseFloat(h.no3) || 0, gh: parseFloat(h.gh) || 0, kh: parseFloat(h.kh) || 0
+                no2: parseFloat(h.no2) || 0, no3: parseFloat(h.no3) || 0, gh: parseFloat(h.gh) || 0, kh: parseFloat(h.kh) || 0,
+                cl2: parseFloat(h.cl2) || 0
             }));
             if (Array.isArray(r.maintenanceLog)) t.maintenanceLog = r.maintenanceLog.filter(e => e && typeof e.t === "number" && typeof e.id === "string").slice(-20).map(e => ({ id: e.id, label: String(e.label || ''), t: e.t }));
             if (r.cycle && typeof r.cycle === "object") t.cycle = { on: !!r.cycle.on, startedAt: Number(r.cycle.startedAt) || 0 };
@@ -5632,6 +5645,7 @@
             t.no3 = clean(document.getElementById('valNO3').innerText);
             t.gh = clean(document.getElementById('valGH').innerText);
             t.kh = clean(document.getElementById('valKH').innerText);
+            t.cl2 = clean(document.getElementById('valCl2').innerText);
             t.taskFilter = document.getElementById('taskFilter').checked;
             t.taskPlants = document.getElementById('taskPlants').checked;
             t.taskGlass = document.getElementById('taskGlass').checked;
@@ -5667,6 +5681,7 @@
             document.getElementById('valNO3').innerText = t.no3 || '—';
             document.getElementById('valGH').innerText = t.gh || '—';
             document.getElementById('valKH').innerText = t.kh || '—';
+            document.getElementById('valCl2').innerText = t.cl2 || '—';
             updateCO2Display();
             // При смяна на аквариум заключваме обратно двата отключваеми panel-а
             // (параметри + литри), за да не остане "забравено" отворено поле за редакция.
