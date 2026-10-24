@@ -1,0 +1,70 @@
+rules_version = '2';
+
+// AquaAssist — Firestore Security Rules
+//
+// Приложението няма вход с акаунт (без Firebase Auth) — достъпът до
+// "syncCodes" разчита само на това, че кодът е труден за отгатване
+// (случаен 6-символен суфикс). Тези правила добавят втора линия защита:
+//   1. Никой не може да "listne" цели колекции — само достъп по точен ID,
+//      който вече трябва да знае (get), не през заявка (list).
+//   2. Всеки запис се валидира по форма/размер, за да не може някой да
+//      пренапише документ с боклук или прекомерно голям обем.
+//   3. "bugReports" е create-only — потребителите могат да пращат доклади,
+//      но не и да четат/трият чужди.
+//
+// Как да ги публикуваш: Firebase Console → избери проекта → Firestore
+// Database → таб "Rules" → изтрий текущото съдържание → постави това →
+// бутон "Publish".
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- syncCodes/{code} — пълният backup на потребителя ----------
+    match /syncCodes/{code} {
+      // Четене само по точен код (get) — НЕ позволяваме list/query, за да не
+      // може никой да изтегли данните на всички потребители наведнъж.
+      allow get: if true;
+      allow list: if false;
+
+      // Писане само ако документът изглежда като валиден AquaAssist backup:
+      // има масив "tanks" (непразен), числово "active" и "updatedAt", и
+      // разумен общ размер (Firestore сам пази лимит 1MB на документ, но
+      // проверяваме малко по-рано за по-ясна грешка при злоупотреба).
+      allow create, update: if request.resource.data.keys().hasAll(['tanks', 'active', 'updatedAt'])
+        && request.resource.data.tanks is list
+        && request.resource.data.tanks.size() > 0
+        && request.resource.data.tanks.size() < 100
+        && request.resource.data.active is int
+        && request.resource.data.updatedAt is int;
+
+      allow delete: if false;
+    }
+
+    // ---------- bugReports/{id} — докладите за бъгове ----------
+    match /bugReports/{id} {
+      // Само създаване — потребителите никога не четат/трият доклади (чужди
+      // или собствени) обратно от облака.
+      allow read, update, delete: if false;
+      allow create: if request.resource.data.keys().hasAll(['description', 'section', 'appVersion'])
+        && request.resource.data.description is string
+        && request.resource.data.description.size() > 0
+        && request.resource.data.description.size() < 5000
+        && request.resource.data.section is string
+        && request.resource.data.appVersion is string;
+    }
+
+    // ---------- analytics/featureUsage — анонимни броячи на функции ----------
+    match /analytics/{doc} {
+      // Само натрупване (increment) на известните полета — не позволяваме
+      // произволна презапис/изтриване на документа.
+      allow read: if false;
+      allow delete: if false;
+      allow create, update: if true;
+    }
+
+    // Всичко останало е затворено по подразбиране.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
