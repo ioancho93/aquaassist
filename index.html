@@ -2177,24 +2177,17 @@
             updateMyInhabitants();
         }
 
-        // ---------- Обитатели: Запиши / Редактирай / Изтрий (с дата и час) ----------
+        // ---------- Обитатели: само преглед + бележка (бройка/изтриване стоят в таб "Добави") ----------
         function fmtDT(ts) { return ts ? new Date(ts).toLocaleString(locale()) : ''; }
 
         function inhabitantRow(item, i, isPlant) {
             const accent = isPlant ? 'emerald' : 'cyan';
             const icon = isPlant ? 'fa-seedling text-emerald-400' : 'fa-circle-check text-cyan-400';
-            const editing = !!item.editing;
             const noteVal = (item.note || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
             const meta = [
                 item.addedAt ? `${tr('Добавено')}: ${fmtDT(item.addedAt)}` : '',
-                item.updatedAt ? `${tr('Последна промяна')}: ${fmtDT(item.updatedAt)}` : '',
                 item.noteAt ? `${tr('Бележка от')}: ${fmtDT(item.noteAt)}` : ''
             ].filter(Boolean).join(' · ');
-            const btn = "text-[11px] px-2.5 py-1 rounded-lg border transition-all duration-200 active:scale-95 ";
-            const actions = editing
-                ? `<button onclick="saveItem(${i})" class="${btn}bg-${accent}-700 hover:bg-${accent}-600 border-${accent}-600 text-white"><i class="fa-solid fa-floppy-disk mr-1"></i>${tr('Запиши')}</button>
-                   <button onclick="cancelEditItem(${i})" class="${btn}bg-slate-700 hover:bg-slate-600 border-slate-600 text-slate-200">${tr('Отказ')}</button>`
-                : `<button onclick="editItem(${i})" class="${btn}bg-slate-700 hover:bg-slate-600 border-slate-600 text-${accent}-300"><i class="fa-solid fa-pen mr-1"></i>${tr('Редактирай')}</button>`;
             return `
                 <li class="py-2 space-y-1.5">
                     <div class="flex justify-between items-center">
@@ -2202,25 +2195,15 @@
                             <i class="fa-solid ${icon} mr-2 text-xs"></i>
                             <strong>${speciesName(item.name)}</strong>${isPlant ? '' : ` <span class="text-xs text-slate-400">(${tr(item.type)})</span>`}
                         </span>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="changeCount(${i}, -1)" title="${tr('Намали бройката')}" aria-label="${tr('Намали бройката')}" class="text-slate-400 hover:text-slate-200 text-xs"><i class="fa-solid fa-minus"></i></button>
-                            <span class="bg-slate-700 px-2.5 py-0.5 rounded text-${accent}-300 font-semibold text-xs">${item.count} ${tr('бр.')}</span>
-                            <button onclick="changeCount(${i}, 1)" title="${tr('Увеличи бройката')}" aria-label="${tr('Увеличи бройката')}" class="text-slate-400 hover:text-slate-200 text-xs"><i class="fa-solid fa-plus"></i></button>
-                        </div>
+                        <span class="bg-slate-700 px-2.5 py-0.5 rounded text-${accent}-300 font-semibold text-xs">${item.count} ${tr('бр.')}</span>
                     </div>
-                    <input type="text" id="invNote_${i}" value="${noteVal}" placeholder="${tr('Бележка...')}" ${editing ? '' : 'disabled'} class="w-full bg-slate-900/60 border border-slate-700 rounded px-2 py-1 text-[11px] text-slate-300 focus:outline-none focus:border-${accent}-400">
+                    <textarea id="invNote_${i}" rows="2" placeholder="${tr('Бележка...')}" class="w-full bg-slate-900/60 border border-slate-700 rounded px-2 py-1.5 text-[11px] text-slate-300 focus:outline-none focus:border-${accent}-400 resize-none">${noteVal}</textarea>
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <p class="text-[10px] text-slate-500 flex-1 min-w-[10rem]">${meta}</p>
-                        <div class="flex gap-1.5">
-                            ${actions}
-                            <button onclick="removeItem(${i})" class="${btn}bg-slate-700 hover:bg-red-900/60 border-slate-600 text-red-400"><i class="fa-solid fa-trash mr-1"></i>${tr('Изтрий')}</button>
-                        </div>
+                        <button onclick="saveItem(${i})" class="text-[11px] px-2.5 py-1 rounded-lg border transition-all duration-200 active:scale-95 bg-${accent}-700 hover:bg-${accent}-600 border-${accent}-600 text-white"><i class="fa-solid fa-floppy-disk mr-1"></i>${tr('Запиши')}</button>
                     </div>
                 </li>`;
         }
-
-        function editItem(i) { if (myFishList[i]) { myFishList[i].editing = true; updateMyInhabitants(); } }
-        function cancelEditItem(i) { if (myFishList[i]) { myFishList[i].editing = false; updateMyInhabitants(); } }
 
         function saveItem(i) {
             const it = myFishList[i];
@@ -2231,7 +2214,6 @@
             if (val !== (it.note || '')) it.noteAt = val ? now : 0;
             it.note = val;
             it.updatedAt = now;
-            it.editing = false;
             updateMyInhabitants();
             saveData();
             showToast(tr('Записано:') + ' ' + it.name.split(' (')[0]);
