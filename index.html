@@ -775,23 +775,10 @@
         <section id="secHistory" data-tab="history" class="tab-panel bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-md space-y-4">
             <div class="flex justify-between items-center">
                 <h2 class="text-lg font-semibold flex items-center"><i class="fa-solid fa-chart-line mr-2 text-cyan-400"></i> <span data-i18n>История на параметрите</span></h2>
-                <div class="flex gap-2">
-                    <button onclick="toggleHistoryDeleteMode()" id="historyDeleteToggleBtn" class="text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded border border-slate-600 text-red-300 transition"><i class="fa-solid fa-list-check mr-1"></i> <span data-i18n>Изтрий записи</span></button>
-                    <button onclick="clearHistory()" class="text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded border border-slate-600 text-slate-300 transition"><i class="fa-solid fa-broom mr-1"></i> <span data-i18n>Изчисти</span></button>
-                </div>
+                <button onclick="clearHistory()" class="text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded border border-slate-600 text-slate-300 transition"><i class="fa-solid fa-broom mr-1"></i> <span data-i18n>Изчисти</span></button>
             </div>
             <div id="historyRange" class="flex flex-wrap items-center gap-1.5"></div>
             <div id="historyCharts" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-
-            <!-- Избор на конкретни записи за изтриване (напр. сгрешена стойност) -->
-            <div id="historyDeletePanel" class="hidden space-y-2 border-t border-slate-700 pt-3">
-                <p class="text-[11px] text-slate-500" data-i18n>Постави отметка на записите, които искаш да премахнеш.</p>
-                <div id="historyEntriesList" class="space-y-1.5 max-h-72 overflow-y-auto"></div>
-                <div class="flex gap-2">
-                    <button onclick="deleteSelectedHistoryEntries()" class="flex-1 bg-red-700 hover:bg-red-600 text-white text-xs py-2 rounded-lg font-medium"><i class="fa-solid fa-trash mr-1"></i><span data-i18n>Изтрий избраните</span></button>
-                    <button onclick="toggleHistoryDeleteMode()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs py-2 rounded-lg font-medium" data-i18n>Отказ</button>
-                </div>
-            </div>
         </section>
 
         <!-- Дневник на смените на водата -->
@@ -805,6 +792,19 @@
         <section id="secInhabitantLog" data-tab="history" class="tab-panel bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-md space-y-3">
             <h2 class="text-lg font-semibold flex items-center"><i class="fa-solid fa-fish mr-2 text-cyan-400"></i> <span data-i18n>Дневник на обитателите</span></h2>
             <div id="inhabitantLogList" class="space-y-2 max-h-64 overflow-y-auto"></div>
+
+            <!-- Избор на конкретни записи от ИСТОРИЯТА НА ПАРАМЕТРИТЕ за изтриване (напр. сгрешена стойност) -->
+            <div class="flex justify-end">
+                <button onclick="toggleHistoryDeleteMode()" id="historyDeleteToggleBtn" class="text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded border border-slate-600 text-red-300 transition"><i class="fa-solid fa-list-check mr-1"></i> <span data-i18n>Изтрий записи</span></button>
+            </div>
+            <div id="historyDeletePanel" class="hidden space-y-2 border-t border-slate-700 pt-3">
+                <p class="text-[11px] text-slate-500" data-i18n>Постави отметка на записите от историята на параметрите, които искаш да премахнеш.</p>
+                <div id="historyEntriesList" class="space-y-1.5 max-h-72 overflow-y-auto"></div>
+                <div class="flex gap-2">
+                    <button onclick="deleteSelectedHistoryEntries()" class="flex-1 bg-red-700 hover:bg-red-600 text-white text-xs py-2 rounded-lg font-medium"><i class="fa-solid fa-trash mr-1"></i><span data-i18n>Изтрий избраните</span></button>
+                    <button onclick="toggleHistoryDeleteMode()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs py-2 rounded-lg font-medium" data-i18n>Отказ</button>
+                </div>
+            </div>
         </section>
 
         <!-- Анализ и прогнози -->
@@ -3844,6 +3844,7 @@
             "Дневник на смените на водата": "Water change log",
             "Изтрий записи": "Delete entries",
             "Постави отметка на записите, които искаш да премахнеш.": "Check the entries you want to remove.",
+            "Постави отметка на записите от историята на параметрите, които искаш да премахнеш.": "Check the parameter history entries you want to remove.",
             "Изтрий избраните": "Delete selected",
             "Няма записи.": "No entries.",
             "без стойности": "no values",
@@ -4024,7 +4025,8 @@
             "Тревисто килимче, много издръжливо": "Grassy carpet, very hardy",
             "Растения:": "Plants:",
             "Риби и безгръбначни:": "Fish and invertebrates:",
-            "Избери вид:": "Select species:", "Само подходящи за моя аквариум": "Only suitable for my aquarium",
+            "Избери вид:": "Select species:", "Само подходящи за моя аквариум": "Only suitable for my aquarium", "Избери": "Select",
+            "Данните временно не могат да се прочетат — вероятно от прекъсване на връзката при зареждане. За да не се загубят, приложението няма да ги запазва в този режим. Моля, презареди страницата (дръпни надолу или бутона за презареждане на браузъра), след като имаш връзка с интернет.": "The data couldn't be read right now — likely due to a connection interruption while loading. To avoid losing it, the app won't save anything in this mode. Please reload the page (pull down or use your browser's reload button) once you have an internet connection.",
             "Брой (рибки / охлюви / скариди):": "Count (fish / snails / shrimp):", "Добави Риба / Безгръбначно": "Add Fish / Invertebrate",
             "Избери растение:": "Select plant:", "Количество (корена / стръка):": "Quantity (roots / stems):", "Добави Растение": "Add Plant",
             "Вид аквариум:": "Aquarium type:", "Форма на аквариума:": "Aquarium shape:", "Обем (Литри):": "Volume (Liters):",
@@ -4088,7 +4090,7 @@
             "Токсични са. Не добавяй риби. При NO2 над 1 mg/l смени 30–50% вода.": "It's toxic. Do not add fish. If NO2 is above 1 mg/l, change 30–50% of the water.",
             "Фаза 1 — амонякът се преработва": "Phase 1 — ammonia is being processed",
             "Очаквай скоро нитрити. Не добавяй риби и не пипай филтъра.": "Expect nitrite soon. Do not add fish and do not disturb the filter.",
-            "Начало": "Start",
+            "Начало на цикъла": "Just starting",
             "Няма измерим амоняк. Добави източник (няколко капки чист амоняк или малко храна) и измервай през 2–3 дни.": "No measurable ammonia. Add a source (a few drops of pure ammonia or a little food) and test every 2–3 days.",
             "Спри": "Stop",
             "Стартирай": "Start",
@@ -4957,7 +4959,7 @@
             if (clear(cur)) return { pct: 90, bar: 'bg-green-500', title: tr('Почти готов'), tip: tr('Последното измерване е добро. Потвърди с още едно измерване след 1–2 дни.') };
             if (cur.no2 > 0.1) return { pct: cur.nh3 > 0.1 ? 45 : 65, bar: 'bg-orange-500', title: tr('Фаза 2 — нитритите се преработват'), tip: tr('Токсични са. Не добавяй риби. При NO2 над 1 mg/l смени 30–50% вода.') };
             if (cur.nh3 > 0.1) return { pct: 25, bar: 'bg-yellow-500', title: tr('Фаза 1 — амонякът се преработва'), tip: tr('Очаквай скоро нитрити. Не добавяй риби и не пипай филтъра.') };
-            return { pct: 5, bar: 'bg-slate-500', title: tr('Начало'), tip: tr('Няма измерим амоняк. Добави източник (няколко капки чист амоняк или малко храна) и измервай през 2–3 дни.') };
+            return { pct: 5, bar: 'bg-slate-500', title: tr('Начало на цикъла'), tip: tr('Няма измерим амоняк. Добави източник (няколко капки чист амоняк или малко храна) и измервай през 2–3 дни.') };
         }
 
         function renderCycle(t) {
