@@ -778,22 +778,10 @@
         <section id="secHistory" data-tab="history" class="tab-panel bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-md space-y-4">
             <div class="flex justify-between items-center">
                 <h2 class="text-lg font-semibold flex items-center"><i class="fa-solid fa-chart-line mr-2 text-cyan-400"></i> <span data-i18n>История на параметрите</span></h2>
-                <div class="flex gap-2">
-                    <!-- Избор на конкретни записи от историята на параметрите за изтриване (напр. сгрешена стойност) -->
-                    <button onclick="toggleHistoryDeleteMode()" id="historyDeleteToggleBtn" class="text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded border border-slate-600 text-red-300 transition"><i class="fa-solid fa-list-check mr-1"></i> <span data-i18n>Изтрий записи</span></button>
-                    <button onclick="clearHistory()" class="text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded border border-slate-600 text-slate-300 transition"><i class="fa-solid fa-broom mr-1"></i> <span data-i18n>Изчисти</span></button>
-                </div>
+                <button onclick="clearHistory()" class="text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded border border-slate-600 text-slate-300 transition"><i class="fa-solid fa-broom mr-1"></i> <span data-i18n>Изчисти</span></button>
             </div>
             <div id="historyRange" class="flex flex-wrap items-center gap-1.5"></div>
             <div id="historyCharts" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-            <div id="historyDeletePanel" class="hidden space-y-2 border-t border-slate-700 pt-3">
-                <p class="text-[11px] text-slate-500" data-i18n>Постави отметка на записите от историята на параметрите, които искаш да премахнеш.</p>
-                <div id="historyEntriesList" class="space-y-1.5 max-h-72 overflow-y-auto"></div>
-                <div class="flex gap-2">
-                    <button onclick="deleteSelectedHistoryEntries()" class="flex-1 bg-red-700 hover:bg-red-600 text-white text-xs py-2 rounded-lg font-medium"><i class="fa-solid fa-trash mr-1"></i><span data-i18n>Изтрий избраните</span></button>
-                    <button onclick="toggleHistoryDeleteMode()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs py-2 rounded-lg font-medium" data-i18n>Отказ</button>
-                </div>
-            </div>
         </section>
 
         <!-- Дневник на смените на водата -->
@@ -809,7 +797,11 @@
 
         <!-- Дневник на обитателите (кога какво е добавено/премахнато) -->
         <section id="secInhabitantLog" data-tab="history" class="tab-panel bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-md space-y-3">
-            <h2 class="text-lg font-semibold flex items-center"><i class="fa-solid fa-fish mr-2 text-cyan-400"></i> <span data-i18n>Дневник на обитателите</span></h2>
+            <div class="flex justify-between items-center">
+                <h2 class="text-lg font-semibold flex items-center"><i class="fa-solid fa-fish mr-2 text-cyan-400"></i> <span data-i18n>Дневник на обитателите</span></h2>
+                <!-- Същият споделен режим на изтриване като бутона в Дневника на водата по-горе -->
+                <button onclick="toggleLogDeleteMode()" id="logDeleteToggleBtn2" class="text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded border border-slate-600 text-red-300 transition"><i class="fa-solid fa-list-check mr-1"></i> <span data-i18n>Изтрий записи</span></button>
+            </div>
             <div id="inhabitantLogList" class="space-y-2 max-h-64 overflow-y-auto"></div>
 
             <!-- Потвърждение при изтриване на отметнати записи от двата дневника по-горе -->
@@ -1684,11 +1676,16 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.47";
+        const APP_VERSION = "3.6.48";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.48", items: [
+                "Премахнато отделното изтриване на записи от историята на параметрите — вече само \"Изтрий записи\" за дневника на водата/обитателите, достъпно от хедъра на двата дневника"
+            ], items_en: [
+                "Removed the separate parameter-history entry deletion — now just \"Delete entries\" for the water/inhabitant logs, accessible from both logs' headers"
+            ] },
             { v: "3.6.47", items: [
                 "Дневник на водата и Дневник на обитателите: \"Изтрий записи\" вече показва чекбоксове директно върху съществуващите записи, вместо отделен дублиращ се списък",
                 "Изтриването на грешен запис от историята на параметрите (темп/pH/...) вече е до бутон \"Изчисти\" в секция \"История на параметрите\""
@@ -3351,59 +3348,6 @@
             store.tanks[store.active].history = [];
             renderHistoryCharts(); renderInsights();
             saveData();
-        }
-
-        // ---------- Изтриване на конкретни записи от историята на параметрите (напр. сгрешена стойност) ----------
-        let historyDeleteMode = false;
-
-        function toggleHistoryDeleteMode() {
-            historyDeleteMode = !historyDeleteMode;
-            const panel = document.getElementById('historyDeletePanel');
-            if (!panel) return;
-            panel.classList.toggle('hidden', !historyDeleteMode);
-            if (historyDeleteMode) renderHistoryEntriesList();
-        }
-
-        function renderHistoryEntriesList() {
-            const box = document.getElementById('historyEntriesList');
-            if (!box) return;
-            const t = store.tanks[store.active];
-            const hist = (t && t.history) || [];
-            if (!hist.length) { box.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">${tr('Няма записи.')}</p>`; return; }
-            const indexed = hist.map((e, idx) => ({ e, idx })).reverse();
-            box.innerHTML = indexed.map(({ e, idx }) => {
-                const parts = [
-                    e.temp ? `${tr('Темп')}: ${e.temp}°C` : '',
-                    (e.ph || e.ph === 0) && e.ph !== '' ? `pH: ${e.ph}` : '',
-                    e.nh3 ? `NH3: ${e.nh3}` : '',
-                    e.no2 ? `NO2: ${e.no2}` : '',
-                    e.no3 ? `NO3: ${e.no3}` : '',
-                    e.gh ? `GH: ${e.gh}` : '',
-                    e.kh ? `KH: ${e.kh}` : '',
-                    e.cl2 ? `Cl2: ${e.cl2}` : ''
-                ].filter(Boolean).join(' · ');
-                return `<label class="flex items-start gap-2 bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 text-xs cursor-pointer hover:border-red-700/60">
-                    <input type="checkbox" class="historyEntryCheck mt-0.5 accent-red-500" data-idx="${idx}">
-                    <span class="flex-1">
-                        <span class="block text-slate-300">${new Date(e.t).toLocaleString(locale())}</span>
-                        <span class="block text-slate-500">${parts || tr('без стойности')}</span>
-                    </span>
-                </label>`;
-            }).join('');
-        }
-
-        async function deleteSelectedHistoryEntries() {
-            const boxes = document.querySelectorAll('.historyEntryCheck:checked');
-            if (!boxes.length) { showToast(tr('Избери поне един запис.'), 'warn'); return; }
-            if (!await showAppConfirm(`${tr('Да изтрия')} ${boxes.length} ${tr('избрани записа?')}`)) return;
-            const t = store.tanks[store.active];
-            if (!t || !Array.isArray(t.history)) return;
-            const idxToRemove = Array.from(boxes).map(b => parseInt(b.dataset.idx)).sort((a, b) => b - a);
-            idxToRemove.forEach(idx => t.history.splice(idx, 1));
-            toggleHistoryDeleteMode();
-            renderHistoryCharts(); renderInsights();
-            saveData();
-            showToast(tr('Записите са изтрити.'));
         }
 
         let historyRange = 0;
