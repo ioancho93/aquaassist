@@ -61,7 +61,10 @@
          което прави runtime компилация в браузъра — не е препоръчано за production и
          зависи от външен CDN дори офлайн). Генериран от реалния index.html с Tailwind CLI. -->
     <link rel="stylesheet" href="tailwind.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Font Awesome вече е локален файл (fontawesome/), вместо да виси на cdnjs.cloudflare.com —
+         същата причина, поради която Tailwind по-горе също е локален: не искаме иконите да изчезват
+         заради блокер/мрежов филтър/срив на външен CDN при потребителя. -->
+    <link rel="stylesheet" href="fontawesome/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
