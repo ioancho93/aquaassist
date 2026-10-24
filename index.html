@@ -778,15 +778,31 @@
         <section id="secHistory" data-tab="history" class="tab-panel bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-md space-y-4">
             <div class="flex justify-between items-center">
                 <h2 class="text-lg font-semibold flex items-center"><i class="fa-solid fa-chart-line mr-2 text-cyan-400"></i> <span data-i18n>История на параметрите</span></h2>
-                <button onclick="clearHistory()" class="text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded border border-slate-600 text-slate-300 transition"><i class="fa-solid fa-broom mr-1"></i> <span data-i18n>Изчисти</span></button>
+                <div class="flex gap-2">
+                    <!-- Избор на конкретни записи от историята на параметрите за изтриване (напр. сгрешена стойност) -->
+                    <button onclick="toggleHistoryDeleteMode()" id="historyDeleteToggleBtn" class="text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded border border-slate-600 text-red-300 transition"><i class="fa-solid fa-list-check mr-1"></i> <span data-i18n>Изтрий записи</span></button>
+                    <button onclick="clearHistory()" class="text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded border border-slate-600 text-slate-300 transition"><i class="fa-solid fa-broom mr-1"></i> <span data-i18n>Изчисти</span></button>
+                </div>
             </div>
             <div id="historyRange" class="flex flex-wrap items-center gap-1.5"></div>
             <div id="historyCharts" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            <div id="historyDeletePanel" class="hidden space-y-2 border-t border-slate-700 pt-3">
+                <p class="text-[11px] text-slate-500" data-i18n>Постави отметка на записите от историята на параметрите, които искаш да премахнеш.</p>
+                <div id="historyEntriesList" class="space-y-1.5 max-h-72 overflow-y-auto"></div>
+                <div class="flex gap-2">
+                    <button onclick="deleteSelectedHistoryEntries()" class="flex-1 bg-red-700 hover:bg-red-600 text-white text-xs py-2 rounded-lg font-medium"><i class="fa-solid fa-trash mr-1"></i><span data-i18n>Изтрий избраните</span></button>
+                    <button onclick="toggleHistoryDeleteMode()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs py-2 rounded-lg font-medium" data-i18n>Отказ</button>
+                </div>
+            </div>
         </section>
 
         <!-- Дневник на смените на водата -->
         <section id="secWaterLog" data-tab="history" class="tab-panel bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-md space-y-3">
-            <h2 class="text-lg font-semibold flex items-center"><i class="fa-solid fa-clock-rotate-left mr-2 text-cyan-400"></i> <span data-i18n>Дневник на смените на водата</span></h2>
+            <div class="flex justify-between items-center">
+                <h2 class="text-lg font-semibold flex items-center"><i class="fa-solid fa-clock-rotate-left mr-2 text-cyan-400"></i> <span data-i18n>Дневник на смените на водата</span></h2>
+                <!-- Управлява режим на изтриване за ДВАТА дневника по-долу (вода + обитатели) наведнъж -->
+                <button onclick="toggleLogDeleteMode()" id="logDeleteToggleBtn" class="text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded border border-slate-600 text-red-300 transition"><i class="fa-solid fa-list-check mr-1"></i> <span data-i18n>Изтрий записи</span></button>
+            </div>
             <div id="waterChangeLogList" class="space-y-2 max-h-64 overflow-y-auto"></div>
         </section>
 
@@ -796,17 +812,10 @@
             <h2 class="text-lg font-semibold flex items-center"><i class="fa-solid fa-fish mr-2 text-cyan-400"></i> <span data-i18n>Дневник на обитателите</span></h2>
             <div id="inhabitantLogList" class="space-y-2 max-h-64 overflow-y-auto"></div>
 
-            <!-- Избор на конкретни записи от ИСТОРИЯТА НА ПАРАМЕТРИТЕ за изтриване (напр. сгрешена стойност) -->
-            <div class="flex justify-end">
-                <button onclick="toggleHistoryDeleteMode()" id="historyDeleteToggleBtn" class="text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded border border-slate-600 text-red-300 transition"><i class="fa-solid fa-list-check mr-1"></i> <span data-i18n>Изтрий записи</span></button>
-            </div>
-            <div id="historyDeletePanel" class="hidden space-y-2 border-t border-slate-700 pt-3">
-                <p class="text-[11px] text-slate-500" data-i18n>Постави отметка на записите от историята на параметрите, които искаш да премахнеш.</p>
-                <div id="historyEntriesList" class="space-y-1.5 max-h-72 overflow-y-auto"></div>
-                <div class="flex gap-2">
-                    <button onclick="deleteSelectedHistoryEntries()" class="flex-1 bg-red-700 hover:bg-red-600 text-white text-xs py-2 rounded-lg font-medium"><i class="fa-solid fa-trash mr-1"></i><span data-i18n>Изтрий избраните</span></button>
-                    <button onclick="toggleHistoryDeleteMode()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs py-2 rounded-lg font-medium" data-i18n>Отказ</button>
-                </div>
+            <!-- Потвърждение при изтриване на отметнати записи от двата дневника по-горе -->
+            <div id="logDeleteConfirmBar" class="hidden flex gap-2 border-t border-slate-700 pt-3">
+                <button onclick="deleteSelectedLogEntries()" class="flex-1 bg-red-700 hover:bg-red-600 text-white text-xs py-2 rounded-lg font-medium"><i class="fa-solid fa-trash mr-1"></i><span data-i18n>Изтрий избраните</span></button>
+                <button onclick="toggleLogDeleteMode()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs py-2 rounded-lg font-medium" data-i18n>Отказ</button>
             </div>
         </section>
 
@@ -1675,11 +1684,18 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.46";
+        const APP_VERSION = "3.6.47";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.47", items: [
+                "Дневник на водата и Дневник на обитателите: \"Изтрий записи\" вече показва чекбоксове директно върху съществуващите записи, вместо отделен дублиращ се списък",
+                "Изтриването на грешен запис от историята на параметрите (темп/pH/...) вече е до бутон \"Изчисти\" в секция \"История на параметрите\""
+            ], items_en: [
+                "Water log and Inhabitant log: \"Delete entries\" now shows checkboxes directly on the existing entries, instead of a separate duplicate list",
+                "Deleting a wrong parameter-history entry (temp/pH/...) is now next to the \"Clear\" button in the \"Parameter history\" section"
+            ] },
             { v: "3.6.46", items: [
                 "Поправка: редактирането на параметрите на водата на няколко пъти в рамките на един и същ ден вече обновява последния запис в историята, вместо да създава нов, дублиращ вече записани стойности"
             ], items_en: [
@@ -3069,18 +3085,54 @@
             if (t.inhabitantLog.length > 60) t.inhabitantLog = t.inhabitantLog.slice(-60);
         }
 
+        // ---------- Изтриване на отметнати записи от дневника на водата/обитателите (директно върху списъците) ----------
+        let logDeleteMode = false;
+
+        function toggleLogDeleteMode() {
+            logDeleteMode = !logDeleteMode;
+            const bar = document.getElementById('logDeleteConfirmBar');
+            if (bar) bar.classList.toggle('hidden', !logDeleteMode);
+            renderWaterChangeLog();
+            renderInhabitantLog();
+        }
+
+        async function deleteSelectedLogEntries() {
+            const boxes = document.querySelectorAll('.logEntryCheck:checked');
+            if (!boxes.length) { showToast(tr('Избери поне един запис.'), 'warn'); return; }
+            if (!await showAppConfirm(`${tr('Да изтрия')} ${boxes.length} ${tr('избрани записа?')}`)) return;
+            const t = store.tanks[store.active];
+            if (!t) return;
+            const wcIdx = [], inhabIdx = [];
+            boxes.forEach(b => {
+                const idx = parseInt(b.dataset.idx);
+                (b.dataset.logtype === 'wc' ? wcIdx : inhabIdx).push(idx);
+            });
+            wcIdx.sort((a, b) => b - a).forEach(idx => { if (Array.isArray(t.waterChangeLog)) t.waterChangeLog.splice(idx, 1); });
+            inhabIdx.sort((a, b) => b - a).forEach(idx => { if (Array.isArray(t.inhabitantLog)) t.inhabitantLog.splice(idx, 1); });
+            logDeleteMode = false;
+            const bar = document.getElementById('logDeleteConfirmBar');
+            if (bar) bar.classList.add('hidden');
+            renderWaterChangeLog(); renderInhabitantLog();
+            saveData();
+            showToast(tr('Записите са изтрити.'));
+        }
+
         function renderInhabitantLog() {
             const box = document.getElementById('inhabitantLogList');
             if (!box) return;
             const t = store.tanks[store.active];
             const log = (t && t.inhabitantLog) || [];
             if (!log.length) { box.innerHTML = `<div class="flex flex-col items-center gap-2 text-center text-slate-500 py-6"><i class="fa-solid fa-clock-rotate-left text-2xl text-slate-600"></i><p class="text-sm">${tr('Все още няма записи за добавяне или премахване на обитатели.')}</p></div>`; return; }
-            box.innerHTML = log.slice().reverse().map(e => {
+            const indexed = log.map((e, idx) => ({ e, idx })).reverse();
+            box.innerHTML = indexed.map(({ e, idx }) => {
                 const added = e.action === 'added';
-                return `<div class="flex justify-between items-center bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 text-xs">
-                    <span><i class="fa-solid ${added ? 'fa-plus text-emerald-400' : 'fa-minus text-red-400'} mr-1.5"></i>${speciesName(e.name)} — ${e.count} ${tr('бр.')}</span>
+                return `<label class="flex justify-between items-center bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 text-xs ${logDeleteMode ? 'cursor-pointer hover:border-red-700/60' : ''}">
+                    <span class="flex items-center gap-2">
+                        ${logDeleteMode ? `<input type="checkbox" class="logEntryCheck accent-red-500" data-logtype="inhab" data-idx="${idx}">` : ''}
+                        <span><i class="fa-solid ${added ? 'fa-plus text-emerald-400' : 'fa-minus text-red-400'} mr-1.5"></i>${speciesName(e.name)} — ${e.count} ${tr('бр.')}</span>
+                    </span>
                     <span class="text-slate-400">${new Date(e.t).toLocaleString(locale())}</span>
-                </div>`;
+                </label>`;
             }).join('');
         }
 
@@ -3090,11 +3142,15 @@
             const t = store.tanks[store.active];
             const log = (t && t.waterChangeLog) || [];
             if (!log.length) { box.innerHTML = `<div class="flex flex-col items-center gap-2 text-center text-slate-500 py-6"><i class="fa-solid fa-droplet text-2xl text-slate-600"></i><p class="text-sm">${tr('Все още няма записани смени на вода.')}<br>${tr('Отчетете първата смяна отгоре.')}</p></div>`; return; }
-            box.innerHTML = log.slice().reverse().map(e => `
-                <div class="flex justify-between items-center bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 text-xs">
-                    <span><i class="fa-solid fa-droplet mr-1.5 text-cyan-400"></i>${new Date(e.t).toLocaleString(locale())}</span>
+            const indexed = log.map((e, idx) => ({ e, idx })).reverse();
+            box.innerHTML = indexed.map(({ e, idx }) => `
+                <label class="flex justify-between items-center bg-slate-900/60 border border-slate-700 rounded-lg px-3 py-2 text-xs ${logDeleteMode ? 'cursor-pointer hover:border-red-700/60' : ''}">
+                    <span class="flex items-center gap-2">
+                        ${logDeleteMode ? `<input type="checkbox" class="logEntryCheck accent-red-500" data-logtype="wc" data-idx="${idx}">` : ''}
+                        <span><i class="fa-solid fa-droplet mr-1.5 text-cyan-400"></i>${new Date(e.t).toLocaleString(locale())}</span>
+                    </span>
                     <span class="text-cyan-300 font-semibold">${e.percent}% ${tr('сменена вода')}</span>
-                </div>`).join('');
+                </label>`).join('');
         }
 
         // Превключва към таб "Аквариум", скролва до параметрите и отваря формата
