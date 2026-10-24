@@ -5,7 +5,8 @@
 // същата причина като Tailwind по-горе (v15): да не зависи от външен CDN.
 // v23: Компактен избор на аквариум (index.html) — нова версия на CACHE_NAME, за
 // да вземат потребителите веднага новия HTML вместо стария кеширан.
-const CACHE_NAME = "aquaassistant-cache-v23";
+// v24: Поправка на дублиращите се записи в историята на параметрите.
+const CACHE_NAME = "aquaassistant-cache-v24";
 const CORE_ASSETS = [
   "./index.html",
   "./manifest.json",

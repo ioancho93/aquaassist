@@ -1675,11 +1675,16 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.45";
+        const APP_VERSION = "3.6.46";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.46", items: [
+                "Поправка: редактирането на параметрите на водата на няколко пъти в рамките на един и същ ден вече обновява последния запис в историята, вместо да създава нов, дублиращ вече записани стойности"
+            ], items_en: [
+                "Fix: editing water parameters multiple times within the same day now updates the latest history entry instead of creating a new one that duplicates already-recorded values"
+            ] },
             { v: "3.6.45", items: [
                 "Падащото меню за избор на аквариум вече е компактно (прилепва към името), вместо да се разтяга на цялата ширина на лентата"
             ], items_en: [
@@ -3259,7 +3264,7 @@
         function recordHistory() {
             const t = store.tanks[store.active];
             if (!t) return;
-            t.history.push({
+            const snapshot = {
                 t: Date.now(),
                 temp: parseFloat(document.getElementById('valTemp').innerText) || 0,
                 ph: parseFloat(document.getElementById('valPH').innerText) || 0,
@@ -3269,7 +3274,18 @@
                 gh: parseFloat(document.getElementById('valGH').innerText) || 0,
                 kh: parseFloat(document.getElementById('valKH').innerText) || 0,
                 cl2: parseFloat(document.getElementById('valCl2').innerText) || 0
-            });
+            };
+            // Ако последният запис в историята е от същия календарен ден, обновяваме него
+            // вместо да добавяме нов — иначе всяко последователно редактиране на по един
+            // параметър (напр. първо температура, после pH) създаваше отделен запис,
+            // повтарящ вече записаните стойности на другите параметри.
+            const last = t.history[t.history.length - 1];
+            const sameDay = last && new Date(last.t).toDateString() === new Date(snapshot.t).toDateString();
+            if (sameDay) {
+                t.history[t.history.length - 1] = snapshot;
+            } else {
+                t.history.push(snapshot);
+            }
             if (t.history.length > 30) t.history = t.history.slice(-30);
             renderHistoryCharts(); renderInsights();
         }
