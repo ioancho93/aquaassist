@@ -18,7 +18,8 @@
 // (cache: "no-cache"), за да не сервира остарял HTTP кеш "прясна" на вид страница.
 // v29: Нова аква цветова палитра за светлата тема + допълнени липсващи CSS класове;
 // банерът "Обнови" вече не покрива бутона "+" на телефон.
-const CACHE_NAME = "aquaassistant-cache-v29";
+// v30: Премахната светлата тема изцяло (цветовата гама не се хареса).
+const CACHE_NAME = "aquaassistant-cache-v30";
 const CORE_ASSETS = [
   "./index.html",
   "./manifest.json",
