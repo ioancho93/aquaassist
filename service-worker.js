@@ -12,7 +12,11 @@
 // записи" вече има бутон и в дневника на обитателите, не само на водата.
 // v27: Светла тема, снимка на аквариума (IndexedDB), тенденция (нагоре/надолу)
 // до параметрите на водата.
-const CACHE_NAME = "aquaassistant-cache-v27";
+// v28: Надежден механизъм за обновление — вече не прескачаме "waiting" автоматично
+// (виж по-долу), а чакаме index.html да помоли изрично (бутон "Обнови" на страницата)
+// след като открие нова версия. Плюс: navigate заявките вече форсират revalidation
+// (cache: "no-cache"), за да не сервира остарял HTTP кеш "прясна" на вид страница.
+const CACHE_NAME = "aquaassistant-cache-v28";
 const CORE_ASSETS = [
   "./index.html",
   "./manifest.json",
@@ -45,7 +49,15 @@ self.addEventListener("install", (event) => {
       ])
     )
   );
-  self.skipWaiting();
+  // ВАЖНО: НЕ викаме self.skipWaiting() тук автоматично. Ако го направим, новата
+  // версия поема контрол веднага и мълчаливо, докато отворената страница още пуска
+  // стария JS в паметта — точно затова "някои неща се обновяват, други не". Вместо
+  // това чакаме index.html да провери за нова версия и потребителят сам да натисне
+  // "Обнови" (виж checkForAppUpdate/SKIP_WAITING съобщението по-долу).
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
@@ -65,7 +77,10 @@ self.addEventListener("fetch", (event) => {
 
   if (req.mode === "navigate" || req.destination === "document") {
     event.respondWith(
-      fetch(req)
+      // cache: "no-cache" форсира revalidation със сървъра (условен GET), вместо
+      // да приема потенциално остарял отговор от HTTP кеша на браузъра/мрежата
+      // пред него — именно затова понякога стар HTML се показваше като "пресен".
+      fetch(req, { cache: "no-cache" })
         .then((res) => {
           const copy = res.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(req, copy)).catch(() => {});

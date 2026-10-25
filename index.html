@@ -1734,11 +1734,18 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.49";
+        const APP_VERSION = "3.6.50";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.50", items: [
+                "Приложението вече показва банер \"Налична е нова версия\" с бутон \"Обнови\", вместо тихо да чака ръчно затваряне/отваряне — трябва да оправи случаите, когато само част от обновленията се виждат",
+                "Стрелка нагоре/надолу вече има и в мини-картите на \"Моментен статус\" (Начало), не само в \"Параметри на водата\""
+            ], items_en: [
+                "The app now shows an \"Update available\" banner with an \"Update\" button, instead of silently waiting for a manual close/reopen — should fix cases where only some updates were showing up",
+                "Up/down arrow is now also on the \"Live status\" mini-cards (Home), not just \"Water parameters\""
+            ] },
             { v: "3.6.49", items: [
                 "Нова светла тема (в Настройки → Тема)",
                 "Снимка на аквариума — показва се до името горе и в конфигурацията (пази се само локално)",
@@ -4023,6 +4030,8 @@
             "Снимката на аквариума е премахната.": "The aquarium photo has been removed.",
             "Спрямо предишния запис": "Compared to the previous entry",
             "Светла": "Light",
+            "Налична е нова версия на приложението.": "A new version of the app is available.",
+            "Обнови": "Update",
             "Известия": "Notifications",
             "Включи": "Enable", "Включени": "Enabled", "Известията са включени": "Notifications are enabled",
             "Инсталирай приложението": "Install the app",
@@ -5865,13 +5874,25 @@
                     ? `<svg viewBox="0 0 100 34" class="w-full h-10 text-cyan-400">${areaChart(pts, 100, 34, gradId)}</svg>
                        <div class="flex justify-between text-[9px] text-slate-500 -mt-0.5"><span>${Math.min(...vals).toFixed(1)}</span><span>${Math.max(...vals).toFixed(1)}</span></div>`
                     : `<p class="text-[10px] text-slate-600 h-10 flex items-center justify-center">${tr('няма история')}</p>`;
+                // Стрелка нагоре/надолу спрямо предишния различен ден от историята (т.3) —
+                // същата логика като renderParamTrends() за картите в таб "Аквариум".
+                let trendHtml = '';
+                if (hist.length >= 2) {
+                    const diff = (hist[hist.length - 1][key] || 0) - (hist[hist.length - 2][key] || 0);
+                    if (isFinite(diff) && Math.abs(diff) >= 0.01) {
+                        const up = diff > 0;
+                        const abs = Math.abs(diff);
+                        const diffStr = abs < 10 ? (Math.round(abs * 10) / 10) : Math.round(abs);
+                        trendHtml = ` <span class="text-xs font-semibold ${up ? 'text-amber-400' : 'text-sky-400'}"><i class="fa-solid ${up ? 'fa-arrow-up' : 'fa-arrow-down'}"></i> ${diffStr}</span>`;
+                    }
+                }
                 return `<div onclick="goToParamsEdit()" role="button" tabindex="0" title="${tr('Редактирай')}" class="bg-slate-900/60 border ${cls} ${pulse} rounded-xl p-3 space-y-2 transition-colors duration-300 relative cursor-pointer hover:border-cyan-500/60 active:scale-[0.98]">
                     <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full ${dot}"></span>
                     <div class="flex items-center gap-2">
                         <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs bg-cyan-900/60 text-cyan-300"><i class="fa-solid ${icon}"></i></span>
                         <span class="text-[11px] text-slate-400">${tr(label)}</span>
                     </div>
-                    <p class="text-xl font-bold text-slate-100">${isNaN(v) ? '—' : v}${unit ? ' <span class="text-xs font-normal text-slate-400">' + unit + '</span>' : ''}</p>
+                    <p class="text-xl font-bold text-slate-100">${isNaN(v) ? '—' : v}${unit ? ' <span class="text-xs font-normal text-slate-400">' + unit + '</span>' : ''}${trendHtml}</p>
                     ${chart}
                 </div>`;
             }).join('');
@@ -6372,10 +6393,47 @@
         }
 
         // ---------- PWA: service worker, инсталиране, theme-color ----------
+        // Надежден механизъм за обновление: браузърите (особено инсталирано PWA,
+        // отваряно рядко като нормален таб) не проверяват service-worker.js
+        // достатъчно често сами — затова проверяваме изрично при отваряне, при
+        // връщане на фокус и периодично, и показваме банер с бутон "Обнови" вместо
+        // да разчитаме новата версия тихо да се самоналожи (виж service-worker.js).
         if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
             window.addEventListener("load", () => {
-                navigator.serviceWorker.register("service-worker.js").catch(() => {});
+                navigator.serviceWorker.register("service-worker.js").then((reg) => {
+                    if (reg.waiting && navigator.serviceWorker.controller) showAppUpdateBanner(reg);
+                    reg.addEventListener("updatefound", () => {
+                        const nw = reg.installing;
+                        if (!nw) return;
+                        nw.addEventListener("statechange", () => {
+                            if (nw.state === "installed" && navigator.serviceWorker.controller) showAppUpdateBanner(reg);
+                        });
+                    });
+                    document.addEventListener("visibilitychange", () => {
+                        if (document.visibilityState === "visible") reg.update().catch(() => {});
+                    });
+                    setInterval(() => reg.update().catch(() => {}), 60 * 60 * 1000);
+                }).catch(() => {});
+                let swReloaded = false;
+                navigator.serviceWorker.addEventListener("controllerchange", () => {
+                    if (swReloaded) return;
+                    swReloaded = true;
+                    window.location.reload();
+                });
             });
+        }
+
+        function showAppUpdateBanner(reg) {
+            if (document.getElementById("appUpdateBanner")) return;
+            const el = document.createElement("div");
+            el.id = "appUpdateBanner";
+            el.className = "fixed left-3 right-3 bottom-3 z-[90] bg-cyan-700 text-white rounded-xl shadow-lg px-4 py-3 flex items-center justify-between gap-3 text-sm";
+            el.innerHTML = `<span><i class="fa-solid fa-circle-up mr-1.5"></i>${tr('Налична е нова версия на приложението.')}</span>
+                <button id="appUpdateReloadBtn" class="bg-white text-cyan-700 font-semibold px-3 py-1.5 rounded-lg shrink-0">${tr('Обнови')}</button>`;
+            document.body.appendChild(el);
+            document.getElementById("appUpdateReloadBtn").onclick = () => {
+                if (reg.waiting) reg.waiting.postMessage({ type: "SKIP_WAITING" });
+            };
         }
 
         // iOS (Safari и др.) никога не праща beforeinstallprompt — няма автоматичен бутон за инсталиране.
