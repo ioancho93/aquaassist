@@ -154,45 +154,52 @@
         body[data-theme="coral"] { background-image: radial-gradient(ellipse 90% 55% at 50% -10%, rgba(244,63,94,0.16), transparent 60%), radial-gradient(ellipse 80% 50% at 85% 100%, rgba(190,18,60,0.35), transparent 70%); background-attachment: fixed; }
         body[data-theme="abyss"] { background-image: radial-gradient(ellipse 90% 55% at 50% -10%, rgba(99,102,241,0.18), transparent 60%), radial-gradient(ellipse 80% 50% at 15% 100%, rgba(74,4,78,0.4), transparent 70%); background-attachment: fixed; }
         body[data-theme="jungle"] { background-image: radial-gradient(ellipse 90% 55% at 50% -10%, rgba(163,230,53,0.14), transparent 60%), radial-gradient(ellipse 80% 50% at 85% 100%, rgba(69,26,3,0.55), transparent 70%); background-attachment: fixed; }
-        body[data-theme="light"] { background-image: radial-gradient(ellipse 90% 55% at 50% -10%, rgba(34,211,238,0.10), transparent 60%), radial-gradient(ellipse 80% 50% at 85% 100%, rgba(226,232,240,0.6), transparent 70%); background-attachment: fixed; }
+        body[data-theme="light"] { background-image: radial-gradient(ellipse 90% 55% at 50% -10%, rgba(34,211,238,0.16), transparent 60%), radial-gradient(ellipse 80% 50% at 85% 100%, rgba(186,230,253,0.5), transparent 70%); background-attachment: fixed; }
 
         /* ---------- Светла тема: преоцветява слейт картите/текста (т.4) ----------
            Останалите теми само сменят фона на <body> и декоративния градиент
            по-горе — вътрешните карти/бутони си остават bg-slate-* (тъмни), защото
            изглеждат добре върху тъмен body. Светлата тема обаче трябва тези карти
            да станат светли, затова преоцветяваме всички използвани slate класове
-           в приложението, скопирано само под body[data-theme="light"]. */
+           в приложението, скопирано само под body[data-theme="light"].
+           Палитрата умишлено не е плоско сиво-бяла — държи лек студен "аква" тон
+           (sky/cyan отенъци вместо чист slate), за да пасва на бранда на
+           приложението, вместо да изглежда като генеричен Tailwind сив UI. */
         body[data-theme="light"] .bg-slate-800,
         body[data-theme="light"] .bg-slate-900 { background-color: #ffffff; }
         body[data-theme="light"] .bg-slate-800\/80 { background-color: rgba(255,255,255,0.88); }
         body[data-theme="light"] .bg-slate-800\/95 { background-color: rgba(255,255,255,0.97); }
-        body[data-theme="light"] .bg-slate-900\/40 { background-color: rgba(226,232,240,0.55); }
-        body[data-theme="light"] .bg-slate-900\/60 { background-color: rgba(226,232,240,0.8); }
-        body[data-theme="light"] .bg-slate-900\/95 { background-color: rgba(226,232,240,0.97); }
+        body[data-theme="light"] .bg-slate-900\/40 { background-color: rgba(224,242,254,0.55); }
+        body[data-theme="light"] .bg-slate-900\/60 { background-color: rgba(224,242,254,0.8); }
+        body[data-theme="light"] .bg-slate-900\/95 { background-color: rgba(224,242,254,0.97); }
         body[data-theme="light"] .bg-slate-700,
         body[data-theme="light"] .bg-slate-700\/40,
         body[data-theme="light"] .bg-slate-700\/50,
         body[data-theme="light"] .bg-slate-700\/60,
-        body[data-theme="light"] .bg-slate-700\/80 { background-color: #e2e8f0; }
+        body[data-theme="light"] .bg-slate-700\/80 { background-color: #e0f2fe; }
         body[data-theme="light"] .bg-slate-600,
-        body[data-theme="light"] .bg-slate-500 { background-color: #cbd5e1; }
-        body[data-theme="light"] .hover\:bg-slate-600:hover { background-color: #cbd5e1; }
-        body[data-theme="light"] .hover\:bg-slate-800:hover { background-color: #f1f5f9; }
+        body[data-theme="light"] .bg-slate-500 { background-color: #bae6fd; }
+        body[data-theme="light"] .hover\:bg-slate-600:hover { background-color: #bae6fd; }
+        body[data-theme="light"] .hover\:bg-slate-800:hover,
+        body[data-theme="light"] .hover\:bg-slate-800\/80:hover { background-color: #e0f2fe; }
+        body[data-theme="light"] .hover\:text-slate-400:hover { color: #0369a1; }
         body[data-theme="light"] .text-slate-100,
         body[data-theme="light"] .text-slate-200 { color: #0f172a; }
         body[data-theme="light"] .text-slate-300 { color: #1e293b; }
         body[data-theme="light"] .text-slate-400,
-        body[data-theme="light"] .text-slate-500 { color: #64748b; }
+        body[data-theme="light"] .text-slate-500 { color: #475569; }
         body[data-theme="light"] .border-slate-600,
         body[data-theme="light"] .border-slate-600\/60,
+        body[data-theme="light"] .hover\:border-slate-600:hover,
         body[data-theme="light"] .border-slate-700,
         body[data-theme="light"] .border-slate-700\/50,
         body[data-theme="light"] .border-slate-700\/80,
         body[data-theme="light"] .border-slate-800,
         body[data-theme="light"] .divide-slate-600,
-        body[data-theme="light"] .divide-slate-700 { border-color: #cbd5e1; }
+        body[data-theme="light"] .divide-slate-700,
+        body[data-theme="light"] .divide-slate-700\/60 { border-color: #bae6fd; }
         body[data-theme="light"] #topBar header.bg-slate-800,
-        body[data-theme="light"] nav.bg-slate-800 { box-shadow: 0 12px 34px -14px rgba(100,116,139,0.25), inset 0 1px 0 0 rgba(255,255,255,0.6); }
+        body[data-theme="light"] nav.bg-slate-800 { box-shadow: 0 12px 34px -14px rgba(14,165,233,0.25), inset 0 1px 0 0 rgba(255,255,255,0.7); }
 
         /* ===== Премиум UI слой (само визуален, не пипа функционалност) ===== */
         /* Кара браузъра да рисува собствените си контроли (падащо меню на
@@ -1734,11 +1741,18 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.50";
+        const APP_VERSION = "3.6.51";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.51", items: [
+                "Нова цветова гама на светлата тема (аква/небесно синьо вместо плоско сиво) + допълнени липсващи стилове, за да не остава нищо в старите тъмни цветове",
+                "Банерът \"Налична е нова версия\" вече не покрива бутона \"+\" на телефон"
+            ], items_en: [
+                "New light-theme color palette (aqua/sky blue instead of flat gray) + completed a few missing styles so nothing was left in the old dark colors",
+                "The \"Update available\" banner no longer covers the \"+\" button on phones"
+            ] },
             { v: "3.6.50", items: [
                 "Приложението вече показва банер \"Налична е нова версия\" с бутон \"Обнови\", вместо тихо да чака ръчно затваряне/отваряне — трябва да оправи случаите, когато само част от обновленията се виждат",
                 "Стрелка нагоре/надолу вече има и в мини-картите на \"Моментен статус\" (Начало), не само в \"Параметри на водата\""
@@ -3939,13 +3953,13 @@
             coral: "bg-stone-950 text-rose-50 min-h-screen transition-colors duration-300 pb-6",
             abyss: "bg-indigo-950 text-indigo-100 min-h-screen transition-colors duration-300 pb-6",
             jungle: "bg-stone-900 text-lime-50 min-h-screen transition-colors duration-300 pb-6",
-            light: "bg-slate-50 text-slate-900 min-h-screen transition-colors duration-300 pb-6"
+            light: "bg-sky-50 text-slate-900 min-h-screen transition-colors duration-300 pb-6"
         };
         const themeLabels = { ocean: "Океанско Синьо", plant: "Растителен Зелен", dark: "Тъмен Нощен", coral: "Коралов Риф", abyss: "Дълбоко Море", jungle: "Сладководна Джунгла", light: "Светла" };
         const themeAccent = { coral: "coral", abyss: "abyss", jungle: "jungle" };
 
         function themeFlash(theme) {
-            const colors = { ocean: '34,211,238', plant: '16,185,129', dark: '148,163,184', coral: '244,63,94', abyss: '99,102,241', jungle: '245,158,11', light: '148,163,184' };
+            const colors = { ocean: '34,211,238', plant: '16,185,129', dark: '148,163,184', coral: '244,63,94', abyss: '99,102,241', jungle: '245,158,11', light: '56,189,248' };
             const c = colors[theme] || '34,211,238';
             const el = document.createElement('div');
             el.style.cssText = `position:fixed;inset:0;z-index:70;pointer-events:none;background:radial-gradient(circle at 85% 0%, rgba(${c},0.4), transparent 60%);opacity:0;transition:opacity .45s ease;`;
@@ -3957,7 +3971,7 @@
         function renderThemeSwatches() {
             const box = document.getElementById('themeSwatches');
             if (!box) return;
-            const dot = { ocean: '#22d3ee', plant: '#10b981', dark: '#94a3b8', coral: '#f43f5e', abyss: '#6366f1', jungle: '#f59e0b', light: '#e2e8f0' };
+            const dot = { ocean: '#22d3ee', plant: '#10b981', dark: '#94a3b8', coral: '#f43f5e', abyss: '#6366f1', jungle: '#f59e0b', light: '#38bdf8' };
             box.innerHTML = Object.keys(themeClasses).map(id => `
                 <button onclick="changeTheme('${id}', true)" title="${tr(themeLabels[id])}" class="flex flex-col items-center gap-1 p-2 rounded-lg border transition-all duration-200 ${id === currentTheme ? 'border-cyan-400 bg-slate-700' : 'border-slate-700 hover:border-slate-600'}" aria-label="${tr(themeLabels[id])}">
                     <span class="w-5 h-5 rounded-full border border-white/20" style="background:${dot[id]}"></span>
@@ -6427,7 +6441,9 @@
             if (document.getElementById("appUpdateBanner")) return;
             const el = document.createElement("div");
             el.id = "appUpdateBanner";
-            el.className = "fixed left-3 right-3 bottom-3 z-[90] bg-cyan-700 text-white rounded-xl shadow-lg px-4 py-3 flex items-center justify-between gap-3 text-sm";
+            // bottom-24 (не bottom-3), за да не покрива плаващия бутон "+" (#fabWrap),
+            // който стои на същото място на мобилен екран (открито при /truth проверка).
+            el.className = "fixed left-3 right-3 bottom-24 md:bottom-3 z-[90] bg-cyan-700 text-white rounded-xl shadow-lg px-4 py-3 flex items-center justify-between gap-3 text-sm";
             el.innerHTML = `<span><i class="fa-solid fa-circle-up mr-1.5"></i>${tr('Налична е нова версия на приложението.')}</span>
                 <button id="appUpdateReloadBtn" class="bg-white text-cyan-700 font-semibold px-3 py-1.5 rounded-lg shrink-0">${tr('Обнови')}</button>`;
             document.body.appendChild(el);
@@ -6471,7 +6487,7 @@
             });
         }
 
-        const themeColorHex = { ocean: "#0f172a", plant: "#09090b", dark: "#000000", coral: "#0c0a09", abyss: "#1e1b4b", jungle: "#1c1917", light: "#f8fafc" };
+        const themeColorHex = { ocean: "#0f172a", plant: "#09090b", dark: "#000000", coral: "#0c0a09", abyss: "#1e1b4b", jungle: "#1c1917", light: "#f0f9ff" };
 
         function vibrate(ms) {
             try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}

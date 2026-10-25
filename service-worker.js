@@ -16,7 +16,9 @@
 // (виж по-долу), а чакаме index.html да помоли изрично (бутон "Обнови" на страницата)
 // след като открие нова версия. Плюс: navigate заявките вече форсират revalidation
 // (cache: "no-cache"), за да не сервира остарял HTTP кеш "прясна" на вид страница.
-const CACHE_NAME = "aquaassistant-cache-v28";
+// v29: Нова аква цветова палитра за светлата тема + допълнени липсващи CSS класове;
+// банерът "Обнови" вече не покрива бутона "+" на телефон.
+const CACHE_NAME = "aquaassistant-cache-v29";
 const CORE_ASSETS = [
   "./index.html",
   "./manifest.json",
