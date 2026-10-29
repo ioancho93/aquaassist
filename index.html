@@ -1695,11 +1695,16 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.52";
+        const APP_VERSION = "3.6.53";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.53", items: [
+                "Поправка: текстът на бутона \"Обнови\" в банера за нова версия не се виждаше (сливаше се с белия фон) при тъмни теми — липсващ стил в tailwind.css"
+            ], items_en: [
+                "Fix: the \"Update\" button text in the new-version banner was invisible (blended into the white background) on dark themes — missing style in tailwind.css"
+            ] },
             { v: "3.6.52", items: [
                 "Премахната светлата тема — обратна връзка показа, че цветовата гама не работи добре"
             ], items_en: [
