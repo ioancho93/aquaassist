@@ -1695,11 +1695,16 @@
 
         let myFishList = [];
         const DAY_MS = 24 * 60 * 60 * 1000;
-        const APP_VERSION = "3.6.53";
+        const APP_VERSION = "3.6.54";
 
         // История на промените - най-новото най-отгоре. Показва се само откъслекът, който потребителят пропуска.
         // items = български текст, items_en = английски превод (показва се според избрания език).
         const CHANGELOG = [
+            { v: "3.6.54", items: [
+                "Поправка: нов аквариум, в който още нищо не е въведено, вече не показва подвеждащо \"Време е за смяна на водата\" / \"просрочена\" — предупреждението се появява едва след първата въведена информация"
+            ], items_en: [
+                "Fix: a brand-new tank with nothing entered no longer shows a misleading \"Time for a water change\" / \"overdue\" alert — it appears only once you've entered some data"
+            ] },
             { v: "3.6.53", items: [
                 "Поправка: текстът на бутона \"Обнови\" в банера за нова версия не се виждаше (сливаше се с белия фон) при тъмни теми — липсващ стил в tailwind.css"
             ], items_en: [
@@ -2637,6 +2642,22 @@
             renderMiniStatus();
         }
 
+        // Дали в текущия аквариум потребителят е въвел НЕЩО (измерване, смяна на вода,
+        // запис в историята или обитател). Срокът за смяна на водата на съвсем нов
+        // аквариум (5 дни от създаването) е само вътрешна стойност по подразбиране —
+        // докато няма никаква активност, не бива да се представя като "просрочена"
+        // задача (иначе нов посетител вижда "Време е за смяна на водата" без да е въвел нищо).
+        function tankHasUserActivity() {
+            const t = store.tanks[store.active];
+            if (!t) return false;
+            const hasParam = [t.temp, t.ph, t.nh3, t.no2, t.no3, t.gh, t.kh, t.cl2]
+                .some(v => v !== undefined && v !== null && String(v).trim() !== '');
+            return hasParam
+                || (Array.isArray(t.waterChangeLog) && t.waterChangeLog.length > 0)
+                || (Array.isArray(t.history) && t.history.length > 0)
+                || myFishList.length > 0;
+        }
+
         let healthDangerWarned = false;
         function updateOverallHealth(stockingPercent) {
             const title = document.getElementById('healthTitle');
@@ -2667,7 +2688,7 @@
                 badge.innerText = tr("Внимание");
                 badge.className = "bg-yellow-900 text-yellow-200 text-xs px-2.5 py-1 rounded-full font-bold";
                 icon.className = "fa-solid fa-triangle-exclamation text-yellow-400 text-xl animate-pulse";
-            } else if (daysLeft <= 0) {
+            } else if (daysLeft <= 0 && tankHasUserActivity()) {
                 title.innerText = tr("Време е за смяна на водата");
                 desc.innerText = tr("Смяната на 30% от водата е от съществено значение днес.");
                 badge.innerText = tr("Поддръжка");
@@ -2698,7 +2719,11 @@
             const today = waterChangedToday && new Date(waterChangedToday).toDateString() === new Date().toDateString();
 
             box.classList.remove('bg-cyan-950', 'border-cyan-700', 'bg-emerald-950', 'border-emerald-700');
-            if (today) {
+            if (!tankHasUserActivity()) {
+                // Съвсем нов аквариум без нищо въведено — няма реален график, който да е "просрочен".
+                box.classList.add('bg-cyan-950', 'border-cyan-700');
+                text.innerText = tr('Отчети първата си смяна на водата, за да започнем да следим графика.');
+            } else if (today) {
                 box.classList.add('bg-emerald-950', 'border-emerald-700');
                 const left = Math.max(daysLeft, 0);
                 text.innerHTML = `${tr('Водата е сменена днес. Следваща смяна след:')} <strong>${left} ${dayWord(left)}</strong>`;
@@ -4239,6 +4264,7 @@
             "след:": "in:",
             "днес": "today",
             "Смяната на водата е просрочена с:": "Water change is overdue by:",
+            "Отчети първата си смяна на водата, за да започнем да следим графика.": "Log your first water change so we can start tracking the schedule.",
             "Записана смяна на": "Logged a change of",
             "вода.": "water.",
             "Все още няма записани смени на вода.": "No water changes logged yet.",
@@ -6536,7 +6562,7 @@
             const daysLeft = Math.ceil((waterDue - Date.now()) / DAY_MS);
             const no3 = parseFloat(document.getElementById('valNO3').innerText) || 0;
             let body = null;
-            if (daysLeft <= 0) body = tr("Време е за смяна на водата в аквариум „") + (t ? t.name : '') + "“.";
+            if (daysLeft <= 0 && tankHasUserActivity()) body = tr("Време е за смяна на водата в аквариум „") + (t ? t.name : '') + "“.";
             else if (no3 > 40) body = `${tr('Нитратите са високи')} (${no3} mg/l) — ${tr('обмисли по-ранна смяна на водата.')}`;
             else {
                 // Дозиране (торове/добавки) — същата логика за "просрочено", каквата

@@ -21,7 +21,9 @@
 // v30: Премахната светлата тема изцяло (цветовата гама не се хареса).
 // v31: Поправка в tailwind.css — липсваше .text-cyan-700 (и още 13 класа), затова
 // текстът на бутона "Обнови" беше невидим (бял на бял фон) при тъмни теми.
-const CACHE_NAME = "aquaassistant-cache-v31";
+// v32: Поправка — нов аквариум без въведени данни вече не показва "просрочена"
+// смяна на водата (index.html: tankHasUserActivity).
+const CACHE_NAME = "aquaassistant-cache-v32";
 const CORE_ASSETS = [
   "./index.html",
   "./manifest.json",
